@@ -219,7 +219,7 @@ function renderAccount(user, premium = currentUserPremium) {
   button.innerHTML = `<span class="material-symbols-rounded">${user ? 'logout' : 'login'}</span>${user ? 'Sign out' : 'Sign in'}`;
   button.setAttribute('aria-pressed', String(Boolean(user)));
   document.querySelectorAll('[data-firebase-required]').forEach(control => { control.disabled = !user || !premium; });
-  status(user ? premium ? `Signed in as ${user.email || 'Google user'} · Premium access enabled.` : `Signed in as ${user.email || 'Google user'}.` : 'Demo mode. Sign in with Google to find or create your personal collection spreadsheet.');
+  status(user ? `Signed in as ${user.email || 'Google user'}.` : 'Demo mode. Sign in with Google to find or create your personal collection spreadsheet.');
 }
 
 function chooseInitialSyncDirection(hasRemoteSettings) {
