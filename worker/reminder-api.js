@@ -1,5 +1,5 @@
 const APP_ID = 'd9dcde89-f32c-46c1-89f8-61d98a8267f1';
-const FIREBASE_API_KEY = 'AIzaSyDUOiBJMfjHyFISy_U7rA7ldKKnoZ05QvQ';
+const FIREBASE_PROJECT_ID = 'custom-figures-collector';
 const ALLOWED_ORIGINS = new Set([
   'https://cmcollector.com',
   'https://www.cmcollector.com'
@@ -24,17 +24,23 @@ function json(origin, data, status = 200) {
 async function authenticatedUser(request) {
   const authorization = request.headers.get('Authorization') || '';
   if (!authorization.startsWith('Bearer ')) throw new Error('Authentication required.');
-  const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken: authorization.slice(7) })
-    }
-  );
-  const result = await response.json();
-  if (!response.ok || !result.users?.[0]?.localId) throw new Error('Invalid or expired sign-in.');
-  return result.users[0];
+  const parts = authorization.slice(7).split('.');
+  if (parts.length !== 3) throw new Error('Invalid or expired sign-in.');
+  const decode = value => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(value.replaceAll('-', '+').replaceAll('_', '/')), char => char.charCodeAt(0))));
+  const header = decode(parts[0]);
+  const claims = decode(parts[1]);
+  const keysResponse = await fetch('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com');
+  const keys = await keysResponse.json();
+  const jwk = keys.keys?.find(key => key.kid === header.kid);
+  if (!jwk) throw new Error('Invalid or expired sign-in.');
+  const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+  const signature = Uint8Array.from(atob(parts[2].replaceAll('-', '+').replaceAll('_', '/')), char => char.charCodeAt(0));
+  const valid = await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, key, signature, new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
+  const now = Math.floor(Date.now() / 1000);
+  if (!valid || claims.aud !== FIREBASE_PROJECT_ID || claims.iss !== `https://securetoken.google.com/${FIREBASE_PROJECT_ID}` || !claims.sub || claims.exp <= now || claims.iat > now) {
+    throw new Error('Invalid or expired sign-in.');
+  }
+  return { localId: claims.sub };
 }
 
 async function cancelNotification(messageId, env) {
