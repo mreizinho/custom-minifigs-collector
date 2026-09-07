@@ -8,6 +8,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      await OneSignal.init({
+        appId: 'd9dcde89-f32c-46c1-89f8-61d98a82671f',
+        serviceWorkerPath: 'OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: '/' },
+        notifyButton: { enable: false }
+      });
+      window.dispatchEvent(new CustomEvent('collector-push-ready'));
+    });
+  </script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="preload" href="lego-figure.svg?v=15" as="image" type="image/svg+xml" />
   <link rel="preload" href="lego-figure-dark.svg?v=7" as="image" type="image/svg+xml" />
@@ -59,7 +72,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <script src="demo-catalogue.js?v=20260902-1"></script>
-  <script src="app.js?v=20260907-1"></script>
+  <script src="app.js?v=20260907-2"></script>
   <script src="mobile-tag-behavior.js?v=20260719-3"></script>
   <script src="date-time-format.js?v=20260903-9"></script>
   <script type="module" src="firebase-sync.js?v=20260903-9"></script>

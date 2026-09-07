@@ -10,6 +10,7 @@ const productionFiles = [
   'demo-catalogue.js',
   'firebase-sync.js',
   'release-calendar.js',
+  'OneSignalSDKWorker.js',
   'mobile-tag-behavior.js',
   'header.css',
   'palette.css',
@@ -20,6 +21,10 @@ const productionFiles = [
   'lego-figure-dark.svg',
   'lego-figure-outline.svg',
   'lego-figure-outline-dark.svg',
+  'privacy.html',
+  'privacy-policy.svg',
+  'buymecoffee.png',
+  'buymecoffee-inverted.png',
   'admin',
   'assets'
 ];
