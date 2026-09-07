@@ -1,0 +1,4 @@
+name = "cmcollector-reminders"
+main = "worker/reminder-api.js"
+compatibility_date = "2026-09-07"
+workers_dev = true
