@@ -470,8 +470,8 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 .settings-dialog.is-scrollable:hover::-webkit-scrollbar-thumb,.settings-dialog.is-scrollable:focus-within::-webkit-scrollbar-thumb { background:color-mix(in srgb,var(--ink) 34%,transparent); background-clip:padding-box; }
 .settings-copy { min-height: 100%; padding: 34px 34px 10px; }
 .settings-copy h2 { margin: 0 46px 8px 0; font-size: 30px; }
-.settings-tabs { --settings-tab-index:0; position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:0 0 12px; border-bottom:1px solid var(--line); user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
-.settings-tabs::after { content:''; position:absolute; left:0; bottom:-1px; width:33.3333%; height:3px; background:var(--accent); transform:translateX(calc(var(--settings-tab-index) * 100%)); transition:transform .18s cubic-bezier(.2,.8,.2,1); }
+.settings-tabs { --settings-tab-index:0; position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin:0 0 12px; border-bottom:1px solid var(--line); user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.settings-tabs::after { content:''; position:absolute; left:0; bottom:-1px; width:50%; height:3px; background:var(--accent); transform:translateX(calc(var(--settings-tab-index) * 100%)); transition:transform .18s cubic-bezier(.2,.8,.2,1); }
 .settings-copy .settings-tabs button[role="tab"] { min-width:0; border:0; background:transparent; color:var(--muted); padding:10px 8px 12px; font:inherit; font-size:13px; font-weight:600; }
 .settings-tabs button .material-symbols-rounded { font-size:18px; }
 .settings-copy .settings-tabs button[aria-selected="true"] { background:transparent; color:var(--accent); box-shadow:none; }
@@ -1272,4 +1272,5 @@ body:not(.dark) .detail-edit-button:focus-visible,
 @media(max-width:600px){.about-copy{padding:30px 22px 24px}.about-dialog>.close{top:12px;right:12px}}
 .settings-copy .settings-about-copy{padding:8px 0 4px}
 .settings-copy .settings-about-copy .about-product{font-size:18px;color:var(--ink)}
-@media(max-width:600px){.settings-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.settings-tabs::after{width:33.3333%}.settings-copy .settings-tabs [data-settings-tab="display"]{display:flex!important}.settings-copy .settings-about-copy{padding:8px 0 4px}}
+@media(max-width:600px){.settings-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-tabs::after{width:50%}.settings-copy .settings-tabs [data-settings-tab="display"]{display:flex!important}}
+.settings-version-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.settings-version-heading h3{margin:0}.settings-copy .settings-version-heading .about-refresh{width:46px;min-width:46px;min-height:46px;border:0;background:transparent;color:var(--ink);padding:0}.settings-copy .settings-version-heading .about-refresh:hover,.settings-copy .settings-version-heading .about-refresh:focus-visible{color:var(--accent)}.settings-version-setting .about-versions{margin-top:12px}.settings-version-setting .about-version-status{margin-bottom:0}
