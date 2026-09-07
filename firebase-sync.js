@@ -268,9 +268,10 @@ function chooseInitialSyncDirection(hasRemoteSettings) {
 function installSettingsUi() {
   const pickerButton = document.querySelector('#chooseSpreadsheet');
   const spreadsheetField = document.querySelector('.settings-spreadsheet-field');
+  const spreadsheetSection = pickerButton?.closest('section');
   if (pickerButton) {
-    pickerButton.setAttribute('aria-label', 'Open spreadsheet');
-    pickerButton.title = 'Open spreadsheet';
+    pickerButton.setAttribute('aria-label', 'Open SpreadsheeT');
+    pickerButton.title = 'Open SpreadsheeT';
     pickerButton.innerHTML = '<span class="material-symbols-rounded" aria-hidden="true">table_view</span>';
     if (spreadsheetField) spreadsheetField.append(pickerButton);
   }
@@ -297,6 +298,10 @@ function installSettingsUi() {
     </div>
     <p id="firebaseStatus" class="settings-status" role="status" aria-live="polite"></p>`;
   if (pickerButton) section.querySelector('.google-settings-heading')?.append(pickerButton);
+  const spreadsheetInput = spreadsheetSection?.querySelector('#spreadsheetUrl');
+  if (spreadsheetInput) section.append(spreadsheetInput);
+  if (saveSpreadsheet) section.append(saveSpreadsheet);
+  spreadsheetSection?.remove();
   let settingsFooter = document.querySelector('.settings-footer');
   if (!settingsFooter) {
     settingsFooter = document.createElement('div');
