@@ -85,8 +85,8 @@ export default {
         headings: { en: String(body.eventName || 'Drop reminder').slice(0, 120) },
         contents: { en: `${body.siteName || 'Release'} · ${body.eventName || 'Upcoming drop'}`.slice(0, 240) },
         url: body.siteUrl || 'https://cmcollector.com/',
-        chrome_web_icon: 'https://cmcollector.com/notification-lego-head.png',
-        firefox_icon: 'https://cmcollector.com/notification-lego-head.png',
+        chrome_web_icon: 'https://cmcollector.com/notification-lego-head-white.png',
+        firefox_icon: 'https://cmcollector.com/notification-lego-head-white.png',
         chrome_web_badge: 'https://cmcollector.com/notification-lego-head.png',
         idempotency_key: await idempotencyKey(`${user.localId}:${body.reminderId}:${remindAt.toISOString()}`)
       };

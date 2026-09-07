@@ -18,6 +18,7 @@ const productionFiles = [
   'release-calendar.css',
   'lego-head.svg',
   'notification-lego-head.png',
+  'notification-lego-head-white.png',
   'lego-figure.svg',
   'lego-figure-dark.svg',
   'lego-figure-outline.svg',
