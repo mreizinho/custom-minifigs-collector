@@ -506,6 +506,8 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 .settings-copy .google-settings > p:not(.settings-status),.settings-copy .desktop-columns-setting > p { text-align:justify; text-align-last:left; }
 .settings-spreadsheet-field { display: grid; grid-template-columns: minmax(0,1fr) 46px; }
 .settings-spreadsheet-field #spreadsheetUrl { min-width: 0; border-right: 0; }
+.google-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.google-settings-heading h3 { margin: 0; }
 .settings-copy #chooseSpreadsheet { width: 46px; min-width: 46px; padding: 0; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
 .settings-copy #chooseSpreadsheet .material-symbols-rounded { font-size: 22px; }
 .settings-copy textarea { width: 100%; resize: vertical; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 11px 12px; font: inherit; line-height: 1.45; }
