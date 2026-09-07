@@ -1,0 +1,11 @@
+{
+  "name": "cmcollector-reminder-scheduler",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "send-reminders": "node scripts/send-release-reminders.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}
