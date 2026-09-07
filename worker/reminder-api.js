@@ -90,7 +90,7 @@ export default {
         url: body.siteUrl || 'https://cmcollector.com/',
         chrome_web_icon: 'https://cmcollector.com/notification-lego-head-white.png',
         firefox_icon: 'https://cmcollector.com/notification-lego-head-white.png',
-        chrome_web_badge: 'https://cmcollector.com/notification-lego-head.png',
+        chrome_web_badge: 'https://cmcollector.com/notification-lego-head.png?v=2',
         idempotency_key: await idempotencyKey(`${user.localId}:${body.reminderId}:${remindAt.toISOString()}`)
       };
       if (remindAt.getTime() > Date.now() + 30000) payload.send_after = remindAt.toISOString();
