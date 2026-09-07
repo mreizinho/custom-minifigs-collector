@@ -2,7 +2,7 @@
   "indexes": [
     {
       "collectionGroup": "releaseReminders",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "remindAt", "order": "ASCENDING" }

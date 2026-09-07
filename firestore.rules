@@ -43,18 +43,6 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    match /releaseReminders/{reminderId} {
-      allow read, delete: if signedIn()
-        && resource.data.ownerUid == request.auth.uid;
-      allow create, update: if signedIn()
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.keys().hasOnly([
-          'ownerUid', 'eventId', 'eventScope', 'eventName', 'siteName',
-          'siteUrl', 'eventStartsAt', 'remindAt', 'minutesBefore', 'status',
-          'attempts', 'sentAt', 'oneSignalMessageId', 'lastError', 'updatedAt'
-        ]);
-    }
-
     match /users/{userId} {
       allow read, create, update: if signedIn()
         && request.auth.uid == userId;
@@ -67,6 +55,19 @@ service cloud.firestore {
       allow create, update: if signedIn()
         && request.auth.uid == userId
         && request.resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /users/{userId}/releaseReminders/{reminderId} {
+      allow read, delete: if signedIn()
+        && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'ownerUid', 'eventId', 'eventScope', 'eventName', 'siteName',
+          'siteUrl', 'eventStartsAt', 'remindAt', 'minutesBefore', 'status',
+          'attempts', 'sentAt', 'oneSignalMessageId', 'lastError', 'updatedAt'
+        ]);
     }
 
     match /{document=**} {

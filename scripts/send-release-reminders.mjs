@@ -12,7 +12,7 @@ const serviceAccount = JSON.parse(serviceAccountText);
 if (!getApps().length) initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 const now = Timestamp.now();
-const due = await db.collection('releaseReminders')
+const due = await db.collectionGroup('releaseReminders')
   .where('status', '==', 'active')
   .where('remindAt', '<=', now)
   .orderBy('remindAt', 'asc')
