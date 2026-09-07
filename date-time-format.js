@@ -26,7 +26,7 @@ syncPremiumPromotion();
 const spreadsheetSection=document.querySelector('#spreadsheetUrl')?.closest('section');
 const spreadsheetInput=document.querySelector('#spreadsheetUrl');
 const spreadsheetPicker=document.querySelector('#chooseSpreadsheet');
-const syncSpreadsheetValue=()=>{const authenticated=Boolean(window.collectorFirebaseAuthenticatedUser);if(spreadsheetSection)spreadsheetSection.hidden=false;if(spreadsheetInput&&(!authenticated||(typeof isDemoMode==='function'&&isDemoMode())))spreadsheetInput.value='';if(spreadsheetPicker){spreadsheetPicker.disabled=!authenticated;spreadsheetPicker.title=authenticated?'Choose spreadsheet':'Sign in to choose a spreadsheet';spreadsheetPicker.setAttribute('aria-label',spreadsheetPicker.title)}};
+const syncSpreadsheetValue=()=>{const authenticated=Boolean(window.collectorFirebaseAuthenticatedUser);if(spreadsheetSection)spreadsheetSection.hidden=true;if(spreadsheetInput&&(!authenticated||(typeof isDemoMode==='function'&&isDemoMode())))spreadsheetInput.value='';if(spreadsheetPicker){spreadsheetPicker.disabled=!authenticated;spreadsheetPicker.title='Open Spreadsheet';spreadsheetPicker.setAttribute('aria-label','Open Spreadsheet')}};
 window.addEventListener('collector-google-auth',syncSpreadsheetValue);
 document.querySelector('#settingsToggle')?.addEventListener('click',()=>setTimeout(syncSpreadsheetValue,0));
 const formatSettingsDialog=document.querySelector('#settingsDialog');if(formatSettingsDialog)new MutationObserver(()=>{if(formatSettingsDialog.open)syncSpreadsheetValue()}).observe(formatSettingsDialog,{attributes:true,attributeFilter:['open']});
