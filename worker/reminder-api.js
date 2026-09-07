@@ -49,7 +49,10 @@ async function cancelNotification(messageId, env) {
     `https://api.onesignal.com/notifications/${encodeURIComponent(messageId)}?app_id=${APP_ID}`,
     { method: 'DELETE', headers: { Authorization: `Key ${env.ONESIGNAL_APP_API_KEY}` } }
   );
-  if (!response.ok && response.status !== 404) throw new Error('Could not cancel the previous reminder.');
+  // OneSignal returns 400 when a notification has already been delivered or
+  // can no longer be cancelled. That old message cannot interfere with the
+  // replacement, so editing the event should continue normally.
+  if (!response.ok && ![400, 404, 409].includes(response.status)) throw new Error('Could not cancel the previous reminder.');
 }
 
 async function idempotencyKey(value) {

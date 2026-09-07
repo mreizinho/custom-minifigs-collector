@@ -48,6 +48,7 @@ let saveTimer = 0;
 let applyingRemote = false;
 let settingsBaseline = null;
 let pendingGoogleAccessToken = '';
+let authActionPending = false;
 let deferGuestReloadUntilSettingsClose = false;
 let cloudSyncPaused = false;
 let authStateRevision = 0;
@@ -303,6 +304,9 @@ function installSettingsUi() {
     document.querySelector('.settings-copy').append(settingsFooter);
   }
   document.querySelector('#firebaseAuth').addEventListener('click', async () => {
+    if (authActionPending) return;
+    authActionPending = true;
+    document.querySelector('#firebaseAuth').disabled = true;
     try {
       if (auth.currentUser) {
         deferGuestReloadUntilSettingsClose = Boolean(document.querySelector('#settingsDialog')?.open);
@@ -327,10 +331,16 @@ function installSettingsUi() {
       promptOnNextUserConnection = false;
       const message = error.code === 'auth/popup-blocked'
         ? 'The sign-in popup was blocked. Allow popups for this site and try again.'
+        : error.code === 'auth/cancelled-popup-request'
+          ? 'Google sign-in is already opening. Please wait for it to finish.'
         : error.code === 'auth/unauthorized-domain'
           ? 'This website is not listed in Firebase Authentication authorized domains.'
           : error.message;
       status(message, true);
+    } finally {
+      authActionPending = false;
+      renderAccount(auth.currentUser, currentUserPremium);
+      document.querySelector('#firebaseAuth').disabled = false;
     }
   });
   document.querySelector('#firebaseUpload').addEventListener('click', async () => {
