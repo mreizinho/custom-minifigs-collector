@@ -270,8 +270,8 @@ function installSettingsUi() {
   const spreadsheetField = document.querySelector('.settings-spreadsheet-field');
   const spreadsheetSection = pickerButton?.closest('section');
   if (pickerButton) {
-    pickerButton.setAttribute('aria-label', 'Open SpreadsheeT');
-    pickerButton.title = 'Open SpreadsheeT';
+    pickerButton.setAttribute('aria-label', 'Open Spreadsheet');
+    pickerButton.title = 'Open Spreadsheet';
     pickerButton.innerHTML = '<span class="material-symbols-rounded" aria-hidden="true">table_view</span>';
     if (spreadsheetField) spreadsheetField.append(pickerButton);
   }
@@ -282,7 +282,7 @@ function installSettingsUi() {
   const section = document.querySelector('.google-settings');
   if (!section) return;
   section.innerHTML = `
-    <div class="google-settings-heading"><h3>Google Account</h3></div>
+    <div class="google-settings-heading"><h3>Google Account and Spreadsheet</h3></div>
     <input id="googleClientId" type="hidden">
     <button type="button" id="connectGoogle" hidden></button>
     <button type="button" id="saveGoogleClient" hidden></button>
