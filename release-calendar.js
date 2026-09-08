@@ -50,7 +50,7 @@ onAuthStateChanged(auth,user=>{currentUser=user;syncPushUser(user).catch(error=>
 
 const openFormWithTomorrowDefault=openForm;
 openForm=event=>{openFormWithTomorrowDefault(event);if(event)return;const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());form.elements.startsAt.value=now.toISOString().slice(0,16)};
-const pastEventObserver=new MutationObserver(()=>{const events=combinedEvents();[...list.querySelectorAll('.release-event')].forEach((card,index)=>card.classList.toggle('is-past',eventDate(events[index]).getTime()<Date.now()))});
+const pastEventObserver=new MutationObserver(()=>{const events=combinedEvents();[...list.querySelectorAll('.release-event')].forEach((card,index)=>card.classList.toggle('release-event-past',eventDate(events[index]).getTime()<Date.now()))});
 pastEventObserver.observe(list,{childList:true});
 
 window.addEventListener('collector-date-time-format-change',()=>render());
