@@ -50,7 +50,7 @@ onAuthStateChanged(auth,user=>{currentUser=user;syncPushUser(user).catch(error=>
 
 const openFormWithTomorrowDefault=openForm;
 openForm=event=>{openFormWithTomorrowDefault(event);if(event)return;const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());form.elements.startsAt.value=now.toISOString().slice(0,16)};
-const pastEventObserver=new MutationObserver(()=>{const events=combinedEvents();[...list.querySelectorAll('.release-event')].forEach((card,index)=>card.classList.toggle('release-event-past',eventDate(events[index]).getTime()<Date.now()))});
+const pastEventObserver=new MutationObserver(()=>{const events=combinedEvents();[...list.querySelectorAll('.release-event')].forEach((card,index)=>{card.classList.toggle('release-event-past',eventDate(events[index]).getTime()<Date.now());if(card.dataset.scope!=='Shared'||card.querySelector('.release-global-action'))return;const actions=card.querySelector('.release-event-actions');for(const [icon,label] of [['edit','Edit event'],['delete','Delete event']]){const button=document.createElement('button');button.type='button';button.className='release-global-action';button.disabled=true;button.title=`${label} (global events cannot be changed here)`;button.setAttribute('aria-label',button.title);button.innerHTML=`<span class="material-symbols-rounded" aria-hidden="true">${icon}</span>`;actions.append(button)}})});
 pastEventObserver.observe(list,{childList:true});
 
 window.addEventListener('collector-date-time-format-change',()=>render());
