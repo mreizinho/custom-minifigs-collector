@@ -637,6 +637,7 @@ async function loadPrivatePhoto(fileId){
 }
 imageSource=url=>{const fileId=drivePhotoId(url);return fileId&&privatePhotoUrls.has(fileId)?privatePhotoUrls.get(fileId):publicCatalogueImageSource(url)};
 document.addEventListener('error',async event=>{const image=event.target;if(!(image instanceof HTMLImageElement)||image.dataset.privatePhotoRecovery||!usesAuthenticatedCatalogue())return;const fileId=drivePhotoId(image.currentSrc||image.src);if(!fileId||isFallbackImageSource(image.src))return;image.dataset.privatePhotoRecovery='true';const recovered=await loadPrivatePhoto(fileId);if(recovered&&image.isConnected){image.src=recovered;return}delete image.dataset.privatePhotoRecovery;if(image.isConnected&&typeof image.onerror==='function')image.onerror()},{capture:true});
+document.addEventListener('error',event=>{const image=event.target;if(image instanceof HTMLImageElement&&image.dataset.privatePhotoRecovery)event.stopImmediatePropagation()},{capture:true});
 const rememberPhotoRefreshBeforePrivatePhotos=rememberPhotoRefresh;
 rememberPhotoRefresh=fileId=>{
   rememberPhotoRefreshBeforePrivatePhotos(fileId);
