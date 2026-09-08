@@ -566,7 +566,8 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 body { transition: background-color .2s ease, color .2s ease; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline-color: var(--accent); }
 input, select { color: var(--ink); }
-select { appearance:none; -webkit-appearance:none; padding-right:36px !important; background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%) !important; background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50% !important; background-size:5px 5px,5px 5px !important; background-repeat:no-repeat !important; }
+select { appearance:none; -webkit-appearance:none; padding-right:36px !important; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 14'%3E%3Cpath fill='%2320211e' d='M1 3.5h14L8 10.5z'/%3E%3C/svg%3E") !important; background-position:calc(100% - 11px) 50% !important; background-size:14px 12px !important; background-repeat:no-repeat !important; }
+.dark select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 14'%3E%3Cpath fill='%23f4f2ea' d='M1 3.5h14L8 10.5z'/%3E%3C/svg%3E") !important; }
 input::placeholder { color: var(--muted); opacity: 1; }
 .filters label { color: var(--muted); }
 .tag-filters {
