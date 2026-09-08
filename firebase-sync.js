@@ -58,7 +58,9 @@ let pendingCloudSettings = null;
 // available, but grant the current product to every authenticated Google user.
 const PREMIUM_ENTITLEMENTS_ENABLED = false;
 const REDIRECT_SIGN_IN_KEY = 'collector-google-redirect-pending';
-const useRedirectSignIn = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+// Popup authentication preserves the app origin and session reliably on mobile.
+// Keep redirect only as a fallback for browsers that explicitly block popups.
+const useRedirectSignIn = false;
 
 async function hasPremiumAccess(user) {
   if (!user) return false;
@@ -334,10 +336,13 @@ function installSettingsUi() {
         }
       }
     } catch (error) {
+      if (error.code === 'auth/popup-blocked' && !useRedirectSignIn) {
+        sessionStorage.setItem(REDIRECT_SIGN_IN_KEY, '1');
+        await signInWithRedirect(auth, provider);
+        return;
+      }
       promptOnNextUserConnection = false;
-      const message = error.code === 'auth/popup-blocked'
-        ? 'The sign-in popup was blocked. Allow popups for this site and try again.'
-        : error.code === 'auth/cancelled-popup-request'
+      const message = error.code === 'auth/cancelled-popup-request'
           ? 'Google sign-in is already opening. Please wait for it to finish.'
         : error.code === 'auth/unauthorized-domain'
           ? 'This website is not listed in Firebase Authentication authorized domains.'
