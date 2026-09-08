@@ -33,6 +33,26 @@ function idempotencyKey(path, remindAt) {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+function websiteLabel(siteName, siteUrl) {
+  if (siteName) return String(siteName);
+  if (!siteUrl) return 'Website not specified';
+  try { return new URL(siteUrl).hostname.replace(/^www\./, ''); }
+  catch { return String(siteUrl); }
+}
+
+function eventDateTimeLabel(eventStartsAt, remindAt, timeZone) {
+  const eventDate = eventStartsAt?.toDate?.() || new Date(eventStartsAt);
+  if (!Number.isFinite(eventDate.getTime())) return '';
+  const zone = timeZone || 'UTC';
+  const dayKey = date => new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  const eventDay = dayKey(eventDate);
+  const reminderDay = dayKey(remindAt);
+  const tomorrow = new Date(remindAt.getTime() + 86400000);
+  const day = eventDay === reminderDay ? 'Today' : eventDay === dayKey(tomorrow) ? 'Tomorrow' : new Intl.DateTimeFormat('en-GB', { timeZone: zone, day: 'numeric', month: 'short', year: 'numeric' }).format(eventDate);
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hour12: false }).format(eventDate);
+  return `${day} at ${time}`;
+}
+
 async function cancelMessage(messageId) {
   if (!messageId) return;
   const response = await fetch(`https://api.onesignal.com/notifications/${encodeURIComponent(messageId)}?app_id=${APP_ID}`, {
@@ -81,9 +101,9 @@ for (const snapshot of due.docs) {
       target_channel: 'push',
       include_aliases: { external_id: [claimed.ownerUid] },
       headings: { en: claimed.eventName || 'Drop reminder' },
-      contents: { en: `${claimed.siteName || 'Release'} · ${claimed.eventName || 'Upcoming drop'}` },
+      contents: { en: [websiteLabel(claimed.siteName, claimed.siteUrl), eventDateTimeLabel(claimed.eventStartsAt, remindAt, claimed.timeZone)].filter(Boolean).join('\n') },
       url: claimed.siteUrl || 'https://cmcollector.com/',
-      idempotency_key: idempotencyKey(snapshot.ref.path, claimed.remindAt)
+      idempotency_key: idempotencyKey(`${snapshot.ref.path}:notification-v2`, claimed.remindAt)
     };
     if (scheduled) payload.send_after = remindAt.toISOString();
     const response = await fetch('https://api.onesignal.com/notifications?c=push', {

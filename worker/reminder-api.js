@@ -63,6 +63,48 @@ async function idempotencyKey(value) {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+function websiteLabel(siteName, siteUrl) {
+  if (siteName) return String(siteName);
+  if (!siteUrl) return 'Website not specified';
+  try {
+    return new URL(siteUrl).hostname.replace(/^www\./, '');
+  } catch {
+    return String(siteUrl);
+  }
+}
+
+function eventDateTimeLabel(eventStartsAt, remindAt, timeZone) {
+  const eventDate = new Date(eventStartsAt);
+  if (!Number.isFinite(eventDate.getTime())) return '';
+  const zone = timeZone || 'UTC';
+  const dayKey = date => new Intl.DateTimeFormat('en-CA', {
+    timeZone: zone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+  const eventDay = dayKey(eventDate);
+  const reminderDay = dayKey(remindAt);
+  const tomorrow = new Date(remindAt.getTime() + 86400000);
+  const day = eventDay === reminderDay
+    ? 'Today'
+    : eventDay === dayKey(tomorrow)
+      ? 'Tomorrow'
+      : new Intl.DateTimeFormat('en-GB', {
+          timeZone: zone,
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }).format(eventDate);
+  const time = new Intl.DateTimeFormat('en-GB', {
+    timeZone: zone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(eventDate);
+  return `${day} at ${time}`;
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -86,12 +128,15 @@ export default {
         target_channel: 'push',
         include_aliases: { external_id: [user.localId] },
         headings: { en: String(body.eventName || 'Drop reminder').slice(0, 120) },
-        contents: { en: `${body.siteName || 'Release'} · ${body.eventName || 'Upcoming drop'}`.slice(0, 240) },
+        contents: { en: [
+          websiteLabel(body.siteName, body.siteUrl),
+          eventDateTimeLabel(body.eventStartsAt, remindAt, body.timeZone)
+        ].filter(Boolean).join('\n').slice(0, 240) },
         url: body.siteUrl || 'https://cmcollector.com/',
         chrome_web_icon: 'https://cmcollector.com/notification-lego-head-white.png',
         firefox_icon: 'https://cmcollector.com/notification-lego-head-white.png',
         chrome_web_badge: 'https://cmcollector.com/notification-lego-head.png?v=2',
-        idempotency_key: await idempotencyKey(`${user.localId}:${body.reminderId}:${remindAt.toISOString()}`)
+        idempotency_key: await idempotencyKey(`${user.localId}:${body.reminderId}:${remindAt.toISOString()}:notification-v2`)
       };
       if (remindAt.getTime() > Date.now() + 30000) payload.send_after = remindAt.toISOString();
 
