@@ -65,7 +65,8 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.keys().hasOnly([
           'ownerUid', 'eventId', 'eventScope', 'eventName', 'siteName',
-          'siteUrl', 'eventStartsAt', 'remindAt', 'minutesBefore', 'status',
+          'siteUrl', 'eventStartsAt', 'timeZone', 'remindAt', 'minutesBefore',
+          'notificationVersion', 'status',
           'attempts', 'sentAt', 'scheduledAt', 'scheduledFor',
           'oneSignalMessageId', 'cancelMessageId', 'lastError', 'updatedAt'
         ]);
