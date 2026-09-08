@@ -58,7 +58,7 @@ let pendingCloudSettings = null;
 // available, but grant the current product to every authenticated Google user.
 const PREMIUM_ENTITLEMENTS_ENABLED = false;
 const REDIRECT_SIGN_IN_KEY = 'collector-google-redirect-pending';
-const useRedirectSignIn = false;
+const useRedirectSignIn = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 async function hasPremiumAccess(user) {
   if (!user) return false;
