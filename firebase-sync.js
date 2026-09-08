@@ -572,7 +572,14 @@ async function connectUser(user) {
   }
   remoteFingerprint = fingerprint(remoteSettings);
   if (!shouldOfferCloudDownload) {
-    status(`Signed in as ${user.email || 'Google user'}. A saved configuration is available from Settings.`);
+    if (localSpreadsheetId && localSpreadsheetId !== GUEST_SPREADSHEET_ID) {
+      status(`Signed in as ${user.email || 'Google user'}. Your saved collection is active.`);
+      return;
+    }
+    stageRestoredSpreadsheet(remoteSettings);
+    applySettings(remoteSettings);
+    status(`Signed in as ${user.email || 'Google user'}. Restoring your saved collection…`);
+    location.reload();
     return;
   }
   const download = await confirmCloudSettingsDownload(user, remoteSettings);
