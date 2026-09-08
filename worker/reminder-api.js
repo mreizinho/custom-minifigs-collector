@@ -121,6 +121,11 @@ export default {
 
       const remindAt = new Date(body.remindAt);
       if (!Number.isFinite(remindAt.getTime())) return json(origin, { error: 'Invalid reminder time.' }, 400);
+      const eventStartsAt = new Date(body.eventStartsAt);
+      if (!Number.isFinite(eventStartsAt.getTime())) return json(origin, { error: 'Invalid event time.' }, 400);
+      if (eventStartsAt.getTime() <= Date.now() || remindAt.getTime() <= Date.now()) {
+        return json(origin, { expired: true });
+      }
       if (remindAt.getTime() > Date.now() + 30 * 86400000) return json(origin, { deferred: true });
 
       const payload = {

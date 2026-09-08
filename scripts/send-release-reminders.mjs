@@ -70,7 +70,8 @@ for (const snapshot of due.docs) {
     const fresh = await transaction.get(snapshot.ref);
     if (!fresh.exists || !['active', 'cancel_requested'].includes(fresh.get('status'))) return null;
     const startsAt = fresh.get('eventStartsAt');
-    if (!startsAt || startsAt.toMillis() < Date.now() - 60 * 60 * 1000) {
+    const remindAt = fresh.get('remindAt');
+    if (!startsAt || !remindAt || startsAt.toMillis() <= Date.now() || remindAt.toMillis() <= Date.now()) {
       transaction.update(snapshot.ref, { status: 'expired', updatedAt: FieldValue.serverTimestamp() });
       return null;
     }
