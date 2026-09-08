@@ -100,6 +100,8 @@ function useCardFallback(root,image,imageWrap){
   imageWrap.classList.add('fallback-placeholder');
   root.classList.add('fallback-card');
 }
+let privateCataloguePhotoObserver=null;
+function setCatalogueImageSource(image,url){const fileId=drivePhotoId(url);if(!fileId||!usesAuthenticatedCatalogue()||privatePhotoUrls.has(fileId)){image.src=imageSource(url);return}image.dataset.privatePhotoId=fileId;image.classList.add('fallback-image');image.src=fallbackImageSource();const reveal=()=>loadPrivatePhoto(fileId).then(source=>{if(!source||!image.isConnected)return;image.classList.remove('fallback-image');image.src=source});if(!('IntersectionObserver'in window)){reveal();return}privateCataloguePhotoObserver||=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;privateCataloguePhotoObserver.unobserve(entry.target);const id=entry.target.dataset.privatePhotoId;loadPrivatePhoto(id).then(source=>{if(!source||!entry.target.isConnected)return;entry.target.classList.remove('fallback-image');entry.target.src=source})}),{rootMargin:'500px 0px'});privateCataloguePhotoObserver.observe(image)}
 function render(){
   const items=filtered(),template=$('#cardTemplate'),catalogue=$('#catalogue');
   catalogue.replaceChildren();
@@ -110,7 +112,7 @@ function render(){
     root.querySelector('.price').textContent=money(f.value,f.currency);
     root.querySelectorAll('.condition').forEach(condition=>{condition.textContent=statusLabel(f);condition.hidden=!f.condition});
     if(hasImage){
-      image.src=imageSource(f.image);
+      setCatalogueImageSource(image,f.image);
       image.alt=f.name;
       image.onerror=()=>useCardFallback(root,image,imageWrap);
       if(f.altImage){
@@ -119,7 +121,7 @@ function render(){
         alternate.className='alternate-image';
         alternate.loading='lazy';
         alternate.referrerPolicy='no-referrer';
-        alternate.src=imageSource(f.altImage);
+        setCatalogueImageSource(alternate,f.altImage);
         alternate.alt=`${f.name}, alternate view`;
         imageWrap.classList.add('has-alternate-images');
         alternate.onerror=()=>{alternate.remove();image.classList.remove('primary-image');imageWrap.classList.remove('has-alternate-images')};
