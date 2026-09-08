@@ -96,7 +96,7 @@ for (const snapshot of due.docs) {
       continue;
     }
     const remindAt = claimed.remindAt.toDate();
-    const scheduled = remindAt.getTime() > Date.now() + 30_000;
+    const scheduled = remindAt.getTime() > Date.now();
     const payload = {
       app_id: APP_ID,
       target_channel: 'push',

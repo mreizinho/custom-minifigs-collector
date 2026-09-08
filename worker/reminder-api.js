@@ -143,7 +143,7 @@ export default {
         chrome_web_badge: 'https://cmcollector.com/notification-lego-head.png?v=2',
         idempotency_key: await idempotencyKey(`${user.localId}:${body.reminderId}:${remindAt.toISOString()}:notification-v2`)
       };
-      if (remindAt.getTime() > Date.now() + 30000) payload.send_after = remindAt.toISOString();
+      payload.send_after = remindAt.toISOString();
 
       const response = await fetch('https://api.onesignal.com/notifications?c=push', {
         method: 'POST',
