@@ -33,6 +33,7 @@ const db = getFirestore(app);
 window.collectorFirebaseServices = { auth, db };
 const provider = new GoogleAuthProvider();
 provider.addScope('https://www.googleapis.com/auth/drive.file');
+provider.addScope('https://www.googleapis.com/auth/drive.readonly');
 const GUEST_SPREADSHEET_ID = '1rDpFScTbHWIG3TEUatUNFVX7E68CoOmcgoDRQmrlwZE';
 const GUEST_SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${GUEST_SPREADSHEET_ID}/`;
 const GUEST_COLLECTIONS = ['Star Wars'];
