@@ -30,3 +30,4 @@
 @media(max-width:600px){.settings-copy{display:flex;flex-direction:column;overflow:hidden}.settings-copy>h2,.settings-copy>.settings-tabs{flex:0 0 auto}.settings-tab-panel{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}.settings-tab-panel::-webkit-scrollbar{display:none}}
 @media(max-width:600px){.date-time-picker-columns,.date-time-picker-options,.date-time-picker-option{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.date-time-picker-options{touch-action:pan-y}.date-time-picker-option:focus:not(:focus-visible){outline:none}}
 .settings-copy #chooseSpreadsheet:disabled{cursor:not-allowed;opacity:.42}
+.settings-tab-panel{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none}.settings-tab-panel::-webkit-scrollbar{display:none}
