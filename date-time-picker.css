@@ -33,4 +33,4 @@
 .settings-tab-panel{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none}.settings-tab-panel::-webkit-scrollbar{display:none}
 .date-time-mobile-headings{display:block;margin:0 0 7px;font-size:14px}
 .date-time-format-setting{display:flex;flex-direction:column}.date-time-mobile-headings{order:1}.date-time-format-setting>p{order:2}.date-time-format-controls{order:3}
-@media(min-width:601px){.date-time-format-setting>p{margin-bottom:5px}}
+@media(min-width:601px){.date-time-format-setting>p{margin-bottom:10px}}
