@@ -290,12 +290,12 @@ function installSettingsUi() {
     <button type="button" id="loadOnline" hidden></button>
     <button type="button" id="disconnectGoogle" hidden></button>
     <p>Use your Google Account to backup, restore and sync your configuration across multiple devices. Choose Save to store this device’s configuration, or Load to restore a saved configuration.</p>
-    <p class="settings-save-warning"><span class="material-symbols-rounded" aria-hidden="true">warning</span><span><strong>Important:</strong> After adding or deleting custom tags, choose Save to back up those changes to your Google Account.</span></p>
     <div class="google-settings-actions settings-account-actions">
       <button type="button" id="firebaseAuth"><span class="material-symbols-rounded">login</span>Sign in</button>
       <button type="button" id="firebaseUpload" data-firebase-required><span class="material-symbols-rounded">save</span>Save</button>
       <button type="button" id="firebaseDownload" data-firebase-required><span class="material-symbols-rounded">folder_open</span>Load</button>
     </div>
+    <p class="settings-save-warning"><span class="material-symbols-rounded" aria-hidden="true">warning</span><span><strong>Important:</strong> After adding or deleting custom tags, choose Save to back up those changes to your Google Account.</span></p>
     <p id="firebaseStatus" class="settings-status" role="status" aria-live="polite"></p>`;
   if (pickerButton) section.querySelector('.google-settings-heading')?.append(pickerButton);
   const spreadsheetInput = spreadsheetSection?.querySelector('#spreadsheetUrl');
