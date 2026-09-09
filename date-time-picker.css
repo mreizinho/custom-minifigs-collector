@@ -40,3 +40,4 @@
 .date-time-picker-dialog[data-picker-view="time"] .date-time-picker-body{box-sizing:border-box;height:370px;flex:0 0 370px}.date-time-picker-time-wheels{display:grid}.date-time-picker-time-wheels .date-time-picker-time-header{min-height:42px;margin-bottom:10px}.date-time-picker-time-header .date-time-calendar-heading{grid-column:2}
 .date-time-picker-date-wheels .date-time-calendar-heading{position:relative;justify-self:center;width:max-content}.date-time-picker-date-wheels .date-time-calendar-heading>button{position:absolute;left:calc(100% + 2px)}
 .date-time-calendar-heading{text-transform:uppercase}
+.date-time-calendar{overflow:hidden}
