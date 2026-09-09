@@ -1082,7 +1082,7 @@ html { scrollbar-gutter: stable; }
   .header-actions button>:first-child,.header-actions>a>:first-child { grid-column:1; justify-self:center; }
   .header-actions button::after,.header-actions>a::after { grid-column:2; justify-self:start; }
   .header-actions .privacy-policy-icon { transform:translateX(-1px); }
-  .header-actions .settings-menu-icon { transform:none; }
+  .header-actions .settings-menu-icon { transform:translateY(-1px); }
   .header-actions #releaseCalendarToggle { padding:0 12px 0 7px; }
   .header-actions #statsToggle,
   .header-actions #theme { border: 0; border-radius: 0; background: transparent; }
