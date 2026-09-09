@@ -611,8 +611,8 @@ render=()=>{renderWithoutBatchTagSelection();const currentIds=new Set(figures.ma
 const publicCatalogueLoad=load;
 const publicCatalogueImageSource=imageSource;
 const privatePhotoUrls=new Map(),privatePhotoRequests=new Map(),privatePhotoLoadQueue=[];
-const MAX_PRIVATE_PHOTO_LOADS=4;
-let privatePhotoRenderTimer=0,privatePhotoLoadsActive=0,authenticatedLoadRevision=0;
+const MAX_PRIVATE_PHOTO_LOADS=6;
+let privatePhotoLoadsActive=0,authenticatedLoadRevision=0;
 const usesAuthenticatedCatalogue=()=>!SECRET_DEMO_MODE&&SHEET_ID!==DEFAULT_SHEET_ID;
 function rowsFromSheetValues(values=[]){
   const headers=values[0]||[];
@@ -621,25 +621,19 @@ function rowsFromSheetValues(values=[]){
     raw:Object.fromEntries(headers.map((header,columnIndex)=>[clean(header),cells[columnIndex]??'']))
   })).filter(record=>Object.values(record.raw).some(value=>clean(value)));
 }
-function schedulePrivatePhotoRender(){
-  clearTimeout(privatePhotoRenderTimer);
-  privatePhotoRenderTimer=setTimeout(()=>{
-    render();
-    if($('#detail').open&&activeDetailFigure&&(activeDetailFigure.image||activeDetailFigure.altImage))openDetail(activeDetailFigure);
-  },160);
-}
 function pumpPrivatePhotoQueue(){while(privatePhotoLoadsActive<MAX_PRIVATE_PHOTO_LOADS&&privatePhotoLoadQueue.length){privatePhotoLoadsActive++;privatePhotoLoadQueue.shift()().finally(()=>{privatePhotoLoadsActive--;pumpPrivatePhotoQueue()})}}
 async function loadPrivatePhoto(fileId){
   if(privatePhotoUrls.has(fileId))return privatePhotoUrls.get(fileId);
   if(privatePhotoRequests.has(fileId))return privatePhotoRequests.get(fileId);
-  const request=new Promise(resolve=>privatePhotoLoadQueue.push(async()=>{let result='';try{const response=await sheetsRequest(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`),blob=await response.blob();if(!blob.type.startsWith('image/'))throw Error(`Drive file ${fileId} is not an image.`);result=URL.createObjectURL(blob);privatePhotoUrls.set(fileId,result);schedulePrivatePhotoRender()}catch(error){console.warn(`Could not load private Drive photo ${fileId}.`,error)}finally{privatePhotoRequests.delete(fileId);resolve(result)}}));
+  const request=new Promise(resolve=>privatePhotoLoadQueue.push(async()=>{let result='';try{const response=await sheetsRequest(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`),blob=await response.blob();if(!blob.type.startsWith('image/'))throw Error(`Drive file ${fileId} is not an image.`);result=URL.createObjectURL(blob);privatePhotoUrls.set(fileId,result)}catch(error){console.warn(`Could not load private Drive photo ${fileId}.`,error)}finally{privatePhotoRequests.delete(fileId);resolve(result)}}));
   privatePhotoRequests.set(fileId,request);
   pumpPrivatePhotoQueue();
   return request;
 }
 imageSource=url=>{const fileId=drivePhotoId(url);return fileId&&privatePhotoUrls.has(fileId)?privatePhotoUrls.get(fileId):publicCatalogueImageSource(url)};
 const driveThumbnailSource=fileId=>`https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1000`;
-document.addEventListener('error',async event=>{const image=event.target;if(!(image instanceof HTMLImageElement)||image.dataset.privatePhotoRecovery||!usesAuthenticatedCatalogue())return;const failedSource=image.currentSrc||image.src,fileId=drivePhotoId(failedSource);if(!fileId||isFallbackImageSource(image.src))return;if(!image.dataset.driveThumbnailTried&&/lh3\.googleusercontent\.com/i.test(failedSource)){event.stopImmediatePropagation();image.dataset.driveThumbnailTried='true';image.src=driveThumbnailSource(fileId);return}event.stopImmediatePropagation();image.dataset.privatePhotoRecovery='true';const recovered=await loadPrivatePhoto(fileId);if(recovered&&image.isConnected){image.src=recovered;return}delete image.dataset.privatePhotoRecovery;if(image.isConnected&&typeof image.onerror==='function')image.onerror()},{capture:true});
+const firefoxDrivePhotoRecovery=/firefox/i.test(navigator.userAgent);
+document.addEventListener('error',async event=>{const image=event.target;if(!(image instanceof HTMLImageElement)||image.dataset.privatePhotoRecovery||!usesAuthenticatedCatalogue())return;const failedSource=image.currentSrc||image.src,fileId=drivePhotoId(failedSource);if(!fileId||isFallbackImageSource(image.src))return;if(!firefoxDrivePhotoRecovery&&!image.dataset.driveThumbnailTried&&/lh3\.googleusercontent\.com/i.test(failedSource)){event.stopImmediatePropagation();image.dataset.driveThumbnailTried='true';image.src=driveThumbnailSource(fileId);return}event.stopImmediatePropagation();image.dataset.privatePhotoRecovery='true';const recovered=await loadPrivatePhoto(fileId);if(recovered&&image.isConnected){image.src=recovered;return}delete image.dataset.privatePhotoRecovery;if(image.isConnected&&typeof image.onerror==='function')image.onerror()},{capture:true});
 document.addEventListener('error',event=>{const image=event.target;if(image instanceof HTMLImageElement&&image.dataset.privatePhotoRecovery)event.stopImmediatePropagation()},{capture:true});
 const rememberPhotoRefreshBeforePrivatePhotos=rememberPhotoRefresh;
 rememberPhotoRefresh=fileId=>{
