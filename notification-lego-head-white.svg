@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <title>CMCollector notification card icon</title>
-  <g fill="#fff" stroke="#242624" stroke-width="8" stroke-linejoin="round">
-    <rect x="80" y="22" width="96" height="38" rx="8"/>
-    <rect x="28" y="60" width="200" height="166" rx="34"/>
-    <rect x="66" y="224" width="124" height="18" rx="4"/>
-  </g>
-</svg>
