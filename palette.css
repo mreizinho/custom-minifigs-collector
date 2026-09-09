@@ -1081,7 +1081,8 @@ html { scrollbar-gutter: stable; }
   .header-actions button,.header-actions>a { display:grid; grid-template-columns:30px minmax(0,1fr); column-gap:8px; align-items:center; justify-content:stretch; width:100%; height:44px; border:0; border-radius:0; background:transparent; padding:0 12px; text-align:left; }
   .header-actions button>:first-child,.header-actions>a>:first-child { grid-column:1; justify-self:center; }
   .header-actions button::after,.header-actions>a::after { grid-column:2; justify-self:start; }
-  .header-actions .privacy-policy-icon,.header-actions .settings-menu-icon { transform:none; }
+  .header-actions .privacy-policy-icon { transform:translateX(-1px); }
+  .header-actions .settings-menu-icon { transform:none; }
   .header-actions #releaseCalendarToggle { padding-inline:12px; }
   .header-actions #statsToggle,
   .header-actions #theme { border: 0; border-radius: 0; background: transparent; }
