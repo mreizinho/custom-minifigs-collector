@@ -25,6 +25,7 @@ const productionFiles = [
   'lego-figure-outline-dark.svg',
   'privacy.html',
   'privacy-policy.svg',
+  'gear-716652.png',
   'buymecoffee.png',
   'buymecoffee-inverted.png',
   'admin',
