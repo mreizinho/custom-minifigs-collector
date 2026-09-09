@@ -6,3 +6,4 @@
 @media(max-width:600px){#releaseCalendarToggle .release-calendar-icon-wrap{position:relative;display:grid;flex:0 0 24px;width:24px;height:24px;place-items:center;overflow:visible}#releaseCalendarToggle .release-calendar-badge{position:absolute;top:-8px;right:-9px;display:none;place-items:center;min-width:16px;height:16px;padding:0 4px;border-radius:10px;background:var(--accent);color:#fff;font:700 10px/16px Outfit,sans-serif;text-indent:1px}#releaseCalendarToggle .release-calendar-badge.active{display:grid}}
 .past-event-visibility::after{content:'This time delay affects ALL past events';color:var(--muted);font-weight:400}
 .past-event-action-dialog .past-hours-row>span{color:inherit}
+.past-event-action-dialog .past-hours-row{justify-content:center}
