@@ -41,3 +41,4 @@
 .date-time-picker-date-wheels .date-time-calendar-heading{position:relative;justify-self:center;width:max-content}.date-time-picker-date-wheels .date-time-calendar-heading>button{position:absolute;left:calc(100% + 2px)}
 .date-time-calendar-heading{text-transform:uppercase}
 .date-time-calendar{overflow:hidden}
+.date-time-picker-dialog{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
