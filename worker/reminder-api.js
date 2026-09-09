@@ -21,6 +21,35 @@ function json(origin, data, status = 200) {
   });
 }
 
+async function publicDriveImage(request, fileId) {
+  if (!/^[a-zA-Z0-9_-]{20,}$/.test(fileId)) return new Response('Invalid image ID.', { status: 400 });
+  const cache = caches.default;
+  const cacheKey = new Request(new URL(request.url).origin + `/image/${fileId}`);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+  const sources = [
+    `https://lh3.googleusercontent.com/d/${fileId}=w1000`,
+    `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1000`
+  ];
+  for (const source of sources) {
+    const upstream = await fetch(source, { redirect: 'follow' });
+    const type = upstream.headers.get('Content-Type') || '';
+    if (!upstream.ok || !type.startsWith('image/')) continue;
+    const response = new Response(upstream.body, {
+      status: 200,
+      headers: {
+        'Content-Type': type,
+        'Cache-Control': 'public, max-age=86400',
+        'Access-Control-Allow-Origin': '*',
+        'Cross-Origin-Resource-Policy': 'cross-origin'
+      }
+    });
+    await cache.put(cacheKey, response.clone());
+    return response;
+  }
+  return new Response('Image unavailable.', { status: 404 });
+}
+
 async function authenticatedUser(request) {
   const authorization = request.headers.get('Authorization') || '';
   if (!authorization.startsWith('Bearer ')) throw new Error('Authentication required.');
@@ -107,6 +136,9 @@ function eventDateTimeLabel(eventStartsAt, remindAt, timeZone) {
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+    const imageMatch = request.method === 'GET' && url.pathname.match(/^\/image\/([a-zA-Z0-9_-]+)$/);
+    if (imageMatch) return publicDriveImage(request, imageMatch[1]);
     const origin = request.headers.get('Origin') || '';
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
     if (request.method !== 'POST' || !ALLOWED_ORIGINS.has(origin)) return json(origin, { error: 'Not allowed.' }, 403);
