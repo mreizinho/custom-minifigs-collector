@@ -50,6 +50,7 @@ let settingsBaseline = null;
 let pendingGoogleAccessToken = '';
 let authActionPending = false;
 let deferGuestReloadUntilSettingsClose = false;
+let explicitSignOutPending = false;
 let cloudSyncPaused = false;
 let authStateRevision = 0;
 let promptOnNextUserConnection = false;
@@ -318,6 +319,7 @@ function installSettingsUi() {
     try {
       if (auth.currentUser) {
         deferGuestReloadUntilSettingsClose = Boolean(document.querySelector('#settingsDialog')?.open);
+        explicitSignOutPending = true;
         await signOut(auth);
       } else {
         promptOnNextUserConnection = true;
@@ -336,6 +338,7 @@ function installSettingsUi() {
         }
       }
     } catch (error) {
+      explicitSignOutPending = false;
       if (error.code === 'auth/popup-blocked' && !useRedirectSignIn) {
         sessionStorage.setItem(REDIRECT_SIGN_IN_KEY, '1');
         await signInWithRedirect(auth, provider);
@@ -474,6 +477,16 @@ function confirmCloudSettingsDownload(user, settings) {
 
 async function connectUser(user) {
   const revision = ++authStateRevision;
+  const rememberedUserId = localStorage.getItem('minifig-google-user-id') || localStorage.getItem('minifig-firebase-user-id') || '';
+  if (!user && rememberedUserId && !explicitSignOutPending) {
+    currentUser = null;
+    currentUserPremium = true;
+    cloudSyncPaused = true;
+    renderAccount(null);
+    announceGoogleAuth({ uid: rememberedUserId }, '', true);
+    status('Your collection remains available. Google access will reconnect when an action needs it.');
+    return;
+  }
   const shouldOfferCloudDownload = Boolean(user && promptOnNextUserConnection);
   if (user) promptOnNextUserConnection = false;
   currentUser = user;
@@ -481,6 +494,7 @@ async function connectUser(user) {
   cloudSyncPaused = Boolean(user);
   renderAccount(user);
   if (!user) {
+    explicitSignOutPending = false;
     remoteFingerprint = '';
     sessionStorage.removeItem('collector-restored-spreadsheet-id');
     sessionStorage.removeItem('collector-restored-spreadsheet-url');
