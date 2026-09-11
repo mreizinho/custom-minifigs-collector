@@ -265,6 +265,19 @@ new IntersectionObserver(updateAddFigurePosition,{threshold:0}).observe(searchCo
 function normalizedHeader(value){const header=clean(value);return header==='#'?'id':header.toLowerCase().replace(/[^a-z0-9]/g,'')}
 function headerIndex(headers,names){return headers.findIndex(header=>names.includes(normalizedHeader(header)))}
 function sheetColumn(index){let label='';for(let number=index+1;number;number=Math.floor((number-1)/26))label=String.fromCharCode(65+(number-1)%26)+label;return label}
+function comparableFigureId(value){return clean(value).replace(/^#/,'').toLowerCase()}
+async function resolveFigureSheetRow(figure){
+  if(!figure)throw Error('No minifig was selected.');
+  const collection=figure.sheetCollection||activeCollection;
+  if(collection!==activeCollection)throw Error(`The collection changed while this minifig was open. Reload ${collection} and try again.`);
+  const escapedCollection=collection.replace(/'/g,"''"),range=encodeURIComponent(`'${escapedCollection}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS`),values=(await response.json()).values||[],headers=values[0]||[],idIndex=headerIndex(headers,['id','number','setnumber','figureid']);
+  if(idIndex<0)throw Error(`The ${collection} sheet is missing an ID column.`);
+  const figureId=figureNumber(figure),expectedId=comparableFigureId(figureId),matches=[];
+  values.slice(1).forEach((row,index)=>{if(comparableFigureId(row[idIndex])===expectedId)matches.push(index+2)});
+  if(!expectedId||matches.length!==1)throw Error(matches.length>1?`ID #${figureId} appears more than once in ${collection}. The change was stopped to protect your data.`:`ID #${figureId} could not be found in ${collection}. Reload the collection and try again.`);
+  figure.sheetRow=matches[0];figure.sheetCollection=collection;
+  return matches[0]
+}
 async function nextSequentialFigureId(headers,escapedCollection){const idIndex=headerIndex(headers,['id','number','setnumber','figureid']);if(idIndex<0)throw Error(`The ${activeCollection} sheet is missing an ID column.`);const idColumn=sheetColumn(idIndex),idRange=encodeURIComponent(`'${escapedCollection}'!${idColumn}2:${idColumn}`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${idRange}?majorDimension=COLUMNS`),values=(await response.json()).values?.[0]||[],usedIds=new Set(values.map(value=>Number.parseInt(clean(value).replace(/^#/,''),10)).filter(id=>Number.isInteger(id)&&id>0));let nextId=1;while(usedIds.has(nextId))nextId++;return nextId}
 function loadImageFile(file){return new Promise((resolve,reject)=>{const image=new Image(),url=URL.createObjectURL(file);image.onload=()=>{URL.revokeObjectURL(url);resolve(image)};image.onerror=()=>{URL.revokeObjectURL(url);reject(Error('The selected photo could not be read.'))};image.src=url})}
 async function photoAsPng(file){if(!file?.type.startsWith('image/'))throw Error('Choose a PNG, JPEG, or WebP image.');const image=await loadImageFile(file),canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;if(!canvas.width||!canvas.height)throw Error('The selected photo has no usable image data.');canvas.getContext('2d').drawImage(image,0,0);return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('The selected photo could not be converted to PNG.')),'image/png'))}
@@ -658,7 +671,7 @@ load=async()=>{
     const escapedCollection=activeCollection.replace(/'/g,"''"),range=encodeURIComponent(`'${escapedCollection}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS`),records=rowsFromSheetValues((await response.json()).values||[]);
     if(revision!==authenticatedLoadRevision)return;
     figures=mapRows(records.map(record=>record.raw));
-    figures.forEach((figure,index)=>{figure.sheetRow=records[index].sheetRow});
+    figures.forEach((figure,index)=>{figure.sheetRow=records[index].sheetRow;figure.sheetCollection=activeCollection});
     renderFilters();
     render();
     loadExchangeRates();
@@ -744,3 +757,21 @@ animateSettingsTab=function(nextTab,direction){if(nextTab===activeSettingsTab)re
 checkAboutVersionWithoutUpdating=async function(){const latest=$('#latestAppVersion'),status=$('#aboutVersionStatus'),refresh=$('#refreshLatestVersion');if(!latest||!status||!refresh)return;latest.textContent='Checking…';status.textContent='Checking GitHub for the latest version…';refresh.disabled=true;try{const url=`https://api.github.com/repos/mreizinho/custom-minifigs-collector/contents/index.html?ref=main&_versionCheck=${Date.now()}`,response=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github.raw+json'}});if(!response.ok)throw Error(`GitHub version check failed (${response.status})`);const html=await response.text(),match=html.match(/app\.js\?v=([^"'&<]+)/);if(!match)throw Error('The version in GitHub could not be identified.');const githubVersion=decodeURIComponent(match[1]);latest.textContent=formatAppVersion(githubVersion);const newer=githubVersion.localeCompare(loadedAppVersion,undefined,{numeric:true})>0;status.textContent=githubVersion===loadedAppVersion?'You are using the latest GitHub version.':newer?'A newer GitHub version is available. Press the button below to update.':'This loaded version is newer than GitHub main.'}catch(error){latest.textContent='Unavailable';status.textContent=error.message}finally{refresh.disabled=false}};
 setTimeout(()=>document.querySelector('.settings-version-heading h3')?.replaceChildren('Engine version'),0);
 checkAboutVersionWithoutUpdating=async function(){const latest=$('#latestAppVersion'),status=$('#aboutVersionStatus'),refresh=$('#refreshLatestVersion');if(!latest||!status||!refresh)return;latest.textContent='Checking…';status.textContent='Checking GitHub for the latest version…';refresh.disabled=true;try{const url=`https://api.github.com/repos/mreizinho/custom-minifigs-collector/contents/index.html?ref=main&_versionCheck=${Date.now()}`,response=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github.raw+json'}});if(!response.ok)throw Error(`GitHub version check failed (${response.status})`);const html=await response.text(),match=html.match(/app\.js\?v=([^"'&<]+)/);if(!match)throw Error('The version in GitHub could not be identified.');const githubVersion=decodeURIComponent(match[1]);latest.textContent=formatAppVersion(githubVersion);const newer=githubVersion.localeCompare(loadedAppVersion,undefined,{numeric:true})>0;status.textContent=githubVersion===loadedAppVersion?'You are using the latest GitHub version.':newer?'A newer GitHub version is available. Use the sync button above to update.':'This loaded version is newer than GitHub main.'}catch(error){latest.textContent='Unavailable';status.textContent=error.message}finally{refresh.disabled=false}};
+
+// Resolve a minifig's current row by its unique ID before any destructive or
+// persistent mutation. Cached row numbers become unsafe if Sheet rows move.
+const uploadFigurePhotoWithoutRowGuard=uploadFigurePhoto;
+uploadFigurePhoto=async(file,figure)=>{await resolveFigureSheetRow(figure);return uploadFigurePhotoWithoutRowGuard(file,figure)};
+const uploadAlternateFigurePhotoWithoutRowGuard=uploadAlternateFigurePhoto;
+uploadAlternateFigurePhoto=async(file,figure)=>{await resolveFigureSheetRow(figure);return uploadAlternateFigurePhotoWithoutRowGuard(file,figure)};
+uploadFigurePhotoTarget=(file,figure,target='primary')=>target==='alternate'?uploadAlternateFigurePhoto(file,figure):uploadFigurePhoto(file,figure);
+const saveFigurePhotoWithoutRowGuard=saveFigurePhoto;
+saveFigurePhoto=async(figure,url)=>{await resolveFigureSheetRow(figure);return saveFigurePhotoWithoutRowGuard(figure,url)};
+const saveFigurePhotoTargetWithoutRowGuard=saveFigurePhotoTarget;
+saveFigurePhotoTarget=async(figure,url,target='primary')=>{await resolveFigureSheetRow(figure);return saveFigurePhotoTargetWithoutRowGuard(figure,url,target)};
+const updateFigureStatusWithoutRowGuard=updateFigureStatusInSheet;
+updateFigureStatusInSheet=async(figure,status)=>{await resolveFigureSheetRow(figure);return updateFigureStatusWithoutRowGuard(figure,status)};
+const saveFigureDetailsWithoutRowGuard=saveFigureDetails;
+saveFigureDetails=async(figure,entry,status)=>{await resolveFigureSheetRow(figure);return saveFigureDetailsWithoutRowGuard(figure,entry,status)};
+const deleteFigureWithoutRowGuard=deleteFigureFromActiveSheet;
+deleteFigureFromActiveSheet=async figure=>{await resolveFigureSheetRow(figure);return deleteFigureWithoutRowGuard(figure)};
