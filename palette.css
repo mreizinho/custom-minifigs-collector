@@ -1266,6 +1266,12 @@ body:not(.dark) .detail-edit-button:focus-visible,
 .dark .detail-edit-button:hover,
 .dark .detail-edit-button:focus-visible { border-color:var(--ink); background:var(--ink); color:var(--paper); }
 @media(max-width:600px){.detail-copy.detail-editing{padding:28px 22px}.detail-edit-form{min-height:auto}.detail-edit-name-row,.detail-edit-brand-origin{grid-template-columns:1fr}.detail-edit-value{grid-template-columns:68px 89px minmax(100px,1fr)}.detail-edit-actions{grid-template-columns:auto 1fr auto auto}}
+@media(max-width:600px){
+  #detail .detail-edit-button{position:fixed;top:auto;right:max(8px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));z-index:3;width:49px;height:49px;border:0;border-radius:4px;background:var(--accent);color:#fff;box-shadow:0 3px 8px #0004}
+  #detail .detail-edit-button .material-symbols-rounded{font-size:27px}
+  #detail .detail-edit-button:hover,#detail .detail-edit-button:focus-visible{border:0;background:var(--accent);color:#fff}
+  #detail.image-zoomed .detail-edit-button{display:none}
+}
 
 /* About and version refresh */
 .about-dialog{position:relative;width:min(440px,calc(100% - 32px));max-width:none;padding:0;border:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);box-shadow:0 18px 48px rgba(0,0,0,.24)}
