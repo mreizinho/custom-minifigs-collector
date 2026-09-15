@@ -21,10 +21,6 @@ premiumDialog.addEventListener('click',event=>{if(event.target===premiumDialog||
 // Modal dialogs close only through their explicit controls or keyboard behavior.
 // Stop backdrop clicks before legacy per-dialog light-dismiss handlers receive them.
 document.addEventListener('click',event=>{if(event.target instanceof HTMLDialogElement)event.stopPropagation()},{capture:true});
-const setSearchSecretHelp=visible=>document.body.classList.toggle('show-search-secret-help',visible);
-window.addEventListener('keydown',event=>{if(event.key==='Control')setSearchSecretHelp(true)});
-window.addEventListener('keyup',event=>{if(event.key==='Control')setSearchSecretHelp(false)});
-window.addEventListener('blur',()=>setSearchSecretHelp(false));
 const resultCount=$('#resultCount'),catalogueToolbar=$('.toolbar'),catalogueStatusToast=document.createElement('div');
 catalogueStatusToast.className='catalogue-status-toast';catalogueStatusToast.setAttribute('aria-hidden','true');catalogueStatusToast.setAttribute('popover','manual');catalogueStatusToast.hidden=true;document.body.append(catalogueStatusToast);
 let catalogueToolbarVisible=true,catalogueStatusToastTimer=0,dismissedCatalogueStatus='';
