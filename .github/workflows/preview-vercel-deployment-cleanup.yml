@@ -1,0 +1,25 @@
+name: Preview Vercel deployment cleanup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test cleanup selection
+        run: node --test scripts/cleanup-vercel-deployments.test.mjs
+      - name: Preview only — no deletion
+        run: node scripts/cleanup-vercel-deployments.mjs --json
+        env:
+          VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_ACCESS_TOKEN }}
+          VERCEL_TEAM_ID: team_Ho7AwTgqd1sLeWOEqlpIVdwd
+          VERCEL_PROJECT_ID: prj_2vB4eFf2T7pRF1jeHkKXBH0L9ZYO
