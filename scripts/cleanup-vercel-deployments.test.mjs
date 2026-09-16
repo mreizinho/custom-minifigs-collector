@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { candidateFingerprint, main, planCleanup } from './cleanup-vercel-deployments.mjs';
+import { candidateFingerprint, main, planCleanup, selectReviewedCandidates } from './cleanup-vercel-deployments.mjs';
 
 const now = Date.parse('2026-09-16T12:00:00Z');
 const deployment = (number, timestamp) => ({
@@ -46,6 +46,10 @@ test('candidate fingerprint is independent of candidate order', () => {
   const second = [{ id: 'dpl_a' }, { id: 'dpl_b' }];
   assert.equal(candidateFingerprint(first), candidateFingerprint(second));
   assert.notEqual(candidateFingerprint(first), candidateFingerprint([{ id: 'dpl_a' }]));
+});
+
+test('reviewed selection refuses an incomplete set before deletion', () => {
+  assert.throws(() => selectReviewedCandidates([]), /Only 0 of 248/);
 });
 
 test('dry run reads API results and never sends DELETE', async () => {

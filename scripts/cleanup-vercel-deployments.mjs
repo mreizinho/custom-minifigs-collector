@@ -1,5 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
+import { APPROVED_HASHES_BASE64 } from './approved-vercel-deployment-hashes.mjs';
 
 const API = 'https://api.vercel.com';
 const TIME_ZONE = 'Europe/Lisbon';
@@ -8,6 +9,19 @@ const MAX_DELETE_PER_RUN = 25;
 
 export function candidateFingerprint(items) {
   return createHash('sha256').update(items.map((item) => item.id).sort().join('\n')).digest('hex');
+}
+
+export function selectReviewedCandidates(items) {
+  const bytes = Buffer.from(APPROVED_HASHES_BASE64, 'base64');
+  if (bytes.length !== 248 * 8) throw new Error('Invalid reviewed deployment digest list');
+  const hashes = new Set();
+  for (let offset = 0; offset < bytes.length; offset += 8) {
+    hashes.add(bytes.subarray(offset, offset + 8).toString('hex'));
+  }
+  if (hashes.size !== 248) throw new Error('Duplicate reviewed deployment digest');
+  const selected = items.filter((item) => hashes.has(createHash('sha256').update(item.id).digest().subarray(0, 8).toString('hex')));
+  if (selected.length !== 248) throw new Error(`Only ${selected.length} of 248 reviewed deployments remain eligible; refusing deletion.`);
+  return selected;
 }
 
 function dayInLisbon(timestamp) {
@@ -70,13 +84,23 @@ export function planCleanup(deployments, aliasIds, now = Date.now()) {
 }
 
 async function requestJson(path, token, options = {}) {
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) throw new Error(`Vercel API ${response.status} on ${options.method ?? 'GET'} ${path.split('?')[0]}`);
-  if (options.method === 'DELETE') return null;
-  return response.json();
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const response = await fetch(`${API}${path}`, {
+      ...options,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.status === 429 && attempt < 5) {
+      const retryAfter = Number(response.headers?.get('retry-after'));
+      const delay = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 60000) : Math.min(1000 * (2 ** attempt), 30000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      continue;
+    }
+    if (!response.ok) throw new Error(`Vercel API ${response.status} on ${options.method ?? 'GET'} ${path.split('?')[0]}`);
+    if (options.method === 'DELETE') return null;
+    return response.json();
+  }
+  throw new Error(`Vercel API retries exhausted on ${options.method ?? 'GET'} ${path.split('?')[0]}`);
 }
 
 async function listPages(endpoint, key, token, projectId, teamId) {
@@ -109,14 +133,15 @@ async function listPages(endpoint, key, token, projectId, teamId) {
 export async function main(args = process.argv.slice(2), env = process.env) {
   const execute = args.includes('--execute');
   const all = args.includes('--execute-all');
+  const reviewed = args.includes('--execute-reviewed');
   const expectedArg = args.find((arg) => arg.startsWith('--expected-sha256='));
   const excludedArgs = args.filter((arg) => arg.startsWith('--exclude-id='));
-  if (args.some((arg) => !['--execute', '--execute-all', '--json'].includes(arg) && !arg.startsWith('--expected-sha256=') && !arg.startsWith('--exclude-id=')) ||
-      (all && (!execute || !expectedArg)) || (expectedArg && !all) ||
+  if (args.some((arg) => !['--execute', '--execute-all', '--execute-reviewed', '--json'].includes(arg) && !arg.startsWith('--expected-sha256=') && !arg.startsWith('--exclude-id=')) ||
+      (all && reviewed) || ((all || reviewed) && (!execute || !expectedArg)) || (expectedArg && !(all || reviewed)) ||
       args.filter((arg) => arg.startsWith('--expected-sha256=')).length > 1 ||
       excludedArgs.length > 1 || (excludedArgs.length > 0 && !all) ||
       (excludedArgs.length > 0 && !/^--exclude-id=dpl_[A-Za-z0-9]+$/.test(excludedArgs[0]))) {
-    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute [--execute-all --expected-sha256=HASH [--exclude-id=ID]]]');
+    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute [--execute-reviewed|--execute-all --expected-sha256=HASH]]');
   }
   const { VERCEL_ACCESS_TOKEN: token, VERCEL_PROJECT_ID: projectId, VERCEL_TEAM_ID: teamId } = env;
   if (!token || !/^prj_[A-Za-z0-9]+$/.test(projectId ?? '') || !/^team_[A-Za-z0-9]+$/.test(teamId ?? '')) {
@@ -144,12 +169,12 @@ export async function main(args = process.argv.slice(2), env = process.env) {
   if (excludedId && !plan.remove.some((item) => item.id === excludedId)) {
     throw new Error(`Excluded deployment ${excludedId} is not a current candidate; refusing deletion.`);
   }
-  const approved = excludedId ? plan.remove.filter((item) => item.id !== excludedId) : plan.remove;
+  const approved = reviewed ? selectReviewedCandidates(plan.remove) : excludedId ? plan.remove.filter((item) => item.id !== excludedId) : plan.remove;
   const fingerprint = candidateFingerprint(approved);
-  if (all && fingerprint !== expectedArg.slice('--expected-sha256='.length)) {
+  if ((all || reviewed) && fingerprint !== expectedArg.slice('--expected-sha256='.length)) {
     throw new Error(`Candidate list changed; refusing deletion. Expected ${expectedArg.slice('--expected-sha256='.length)}, got ${fingerprint}.`);
   }
-  const selected = all ? approved : plan.remove.slice(0, MAX_DELETE_PER_RUN);
+  const selected = all || reviewed ? approved : plan.remove.slice(0, MAX_DELETE_PER_RUN);
   const report = {
     mode: execute ? 'execute' : 'dry-run', projectId, teamId,
     productionReady: deployments.length, activeAliases: aliasIds.length,
