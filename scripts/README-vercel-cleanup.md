@@ -32,6 +32,6 @@ node scripts/cleanup-vercel-deployments.mjs --execute
 
 To run it daily later, add a scheduled GitHub Actions workflow with the token in a repository secret. A workflow is intentionally not installed yet, so simply pushing this script cannot initiate deletions.
 
-The one-time `execute-vercel-deployment-cleanup.yml` workflow is manual and locked to the SHA-256 fingerprint of the 248 candidates from the reviewed 16 September 2026 preview. It refuses deletion if the candidate set has changed. It also requires typing `DELETE 248` when dispatching. It is not scheduled and will not run on a push. If it fails partway through, review a new preview before any further deletion.
+The one-time `execute-vercel-deployment-cleanup.yml` workflow is manual and locked to the SHA-256 fingerprint of the 248 candidates from the reviewed 16 September 2026 preview. A subsequent dry run found one additional older deployment, which the workflow explicitly excludes. It refuses deletion if the remaining candidate set differs from the reviewed 248. It also requires typing `DELETE 248` when dispatching. It is not scheduled and will not run on a push. If it fails partway through, review a new preview before any further deletion.
 
 Tests: `node --test scripts/cleanup-vercel-deployments.test.mjs`.

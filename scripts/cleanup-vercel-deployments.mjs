@@ -110,10 +110,13 @@ export async function main(args = process.argv.slice(2), env = process.env) {
   const execute = args.includes('--execute');
   const all = args.includes('--execute-all');
   const expectedArg = args.find((arg) => arg.startsWith('--expected-sha256='));
-  if (args.some((arg) => !['--execute', '--execute-all', '--json'].includes(arg) && !arg.startsWith('--expected-sha256=')) ||
+  const excludedArgs = args.filter((arg) => arg.startsWith('--exclude-id='));
+  if (args.some((arg) => !['--execute', '--execute-all', '--json'].includes(arg) && !arg.startsWith('--expected-sha256=') && !arg.startsWith('--exclude-id=')) ||
       (all && (!execute || !expectedArg)) || (expectedArg && !all) ||
-      args.filter((arg) => arg.startsWith('--expected-sha256=')).length > 1) {
-    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute [--execute-all --expected-sha256=HASH]]');
+      args.filter((arg) => arg.startsWith('--expected-sha256=')).length > 1 ||
+      excludedArgs.length > 1 || (excludedArgs.length > 0 && !all) ||
+      (excludedArgs.length > 0 && !/^--exclude-id=dpl_[A-Za-z0-9]+$/.test(excludedArgs[0]))) {
+    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute [--execute-all --expected-sha256=HASH [--exclude-id=ID]]]');
   }
   const { VERCEL_ACCESS_TOKEN: token, VERCEL_PROJECT_ID: projectId, VERCEL_TEAM_ID: teamId } = env;
   if (!token || !/^prj_[A-Za-z0-9]+$/.test(projectId ?? '') || !/^team_[A-Za-z0-9]+$/.test(teamId ?? '')) {
@@ -137,15 +140,21 @@ export async function main(args = process.argv.slice(2), env = process.env) {
     throw new Error('Active alias without deployment ID; refusing cleanup');
   }
   const plan = planCleanup(deployments, aliasIds);
-  const fingerprint = candidateFingerprint(plan.remove);
+  const excludedId = excludedArgs[0]?.slice('--exclude-id='.length);
+  if (excludedId && !plan.remove.some((item) => item.id === excludedId)) {
+    throw new Error(`Excluded deployment ${excludedId} is not a current candidate; refusing deletion.`);
+  }
+  const approved = excludedId ? plan.remove.filter((item) => item.id !== excludedId) : plan.remove;
+  const fingerprint = candidateFingerprint(approved);
   if (all && fingerprint !== expectedArg.slice('--expected-sha256='.length)) {
     throw new Error(`Candidate list changed; refusing deletion. Expected ${expectedArg.slice('--expected-sha256='.length)}, got ${fingerprint}.`);
   }
-  const selected = all ? plan.remove : plan.remove.slice(0, MAX_DELETE_PER_RUN);
+  const selected = all ? approved : plan.remove.slice(0, MAX_DELETE_PER_RUN);
   const report = {
     mode: execute ? 'execute' : 'dry-run', projectId, teamId,
     productionReady: deployments.length, activeAliases: aliasIds.length,
-    kept: plan.keep.length, eligibleForDeletion: plan.remove.length, candidateSha256: fingerprint,
+    kept: plan.keep.length, eligibleForDeletion: plan.remove.length,
+    excludedId: excludedId ?? null, candidateSha256: fingerprint,
     candidates: plan.remove,
     selectedThisRun: selected,
   };

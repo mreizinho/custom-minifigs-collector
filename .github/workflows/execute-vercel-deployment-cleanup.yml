@@ -24,7 +24,7 @@ jobs:
       - name: Test cleanup selection
         run: node --test scripts/cleanup-vercel-deployments.test.mjs
       - name: Delete exact reviewed candidate set
-        run: node scripts/cleanup-vercel-deployments.mjs --execute --execute-all --expected-sha256=2b1bd41fbad45194d4c7c7212d2a4c588fcca57bfccf19385b59f460105191ca
+        run: node scripts/cleanup-vercel-deployments.mjs --execute --execute-all --expected-sha256=2b1bd41fbad45194d4c7c7212d2a4c588fcca57bfccf19385b59f460105191ca --exclude-id=dpl_Dr9PHfqdoanVD4nUpn6kohnQjxC6
         env:
           VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_ACCESS_TOKEN }}
           VERCEL_ENABLE_DELETION: 'yes'
