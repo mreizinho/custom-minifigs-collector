@@ -1,9 +1,14 @@
 import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const API = 'https://api.vercel.com';
 const TIME_ZONE = 'Europe/Lisbon';
 const KEEP_RECENT = 20;
 const MAX_DELETE_PER_RUN = 25;
+
+export function candidateFingerprint(items) {
+  return createHash('sha256').update(items.map((item) => item.id).sort().join('\n')).digest('hex');
+}
 
 function dayInLisbon(timestamp) {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -103,8 +108,12 @@ async function listPages(endpoint, key, token, projectId, teamId) {
 
 export async function main(args = process.argv.slice(2), env = process.env) {
   const execute = args.includes('--execute');
-  if (args.some((arg) => !['--execute', '--json'].includes(arg))) {
-    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute]');
+  const all = args.includes('--execute-all');
+  const expectedArg = args.find((arg) => arg.startsWith('--expected-sha256='));
+  if (args.some((arg) => !['--execute', '--execute-all', '--json'].includes(arg) && !arg.startsWith('--expected-sha256=')) ||
+      (all && (!execute || !expectedArg)) || (expectedArg && !all) ||
+      args.filter((arg) => arg.startsWith('--expected-sha256=')).length > 1) {
+    throw new Error('Usage: node scripts/cleanup-vercel-deployments.mjs [--json] [--execute [--execute-all --expected-sha256=HASH]]');
   }
   const { VERCEL_ACCESS_TOKEN: token, VERCEL_PROJECT_ID: projectId, VERCEL_TEAM_ID: teamId } = env;
   if (!token || !/^prj_[A-Za-z0-9]+$/.test(projectId ?? '') || !/^team_[A-Za-z0-9]+$/.test(teamId ?? '')) {
@@ -128,11 +137,15 @@ export async function main(args = process.argv.slice(2), env = process.env) {
     throw new Error('Active alias without deployment ID; refusing cleanup');
   }
   const plan = planCleanup(deployments, aliasIds);
-  const selected = plan.remove.slice(0, MAX_DELETE_PER_RUN);
+  const fingerprint = candidateFingerprint(plan.remove);
+  if (all && fingerprint !== expectedArg.slice('--expected-sha256='.length)) {
+    throw new Error(`Candidate list changed; refusing deletion. Expected ${expectedArg.slice('--expected-sha256='.length)}, got ${fingerprint}.`);
+  }
+  const selected = all ? plan.remove : plan.remove.slice(0, MAX_DELETE_PER_RUN);
   const report = {
     mode: execute ? 'execute' : 'dry-run', projectId, teamId,
     productionReady: deployments.length, activeAliases: aliasIds.length,
-    kept: plan.keep.length, eligibleForDeletion: plan.remove.length,
+    kept: plan.keep.length, eligibleForDeletion: plan.remove.length, candidateSha256: fingerprint,
     candidates: plan.remove,
     selectedThisRun: selected,
   };

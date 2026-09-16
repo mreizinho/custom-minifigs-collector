@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main, planCleanup } from './cleanup-vercel-deployments.mjs';
+import { candidateFingerprint, main, planCleanup } from './cleanup-vercel-deployments.mjs';
 
 const now = Date.parse('2026-09-16T12:00:00Z');
 const deployment = (number, timestamp) => ({
@@ -39,6 +39,13 @@ test('rejects incomplete or out-of-scope deployment data', () => {
   assert.throws(() => planCleanup([deployment(1, '2026-09-01T00:00:00Z'), deployment(1, '2026-09-02T00:00:00Z')], [], now), /duplicate/);
   assert.throws(() => planCleanup([{ ...deployment(1, '2026-09-01T00:00:00Z'), target: 'preview' }], [], now), /Unexpected/);
   assert.throws(() => planCleanup([{ ...deployment(1, '2026-09-01T00:00:00Z'), createdAt: undefined }], [], now), /Invalid creation/);
+});
+
+test('candidate fingerprint is independent of candidate order', () => {
+  const first = [{ id: 'dpl_b' }, { id: 'dpl_a' }];
+  const second = [{ id: 'dpl_a' }, { id: 'dpl_b' }];
+  assert.equal(candidateFingerprint(first), candidateFingerprint(second));
+  assert.notEqual(candidateFingerprint(first), candidateFingerprint([{ id: 'dpl_a' }]));
 });
 
 test('dry run reads API results and never sends DELETE', async () => {

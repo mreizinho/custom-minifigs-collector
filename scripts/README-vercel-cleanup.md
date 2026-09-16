@@ -22,7 +22,7 @@ node scripts/cleanup-vercel-deployments.mjs --json
 
 The JSON includes every candidate in `candidates` and the first 25 in `selectedThisRun`. A run stops if pagination, scope, or alias data is incomplete.
 
-## Deletion (not yet enabled)
+## Deletion
 
 After reviewing the real dry-run report, set `VERCEL_ENABLE_DELETION=yes` and run with `--execute`. This deletes at most 25 deployments per run and rechecks active aliases before each deletion. It cannot recover a deployment's instant-rollback URL or guarantee that external links to the deleted deployment keep working. Do not enable unattended runs until the first deletion batch has been reviewed and verified.
 
@@ -31,5 +31,7 @@ node scripts/cleanup-vercel-deployments.mjs --execute
 ```
 
 To run it daily later, add a scheduled GitHub Actions workflow with the token in a repository secret. A workflow is intentionally not installed yet, so simply pushing this script cannot initiate deletions.
+
+The one-time `execute-vercel-deployment-cleanup.yml` workflow is manual and locked to the SHA-256 fingerprint of the 248 candidates from the reviewed 16 September 2026 preview. It refuses deletion if the candidate set has changed. It also requires typing `DELETE 248` when dispatching. It is not scheduled and will not run on a push. If it fails partway through, review a new preview before any further deletion.
 
 Tests: `node --test scripts/cleanup-vercel-deployments.test.mjs`.

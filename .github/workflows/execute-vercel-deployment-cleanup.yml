@@ -1,0 +1,32 @@
+name: Execute reviewed Vercel deployment cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type DELETE 248 to delete only the exact 248 deployments reviewed in the preview'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    if: inputs.confirmation == 'DELETE 248'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test cleanup selection
+        run: node --test scripts/cleanup-vercel-deployments.test.mjs
+      - name: Delete exact reviewed candidate set
+        run: node scripts/cleanup-vercel-deployments.mjs --execute --execute-all --expected-sha256=2b1bd41fbad45194d4c7c7212d2a4c588fcca57bfccf19385b59f460105191ca
+        env:
+          VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_ACCESS_TOKEN }}
+          VERCEL_ENABLE_DELETION: 'yes'
+          VERCEL_TEAM_ID: team_Ho7AwTgqd1sLeWOEqlpIVdwd
+          VERCEL_PROJECT_ID: prj_2vB4eFf2T7pRF1jeHkKXBH0L9ZYO
