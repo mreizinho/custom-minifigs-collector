@@ -12,3 +12,11 @@ window.DEMO_CATALOGUE = [
   { '#': 99, Name: 'Jedi Temple Guard', Character: '', Brand: 'AVF', 'Est. Value': 70, Currency: 'USD', Origin: 'adrian262', Owned: 'Owned', Status: '', 'Photo URL': 'assets/demo/star-wars/099-main.png', 'ALT Photo URL': 'assets/demo/star-wars/099-alt.png' },
   { '#': 101, Name: 'Sleepy Senator', Character: 'Padme', Brand: "Ra'is", 'Est. Value': 27, Currency: 'EUR', Origin: '', Owned: 'Owned', Status: '', 'Photo URL': 'assets/demo/star-wars/101-main.png', 'ALT Photo URL': 'assets/demo/star-wars/101-alt.png' }
 ];
+
+const DEMO_IMAGE_BASE_URL = 'https://xoesxdfxzkhw09kg.public.blob.vercel-storage.com/';
+for (const figure of window.DEMO_CATALOGUE) {
+  for (const field of ['Photo URL', 'ALT Photo URL']) {
+    const filename = figure[field].split('/').pop();
+    figure[field] = `${DEMO_IMAGE_BASE_URL}${filename}`;
+  }
+}

@@ -29,8 +29,7 @@ const productionFiles = [
   'privacy.html',
   'buymecoffee.png',
   'buymecoffee-inverted.png',
-  'admin',
-  'assets'
+  'admin'
 ];
 
 await rm(outputDirectory, { recursive: true, force: true });
