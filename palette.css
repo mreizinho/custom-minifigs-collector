@@ -261,6 +261,10 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 @media(max-width:600px){.stat-filter-shortcut,.stat-filter-shortcut:hover,.stat-filter-shortcut:focus,.stat-filter-shortcut:active,.stat-filter-shortcut strong { text-decoration:none!important; }.stat-filter-shortcut strong { transform:none!important; }}
 .owned-stat { position: relative; }
 .stat-foot { display: flex; align-items: center; gap: 10px; }
+.owned-value-cycle { display:inline-block; border:0; padding:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.owned-value-cycle small { display:block; }
+.owned-value-cycle:hover small { color:var(--accent); }
+.owned-value-cycle:focus-visible { border-radius:2px; outline:2px solid var(--accent); outline-offset:3px; }
 .currency-toggle { position: absolute; top: 18px; right: 18px; display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .currency-toggle button { border: 0; background: transparent; color: var(--muted); padding: 4px 8px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1; }
 .currency-toggle button + button { border-left: 1px solid var(--line); }
