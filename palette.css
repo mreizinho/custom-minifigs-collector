@@ -1092,13 +1092,13 @@ html { scrollbar-gutter: stable; }
   .header-actions #theme { border: 0; border-radius: 0; background: transparent; }
   .collection-control { width: 100%; }
   .collection-control > #collectionToggle { border: 0; border-radius: 0; background: transparent; }
-  .collection-menu { position: static; width: 100%; margin: 0 0 4px; border: 0; border-top: 1px solid var(--line); box-shadow: none; padding: 4px 6px; }
-  .header-actions .collection-menu button { display: flex; align-items: center; gap: 7px; min-height: 38px; padding: 6px 10px; }
-  .header-actions .collection-menu button::before { flex: 0 0 18px; }
+  .collection-menu { position: static; width: 100%; margin: 0 0 4px; border: 0; border-top: 1px solid var(--line); box-shadow: none; padding: 4px 0; }
+  .header-actions .collection-menu button { display: grid; grid-template-columns: 30px minmax(0, 1fr) 18px; column-gap: 8px; align-items: center; width: 100%; min-height: 44px; padding: 6px 12px 6px 7px; }
+  .header-actions .collection-menu button::before { grid-column: 1; justify-self: center; }
   .header-actions .collection-menu .collection-menu-new::before { display: none; }
-  .header-actions .collection-menu .collection-menu-new .material-symbols-rounded { flex: 0 0 18px; }
-  .header-actions .collection-menu .collection-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .header-actions .collection-menu .collection-delete { flex: 0 0 18px; margin-left: auto; }
+  .header-actions .collection-menu .collection-menu-new .material-symbols-rounded { grid-column: 1; justify-self: center; }
+  .header-actions .collection-menu .collection-name { grid-column: 2; justify-self: start; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .header-actions .collection-menu .collection-delete { grid-column: 3; justify-self: end; }
   .header-actions button:hover,.header-actions>a:hover { background: var(--bg); }
   .header-actions button::after,.header-actions>a::after { content: attr(data-menu-label); font-size: 14px; white-space: nowrap; }
   .header-actions .collection-menu button::after { content: none; }
