@@ -92,6 +92,7 @@ function useCardFallback(root,image,imageWrap){
   image.removeAttribute('alt');
   image.hidden=true;
   imageWrap.querySelectorAll('.alternate-image').forEach(alternate=>alternate.remove());
+  imageWrap.querySelectorAll('.photo-shimmer-layer').forEach(shimmer=>shimmer.remove());
   imageWrap.classList.remove('has-alternate-images');
   imageWrap.classList.add('fallback-placeholder');
   root.classList.add('fallback-card');
@@ -108,7 +109,8 @@ function render(){
     root.querySelector('.price').textContent=money(f.value,f.currency);
     root.querySelectorAll('.condition').forEach(condition=>{condition.textContent=statusLabel(f);condition.hidden=!f.condition});
     if(hasImage){
-      setCatalogueImageSource(image,f.image);
+      const primaryImageSource=imageSource(f.image);
+      image.src=primaryImageSource;
       image.alt=f.name;
       image.onerror=()=>useCardFallback(root,image,imageWrap);
       if(f.altImage){
@@ -123,6 +125,12 @@ function render(){
         alternate.onerror=()=>{alternate.remove();image.classList.remove('primary-image');imageWrap.classList.remove('has-alternate-images')};
         imageWrap.append(alternate);
       }
+      const shimmer=image.cloneNode(false);
+      shimmer.className='photo-shimmer-layer';
+      shimmer.alt='';
+      shimmer.setAttribute('aria-hidden','true');
+      shimmer.onerror=()=>shimmer.remove();
+      imageWrap.append(shimmer);
     }else{
       useCardFallback(root,image,imageWrap);
       const photoAction=document.createElement('span');
