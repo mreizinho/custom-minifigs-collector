@@ -10,8 +10,8 @@ const code = [
   extract('async function appendFigureToActiveSheet(', "addFigureForm.addEventListener('submit'"),
 ].join('\n');
 
-function fixture({ updatedRow = 5, duplicate = false, changeCollection = false } = {}) {
-  const headers = ['#', 'Name', 'Brand', 'Value', 'Currency'];
+function fixture({ updatedRow = 5, duplicate = false, changeCollection = false, expectedCondition = 'New' } = {}) {
+  const headers = ['#', 'Name', 'Brand', 'Value', 'Currency', 'Condition'];
   const before = [headers, ['1', 'Old figure', 'LEGO'], ['2', 'Another figure', 'LEGO'], ['4', 'Phoenix Flyer', 'LEGO']];
   const after = [headers, ...before.slice(1), ['3', 'Wolven Wingman', 'LEGO']];
   if (duplicate) after.push(['3', 'Duplicate', 'LEGO']);
@@ -25,6 +25,7 @@ function fixture({ updatedRow = 5, duplicate = false, changeCollection = false }
       if (url.includes('/values/') && options.method === 'POST') {
         assert.match(url, /insertDataOption=INSERT_ROWS/);
         assert.equal(JSON.parse(options.body).values[0][0], 3);
+        assert.equal(JSON.parse(options.body).values[0][5], expectedCondition);
         if (changeCollection) context.activeCollection = 'Other';
         return { json: async () => ({ updates: { updatedRange: `'Star Wars'!A${updatedRow}:E${updatedRow}`, updatedRows: 1 } }) };
       }
@@ -44,6 +45,11 @@ test('reuses a deleted ID, inserts after existing figures, and returns the verif
   const { context, calls } = fixture();
   assert.deepEqual(JSON.parse(JSON.stringify(await context.appendFigureToActiveSheet(entry))), { id: 3, sheetRow: 5, sheetCollection: 'Star Wars' });
   assert.equal(calls.filter(call => call.options.method === 'POST' && call.url.includes('/values/')).length, 1);
+});
+
+test('writes the condition selected in the add form', async () => {
+  const { context } = fixture({ expectedCondition: 'Display' });
+  await context.appendFigureToActiveSheet({ ...entry, condition: 'Display' });
 });
 
 test('rejects an append response that targets an existing row', async () => {

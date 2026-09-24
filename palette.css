@@ -764,11 +764,11 @@ input::placeholder { color: var(--muted); opacity: 1; }
 .brand-suggestions > strong { display:block; margin:0 36px 14px 0; font-size:14px; }
 .brand-suggestions-close { position:absolute; top:9px; right:9px; display:grid; width:28px; height:28px; place-items:center; border:1px solid var(--line); border-radius:50%; background:var(--paper); color:var(--ink); padding:0; }
 .brand-suggestions-close .material-symbols-rounded { font-size:17px; }
-#brandSuggestionChoices { display:flex; flex-wrap:wrap; gap:8px; }
-#brandSuggestionChoices button { position:relative; isolation:isolate; border:0; border-radius:3px; clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%); background:var(--line); color:var(--ink); padding:8px 13px; font-size:12px; white-space:nowrap; }
-#brandSuggestionChoices button::before { content:''; position:absolute; inset:.65px; z-index:-1; clip-path:polygon(0 0,calc(100% - 7.62px) 0,100% 7.62px,100% 100%,0 100%); background:var(--paper); }
-#brandSuggestionChoices button:hover,#brandSuggestionChoices button:focus-visible { color:var(--accent); }
-.dark #brandSuggestionChoices button::before { background:var(--bg); }
+.suggestion-choices { display:flex; flex-wrap:wrap; gap:8px; }
+.suggestion-choices button { position:relative; isolation:isolate; border:0; border-radius:3px; clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%); background:var(--line); color:var(--ink); padding:8px 13px; font-size:12px; white-space:nowrap; }
+.suggestion-choices button::before { content:''; position:absolute; inset:.65px; z-index:-1; clip-path:polygon(0 0,calc(100% - 7.62px) 0,100% 7.62px,100% 100%,0 100%); background:var(--paper); }
+.suggestion-choices button:hover,.suggestion-choices button:focus-visible,.suggestion-choices .add-new-suggestion { color:var(--accent); }
+.dark .suggestion-choices button::before { background:var(--bg); }
 .add-figure-dialog #newFigureValue { appearance:textfield; -moz-appearance:textfield; }
 .add-figure-dialog #newFigureValue::-webkit-inner-spin-button,.add-figure-dialog #newFigureValue::-webkit-outer-spin-button { margin:0; -webkit-appearance:none; }
 .add-figure-dialog .custom-select-native { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); opacity:0; pointer-events:none; }
