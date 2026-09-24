@@ -780,7 +780,7 @@ input::placeholder { color: var(--muted); opacity: 1; }
 .custom-currency-menu button { display:block; width:100%; border:0; background:transparent; color:var(--ink); padding:10px 12px; text-align:left; }
 .custom-currency-menu button:hover,.custom-currency-menu button:focus-visible { background:color-mix(in srgb,var(--accent) 9%,var(--paper)); color:var(--accent); }
 .custom-currency-menu button.selected { font-weight:600; }
-.add-figure-value { display:grid; grid-template-columns:minmax(0,1fr) 140px; gap:12px; }
+.add-figure-value,.add-figure-pair { display:grid; grid-template-columns:minmax(0,1fr) 140px; gap:12px; }
 .add-figure-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:4px; }
 .add-figure-actions button { min-height:42px; border:1px solid var(--line); background:var(--paper); color:var(--ink); padding:0 16px; font-weight:600; }
 .add-figure-actions #addNewFigurePhoto { display:flex; align-items:center; gap:6px; margin-right:auto; }
