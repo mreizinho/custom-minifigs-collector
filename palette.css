@@ -45,15 +45,15 @@ body.dark {
   -webkit-font-smoothing: antialiased;
 }
 
-.search > .material-symbols-rounded { font-size: 27px; }
+.search > .material-symbols-rounded,.search-secret-help > .material-symbols-rounded { font-size:27px; }
 .search input[type="search"] { -webkit-appearance:none; appearance:none; background:transparent !important; box-shadow:none !important; color:var(--ink); }
 .search input[type="search"]:focus { background:transparent !important; }
 .search input[type="search"]:-webkit-autofill,
 .search input[type="search"]:-webkit-autofill:hover,
 .search input[type="search"]:-webkit-autofill:focus { -webkit-text-fill-color:var(--ink); -webkit-box-shadow:0 0 0 1000px var(--paper) inset !important; caret-color:var(--ink); }
-.search-secret-help { position:relative; }
-.search-secret-help:hover::after {
-  content:attr(data-secret-tooltip);
+.search-secret-help { position:relative; display:grid; place-items:center; }
+.search-secret-tooltip {
+  display:none;
   position:absolute;
   z-index:40;
   top:calc(100% + 12px);
@@ -70,9 +70,13 @@ body.dark {
   font-size:13px;
   font-weight:500;
   line-height:1.55;
-  white-space:pre-line;
-  pointer-events:none;
+  white-space:normal;
+  pointer-events:auto;
+  cursor:default;
 }
+.search-secret-help:hover .search-secret-tooltip,.search-secret-help:focus-within .search-secret-tooltip { display:block; }
+.search-secret-tooltip button { border:0; background:transparent; color:var(--accent); padding:0; font:inherit; font-weight:700; cursor:pointer; }
+.search-secret-tooltip button:hover,.search-secret-tooltip button:focus-visible { text-decoration:underline; text-underline-offset:2px; }
 .view-buttons button { display: grid; place-items: center; padding: 0; }
 .view-buttons .material-symbols-rounded { display: block; font-size: 24px; line-height: 1; transform: translateY(1px); }
 .filter-toggle { align-items: center; gap: 6px; }
