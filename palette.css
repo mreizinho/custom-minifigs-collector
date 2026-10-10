@@ -267,6 +267,11 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 .stat-filter-shortcut:focus-visible { border-radius:2px; outline:2px solid var(--accent); outline-offset:3px; }
 @media(max-width:600px){.stat-filter-shortcut,.stat-filter-shortcut:hover,.stat-filter-shortcut:focus,.stat-filter-shortcut:active,.stat-filter-shortcut strong { text-decoration:none!important; }.stat-filter-shortcut strong { transform:none!important; }}
 .owned-stat { position: relative; }
+.owned-count-line { display:flex; align-items:baseline; gap:10px; }
+.owned-count-line .stat-filter-shortcut { flex:0 0 auto; }
+.preordered-stat-note { display:inline-block!important; color:var(--muted); font-size:13px; line-height:1.2; white-space:nowrap; cursor:help; }
+.preordered-stat-note #preorderedStat { display:inline; color:inherit; font-size:inherit; }
+.preordered-stat-note:focus-visible { border-radius:2px; outline:2px solid var(--accent); outline-offset:3px; }
 .stat-foot { display: flex; align-items: center; gap: 10px; }
 .owned-value-cycle { display:inline-block; border:0; padding:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
 .owned-value-cycle small { display:block; }
