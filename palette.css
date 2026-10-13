@@ -1298,8 +1298,14 @@ body.dark #closeDetail:focus-visible {
 }
 @media(prefers-reduced-motion:reduce){.detail-edit-status-actions button,.detail-edit-actions button[type="submit"]{transition:none}.detail-edit-status-actions button:hover{transform:none}}
 .dark .detail-edit-button { background:var(--bg); }
+body:not(.dark) #closeDetail:hover,
+body:not(.dark) #closeDetail:focus-visible,
 body:not(.dark) .detail-edit-button:hover,
-body:not(.dark) .detail-edit-button:focus-visible { border-color:var(--ink); background:var(--ink); color:var(--paper); }
+body:not(.dark) .detail-edit-button:focus-visible {
+  border-color:var(--line);
+  background:color-mix(in srgb,var(--paper) 92%,var(--ink));
+  color:var(--ink);
+}
 body.dark .detail-edit-button:hover,
 body.dark .detail-edit-button:focus-visible {
   border-color:var(--line);
