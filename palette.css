@@ -1283,12 +1283,14 @@ body:not(.dark) .detail-edit-button { border-color:var(--line); background:#fff;
 .detail-edit-icon-actions { display:flex; gap:6px; }
 .detail-edit-icon-actions button { width:40px; padding:0; }
 .detail-edit-icon-actions .material-symbols-rounded { font-size:19px; }
-.detail-edit-actions .detail-delete-figure { justify-content:flex-start; width:40px; overflow:hidden; gap:7px; color:var(--accent); padding:0 10px; white-space:nowrap; transition:width .18s cubic-bezier(.2,.8,.2,1),background-color .15s ease,color .15s ease,border-color .15s ease; }
-.detail-edit-actions .detail-delete-figure::after { content:'Delete'; opacity:0; transform:translateX(-4px); transition:opacity .12s ease,transform .18s cubic-bezier(.2,.8,.2,1); }
-.detail-edit-actions .detail-delete-figure:hover,.detail-edit-actions .detail-delete-figure:focus-visible { width:97px; }
-.detail-edit-actions .detail-delete-figure:hover::after,.detail-edit-actions .detail-delete-figure:focus-visible::after { opacity:1; transform:translateX(0); }
-.detail-edit-actions .detail-delete-figure:hover,.detail-edit-actions .detail-delete-figure:focus-visible { border-color:var(--accent); background:var(--accent); color:#fff; }
-@media(prefers-reduced-motion:reduce){.detail-edit-status-actions button,.detail-edit-actions button[type="submit"],.detail-edit-actions .detail-delete-figure,.detail-edit-actions .detail-delete-figure::after{transition:none}.detail-edit-status-actions button:hover{transform:none}}
+.detail-edit-actions .detail-delete-figure { color:var(--accent); }
+.detail-edit-icon-actions :is(.detail-delete-figure,.detail-hide-figure):hover,
+.detail-edit-icon-actions :is(.detail-delete-figure,.detail-hide-figure):focus-visible,
+.detail-edit-actions [data-detail-edit-cancel]:hover,
+.detail-edit-actions [data-detail-edit-cancel]:focus-visible,
+#closeDetail:hover,
+#closeDetail:focus-visible { background:color-mix(in srgb,var(--ink) 8%,var(--paper)); }
+@media(prefers-reduced-motion:reduce){.detail-edit-status-actions button,.detail-edit-actions button[type="submit"]{transition:none}.detail-edit-status-actions button:hover{transform:none}}
 .dark .detail-edit-button { background:var(--bg); }
 body:not(.dark) .detail-edit-button:hover,
 body:not(.dark) .detail-edit-button:focus-visible,
