@@ -1316,10 +1316,8 @@ body.dark .detail-edit-button:focus-visible {
   background:color-mix(in srgb,var(--bg) 88%,var(--ink));
   color:var(--ink);
 }
-body.dark .detail-actions button:hover,
-body.dark .detail-actions button:focus-visible,
-body.dark .detail-actions .detail-secondary-action:hover,
-body.dark .detail-actions .detail-secondary-action:focus-visible,
+body.dark .detail-actions button:not([aria-pressed="true"]):not([aria-expanded="true"]):hover,
+body.dark .detail-actions button:not([aria-pressed="true"]):not([aria-expanded="true"]):focus-visible,
 body.dark .detail-edit-actions [data-detail-edit-cancel]:hover,
 body.dark .detail-edit-actions [data-detail-edit-cancel]:focus-visible {
   border-color:var(--line);
