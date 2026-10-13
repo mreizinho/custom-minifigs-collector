@@ -1324,6 +1324,12 @@ body.dark .detail-edit-actions [data-detail-edit-cancel]:focus-visible {
   background:color-mix(in srgb,var(--bg) 88%,var(--ink)) !important;
   color:var(--ink);
 }
+body:not(.dark) .detail-actions button:not([aria-pressed="true"]):not([aria-expanded="true"]):hover,
+body:not(.dark) .detail-actions button:not([aria-pressed="true"]):not([aria-expanded="true"]):focus-visible {
+  border-color:var(--line);
+  background:color-mix(in srgb,var(--paper) 92%,var(--ink)) !important;
+  color:var(--ink);
+}
 @media(max-width:600px){
   #detail:has(.detail-copy.detail-editing){height:100dvh;max-height:100dvh;overflow:hidden}
   #detail:has(.detail-copy.detail-editing) .detail-grid{grid-template-rows:min(42dvh,360px) minmax(0,1fr)}
