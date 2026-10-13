@@ -1292,9 +1292,9 @@ body:not(.dark) .detail-edit-button { border-color:var(--line); background:#fff;
 #closeDetail:focus-visible { background:color-mix(in srgb,var(--ink) 8%,var(--paper)); }
 body.dark #closeDetail:hover,
 body.dark #closeDetail:focus-visible {
-  border-color:var(--line);
-  background:color-mix(in srgb,var(--bg) 88%,var(--ink));
-  color:var(--ink);
+  border-color:var(--ink);
+  background:var(--ink);
+  color:var(--bg);
 }
 @media(prefers-reduced-motion:reduce){.detail-edit-status-actions button,.detail-edit-actions button[type="submit"]{transition:none}.detail-edit-status-actions button:hover{transform:none}}
 .dark .detail-edit-button { background:var(--bg); }
