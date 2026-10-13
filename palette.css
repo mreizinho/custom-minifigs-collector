@@ -269,8 +269,9 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
 .owned-stat { position: relative; }
 .stat-count-line { display:flex; align-items:baseline; gap:10px; }
 .stat-count-line .stat-filter-shortcut { flex:0 0 auto; }
-.stat-secondary-note { display:inline-block!important; color:var(--muted); font-size:13px; line-height:1.2; white-space:nowrap; cursor:help; }
+.stat-secondary-note { display:inline-block!important; border:0; background:transparent; color:var(--muted); padding:0; font:inherit; font-size:13px; line-height:1.2; white-space:nowrap; cursor:pointer; }
 .stat-secondary-note :is(#preorderedStat,#hiddenStat) { display:inline; color:inherit; font-size:inherit; }
+.stat-secondary-note:hover { color:var(--accent); }
 .stat-secondary-note:focus-visible { border-radius:2px; outline:2px solid var(--accent); outline-offset:3px; }
 .stat-foot { display: flex; align-items: center; gap: 10px; }
 .owned-value-cycle { display:inline-block; border:0; padding:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
