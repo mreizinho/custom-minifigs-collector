@@ -376,15 +376,35 @@ async function toggleFigureHidden(figure,trigger){
   if(trigger)trigger.disabled=true;
   try{
     await updateFigureHiddenInSheet(figure,hidden);
-    if(hidden&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      const photo=$('#detail .detail-photo-stage')||$('#detail .detail-image img');
-      if(photo?.animate){
+    const photo=$('#detail .detail-photo-stage')||$('#detail .detail-image img'),reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(hidden){
+      if(photo?.animate&&!reducedMotion){
         const animation=photo.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.975)'}],{duration:240,easing:'ease-in',fill:'forwards'});
         try{await animation.finished}catch{}
+        photo.style.opacity='0';
+        photo.style.transform='scale(.975)';
+        animation.cancel();
+      }else if(photo){
+        photo.style.opacity='0';
+        photo.style.transform='scale(.975)';
       }
+    }else if(photo){
+      if(photo.animate&&!reducedMotion){
+        const animation=photo.animate([{opacity:0,transform:'scale(.975)'},{opacity:1,transform:'scale(1)'}],{duration:200,easing:'ease-out'});
+        try{await animation.finished}catch{}
+      }
+      photo.style.removeProperty('opacity');
+      photo.style.removeProperty('transform');
     }
     renderFilters();
     render();
+    if(trigger){
+      trigger.title=hidden?'Unhide minifig':'Hide minifig';
+      trigger.setAttribute('aria-label',trigger.title);
+      trigger.setAttribute('aria-pressed',String(hidden));
+      const icon=trigger.querySelector('.material-symbols-rounded');
+      if(icon)icon.textContent=hidden?'visibility':'visibility_off';
+    }
     $('#resultCount').textContent=hidden?`${figure.name} hidden. Search for “hide” to show hidden minifigs.`:`${figure.name} is visible in the catalogue again.`;
     return true;
   }catch(error){
@@ -687,7 +707,7 @@ function openDetailEditor(figure){
   copy.querySelectorAll('.detail-menu-picker:not(.detail-brand-picker)').forEach(picker=>{const input=picker.querySelector('input'),toggle=picker.querySelector('[data-detail-picker-toggle]'),menu=picker.querySelector('.detail-picker-menu'),setOpen=open=>{if(open)closeOtherPickerMenus(menu);menu.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)fitPickerMenu(menu)};toggle.onclick=()=>setOpen(menu.hidden);menu.onclick=event=>{const option=event.target.closest('[data-picker-option]');if(option){input.dataset.pickerValue=option.dataset.pickerOption;input.value=option.dataset.pickerLabel;setOpen(false);updateEditDirtyState();return}if(!event.target.closest('[data-picker-add]'))return;const custom=clean(prompt('Enter a new condition state:')||'');if(!custom)return;input.dataset.pickerValue=custom;input.value=custom;setOpen(false);updateEditDirtyState()}});
   const brandInput=copy.querySelector('[name="brand"]'),brandToggle=copy.querySelector('[data-detail-brand-toggle]'),brandMenu=copy.querySelector('.detail-brand-menu'),filterBrandMenu=()=>{const query=brandInput.value.trim().toLowerCase();brandMenu.querySelectorAll('[data-detail-brand]').forEach(button=>button.hidden=!!query&&!button.dataset.detailBrand.toLowerCase().includes(query))},setBrandMenuOpen=open=>{if(open)closeOtherPickerMenus(brandMenu);brandMenu.hidden=!open;brandToggle.setAttribute('aria-expanded',String(open));if(open){filterBrandMenu();fitPickerMenu(brandMenu)}},toggleBrandMenu=()=>setBrandMenuOpen(brandMenu.hidden);brandToggle.onclick=toggleBrandMenu;brandInput.ondblclick=event=>{event.preventDefault();setBrandMenuOpen(true)};brandInput.oninput=()=>{if(!brandMenu.hidden){filterBrandMenu();fitPickerMenu(brandMenu)}};brandMenu.onclick=event=>{const button=event.target.closest('[data-detail-brand]');if(!button)return;brandInput.value=button.dataset.detailBrand;setBrandMenuOpen(false);brandInput.focus();updateEditDirtyState()};copy.addEventListener('pointerdown',event=>{if(event.target.closest('.detail-menu-picker'))return;closeOtherPickerMenus(null)});
   copy.querySelector('[data-detail-edit-cancel]').onclick=()=>transitionDetailPanel(()=>openDetail(figure),true);
-  copy.querySelector('.detail-hide-figure').onclick=async event=>{if(await toggleFigureHidden(figure,event.currentTarget)){$('#detail').close()}};
+  copy.querySelector('.detail-hide-figure').onclick=event=>toggleFigureHidden(figure,event.currentTarget);
   copy.querySelector('.detail-delete-figure').onclick=event=>requestDeleteFigure(figure,event.currentTarget);
   form.onsubmit=async event=>{event.preventDefault();if(!form.classList.contains('is-dirty'))return;const submit=form.querySelector('[type="submit"]'),message=form.querySelector('.detail-edit-message'),data=new FormData(form),entry={name:clean(data.get('name')),character:clean(data.get('character')),brand:clean(data.get('brand')),value:optionalNumericValue(data.get('value')),currency:form.elements.currency.dataset.pickerValue,condition:clean(form.elements.condition.dataset.pickerValue),origin:clean(data.get('origin'))};if(!entry.name){message.textContent='Enter a minifig name.';return}if(!entry.condition){message.textContent='Choose or add a condition.';return}submit.disabled=true;message.textContent='Saving changes…';try{await saveFigureDetails(figure,entry,chosenStatus);$('#resultCount').textContent=`${entry.name} updated.`;transitionDetailPanel(()=>openDetail(figure),true)}catch(error){message.textContent=error.message;console.error(error)}finally{submit.disabled=!form.classList.contains('is-dirty')}};
 }
