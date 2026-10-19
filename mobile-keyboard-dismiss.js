@@ -1,12 +1,38 @@
-document.addEventListener('keydown', event => {
-  if (event.key !== 'Enter' || !window.matchMedia('(max-width: 600px)').matches) return;
+(() => {
+  const mobileViewport = window.matchMedia('(max-width: 600px)');
+  const keyboardInputTypes = new Set([
+    'text',
+    'search',
+    'email',
+    'url',
+    'tel',
+    'number',
+    'password'
+  ]);
 
-  const input = event.target;
-  const keyboardInputTypes = ['text', 'search', 'email', 'url', 'tel', 'number', 'password'];
-  if (!(input instanceof HTMLInputElement) || !keyboardInputTypes.includes(input.type)) return;
+  function isMobileKeyboardInput(target) {
+    return mobileViewport.matches
+      && target instanceof HTMLInputElement
+      && keyboardInputTypes.has(target.type);
+  }
 
-  // Let the field's normal Enter/Go/Search handler run before dismissing the keyboard.
-  setTimeout(() => {
-    if (document.activeElement === input) input.blur();
-  }, 0);
-});
+  function dismissKeyboard(target = document.activeElement) {
+    if (isMobileKeyboardInput(target)) {
+      target.blur();
+    }
+  }
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      dismissKeyboard(event.target);
+    }
+  }, true);
+
+  document.addEventListener('search', event => {
+    dismissKeyboard(event.target);
+  }, true);
+
+  document.addEventListener('submit', () => {
+    dismissKeyboard(document.activeElement);
+  }, true);
+})();
