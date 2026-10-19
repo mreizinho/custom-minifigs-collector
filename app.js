@@ -807,6 +807,14 @@ window.addEventListener('collector-google-auth',event=>{
 if(usesAuthenticatedCatalogue())queueMicrotask(load);
 window.addEventListener('beforeunload',()=>privatePhotoUrls.forEach(url=>URL.revokeObjectURL(url)));
 
+// Dismiss the mobile software keyboard after a single-line field's Enter/Go/Search action.
+document.addEventListener('keydown',event=>{
+  if(event.key!=='Enter'||!window.matchMedia('(max-width: 600px)').matches)return;
+  const input=event.target;
+  if(!(input instanceof HTMLInputElement)||!['text','search','email','url','tel','number','password'].includes(input.type))return;
+  setTimeout(()=>{if(document.activeElement===input)input.blur()},0);
+});
+
 // Keep the detail view open and unchanged until an Owned-to-Wishlist move is confirmed.
 $('#detail').addEventListener('click',async event=>{const button=event.target.closest('#detailWish');if(!button)return;event.preventDefault();event.stopImmediatePropagation();const figure=activeDetailFigure;if(!figure)return;button.disabled=true;const changed=await toggleWished(figure);if(changed&&$('#detail').open){$('#detail').close();openDetail(figure)}else button.disabled=false},{capture:true});
 
