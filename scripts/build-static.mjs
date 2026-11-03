@@ -12,6 +12,7 @@ const productionFiles = [
   'release-calendar.js',
   'OneSignalSDKWorker.js',
   'mobile-tag-behavior.js',
+  'mobile-keyboard-dismiss.js',
   'date-time-format.js',
   'date-time-picker.js',
   'date-time-picker.css',
