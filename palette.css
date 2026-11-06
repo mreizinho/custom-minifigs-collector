@@ -1111,7 +1111,8 @@ html { scrollbar-gutter: stable; }
   .header-actions #statsToggle,
   .header-actions #theme { border: 0; border-radius: 0; background: transparent; }
   .collection-control { width: 100%; }
-  .collection-control > #collectionToggle { border: 0; border-radius: 0; background: transparent; }
+  .collection-control > #collectionToggle { height:auto; min-height:44px; border:0; border-radius:0; background:transparent; }
+  .collection-control > #collectionToggle::after { min-width:0; padding:8px 0; white-space:normal; overflow-wrap:anywhere; line-height:1.25; }
   .collection-menu { position: static; width: 100%; margin: 0 0 4px; border: 0; border-top: 1px solid var(--line); box-shadow: none; padding: 4px 0; }
   .header-actions .collection-menu button { display: grid; grid-template-columns: 30px minmax(0, 1fr) 18px; column-gap: 8px; align-items: center; width: 100%; min-height: 44px; padding: 6px 12px 6px 7px; }
   .header-actions .collection-menu button::before { grid-column: 1; justify-self: center; }
