@@ -168,9 +168,14 @@ body.dark {
 #colorHue::-webkit-slider-thumb { appearance: none; width: 5px; height: 16px; margin-top: -3px; border: 1px solid var(--ink); border-radius: 0; background: var(--paper); }
 #colorHue::-moz-range-track { height: 12px; background: transparent; border: 1px solid var(--line); }
 #colorHue::-moz-range-thumb { width: 5px; height: 16px; border: 1px solid var(--ink); border-radius: 0; background: var(--paper); }
-.custom-color-value { display: grid; grid-template-columns: 28px 1fr; gap: 8px; margin-top: 9px; }
+.custom-color-value { display: grid; grid-template-columns: 28px minmax(0,1fr) 28px; gap: 8px; margin-top: 9px; }
 #customColorPreview { border: 1px solid var(--line); background: var(--picker-color); }
 #customHex { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 6px 7px; font-family: Outfit, sans-serif; font-size: 11px; text-transform: uppercase; }
+#accentEyeDropper { display:grid; place-items:center; width:28px; height:28px; border:1px solid var(--line); background:var(--paper); color:var(--ink); padding:0; }
+#accentEyeDropper[hidden] { display:none; }
+#accentEyeDropper:hover,#accentEyeDropper:focus-visible { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--paper)); }
+#accentEyeDropper .material-symbols-rounded { font-size:17px; }
+@media(max-width:600px){.custom-color-value{grid-template-columns:28px 1fr}#accentEyeDropper{display:none}}
 .color-number-row { display: grid; grid-template-columns: 28px repeat(3, 1fr); align-items: center; gap: 5px; margin-top: 7px; color: var(--muted); font-family: Outfit, sans-serif; font-size: 10px; }
 .color-number-control { display: grid; grid-template-columns: minmax(0, 1fr) 11px; gap: 2px; min-width: 0; }
 .color-number-row input { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 5px 2px; font-family: inherit; font-size: 10px; text-align: center; appearance: textfield; }
