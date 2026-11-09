@@ -156,8 +156,14 @@ body.dark {
 .accent-picker { position: absolute; z-index: 40; top: calc(100% + 10px); right: 0; width: 196px; padding: 14px; border: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); color: var(--ink); font-family: Outfit, sans-serif; font-size: 12px; line-height: 1.2; letter-spacing: 0; text-transform: none; white-space: normal; }
 .accent-picker > span { display: block; margin-bottom: 10px; font-weight: 600; }
 .accent-swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
-.accent-swatches button { width: 100%; aspect-ratio: 1; border: 2px solid var(--paper); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 0 1px var(--line); }
+.accent-swatches button { width: 100%; aspect-ratio: 1; border: 2px solid var(--paper); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 0 1px var(--line); transition:border-color .16s ease,box-shadow .16s ease; }
 .accent-swatches button.active { box-shadow: 0 0 0 2px var(--ink); }
+@media(hover:hover){
+  .accent-swatches button:hover,.accent-swatches button:focus-visible {
+    border-color:color-mix(in srgb,var(--accent) 18%,var(--paper));
+    box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 55%,var(--line)),0 4px 12px color-mix(in srgb,var(--accent) 18%,transparent);
+  }
+}
 .open-custom-accent { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--muted); padding: 7px 0 0; font-size: 12px; }
 .open-custom-accent .material-symbols-rounded { font-size: 17px; }
 .open-custom-accent .material-symbols-rounded { transition:transform .12s ease; }
