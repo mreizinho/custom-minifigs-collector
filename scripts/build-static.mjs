@@ -23,6 +23,7 @@ const productionFiles = [
   'lego-head.svg',
   'notification-lego-head.png',
   'notification-lego-head-white.png',
+  'color-picker-24.png',
   'lego-figure.svg',
   'lego-figure-dark.svg',
   'lego-figure-outline.svg',
