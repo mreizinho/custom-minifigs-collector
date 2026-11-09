@@ -144,7 +144,8 @@ function render(){
     const own=root.querySelector('.own'),wish=root.querySelector('.wish');
     const preordered=isPreordered(f),owned=isOwned(f);own.classList.toggle('selected',owned||preordered);own.classList.toggle('preordered',preordered);wish.classList.toggle('selected',isWished(f));
     own.querySelector('.material-symbols-rounded').textContent=preordered?'deployed_code_history':'check';own.title=preordered?'Pre-ordered':'Owned';own.setAttribute('aria-label',preordered?'Pre-ordered; click to mark as owned':'Toggle owned status');
-    own.setAttribute('aria-pressed',owned||preordered);wish.setAttribute('aria-pressed',isWished(f));
+    const wished=isWished(f),wishLabel=wished?'Remove from wishlist':'Add to wishlist';wish.title=wishLabel;wish.setAttribute('aria-label',wishLabel);
+    own.setAttribute('aria-pressed',owned||preordered);wish.setAttribute('aria-pressed',wished);
     root.querySelector('.image-button').setAttribute('aria-label',`View details for ${f.name}`);
     own.onclick=event=>{event.stopPropagation();toggleOwned(f)};
     wish.onclick=event=>{event.stopPropagation();toggleWished(f)};
