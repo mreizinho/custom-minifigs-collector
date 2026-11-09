@@ -50,8 +50,8 @@
 .collection-preorder-jump:focus-visible{outline:0}
 .collection-preorder-jump:hover .collection-preorder-jump-icon,
 .collection-preorder-jump:focus-visible .collection-preorder-jump-icon{opacity:1}
-.collection-preorder-jump:hover .collection-preorder-jump-icon{background:#d8d6cf;color:#20211e}
+.collection-preorder-jump-icon:hover{background:#d8d6cf;color:#20211e}
 .dark .collection-preorder-jump .collection-preorder-jump-icon{background:#20211e;color:#fff}
-.dark .collection-preorder-jump:hover .collection-preorder-jump-icon{background:#383934;color:#fff}
+.dark .collection-preorder-jump-icon:hover{background:#383934;color:#fff}
 @media(max-width:600px){.collection-preorder-jump{display:none}}
 .search>.material-symbols-rounded:first-child{position:relative;z-index:8}
