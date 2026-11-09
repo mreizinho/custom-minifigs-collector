@@ -948,13 +948,25 @@ render=()=>{
   document.body.classList.add('global-preorder-results');
   if(!allCollectionPreorders){if(allCollectionPreordersRequest)$('#resultCount').textContent='Loading preorders from all collections…';return}
   const items=filtered(),cards=[...document.querySelectorAll('#catalogue .card')];
-  cards.forEach((card,index)=>{const figure=items[index];if(!figure)return;card.dataset.sourceCollection=figure.sourceCollection||figure.sheetCollection||activeCollection;card.style.setProperty('--collection-accent',accentForCollection(card.dataset.sourceCollection));card.title=`${figure.name} · ${card.dataset.sourceCollection}`});
+  cards.forEach((card,index)=>{
+    const figure=items[index];if(!figure)return;
+    const collection=figure.sourceCollection||figure.sheetCollection||activeCollection;
+    card.dataset.sourceCollection=collection;
+    card.style.setProperty('--collection-accent',accentForCollection(collection));
+    card.title=`${figure.name} · ${collection}`;
+    const jump=document.createElement('button');
+    jump.type='button';jump.className='collection-preorder-jump material-symbols-rounded';jump.textContent='arrow_forward';jump.title=`Show ${collection} preorders`;jump.setAttribute('aria-label',jump.title);
+    jump.onclick=event=>{event.preventDefault();event.stopPropagation();showCollectionPreorders(collection)};
+    card.append(jump)
+  });
   $('#resultCount').textContent=`ALL COLLECTIONS: Showing ${items.length} preordered minifigs`
 };
-$('#catalogue').addEventListener('click',event=>{
-  if(!preorderSecretSearchActive())return;
-  const card=event.target.closest('.card'),collection=card?.dataset.sourceCollection;
-  if(!collection||collection===activeCollection)return;
-  event.preventDefault();event.stopImmediatePropagation();selectCollection(collection)
-},true);
+function showCollectionPreorders(collection){
+  const collectionChanged=collection!==activeCollection;
+  if(collectionChanged)selectCollection(collection);
+  else{document.querySelectorAll('.filters input').forEach(input=>input.checked=false);$('#search').value=''}
+  const preorderFilter=document.querySelector('.state-filter[value="preordered"]');
+  if(preorderFilter)preorderFilter.checked=true;
+  if(!collectionChanged)render()
+}
 window.addEventListener('collector-google-auth',()=>{allCollectionPreorders=null;allCollectionPreordersRequest=null;allCollectionPreordersSheet=''});
