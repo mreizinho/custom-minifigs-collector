@@ -180,7 +180,7 @@ function applySettings(settings) {
 async function saveNow(force = false) {
   const authenticatedUser = auth.currentUser || currentUser;
   if (!authenticatedUser || !currentUserPremium) {
-    if (force) throw new Error(authenticatedUser ? 'A premium license is required before uploading.' : 'Google sign-in is not active. Sign in again before uploading.');
+    if (force) throw new Error(authenticatedUser ? 'A premium licence is required before uploading.' : 'Google sign-in is not active. Sign in again before uploading.');
     return;
   }
   if (applyingRemote || (cloudSyncPaused && !force)) return;
@@ -348,7 +348,7 @@ function installSettingsUi() {
       const message = error.code === 'auth/cancelled-popup-request'
           ? 'Google sign-in is already opening. Please wait for it to finish.'
         : error.code === 'auth/unauthorized-domain'
-          ? 'This website is not listed in Firebase Authentication authorized domains.'
+          ? 'This website is not listed in Firebase Authentication authorised domains.'
           : error.message;
       status(message, true);
     } finally {
@@ -536,7 +536,7 @@ async function connectUser(user) {
     nativeSetItem.call(localStorage, 'minifig-spreadsheet-url', GUEST_SPREADSHEET_URL);
     nativeSetItem.call(localStorage, 'minifig-collections', JSON.stringify(GUEST_COLLECTIONS));
     nativeSetItem.call(localStorage, 'minifig-collection', GUEST_COLLECTIONS[0]);
-    status(`Signed in as ${user.email || 'Google user'}. A premium license is required for full access.`, true);
+    status(`Signed in as ${user.email || 'Google user'}. A premium licence is required for full access.`, true);
     window.dispatchEvent(new CustomEvent('collector-premium-required', { detail: { uid: user.uid, email: user.email || '' } }));
     if (guestChanged) location.reload();
     return;
