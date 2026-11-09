@@ -161,7 +161,7 @@ body.dark {
 @media(hover:hover){
   .accent-swatches button:hover,.accent-swatches button:focus-visible {
     border-color:color-mix(in srgb,var(--accent) 9%,var(--paper));
-    box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,var(--line)),0 4px 12px color-mix(in srgb,var(--accent) 18%,transparent);
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,var(--line)),0 4px 12px color-mix(in srgb,var(--accent) 30%,transparent);
   }
 }
 .open-custom-accent { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--muted); padding: 7px 0 0; font-size: 12px; }
