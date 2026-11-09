@@ -1001,3 +1001,14 @@ customAccentDisclosure.onclick=()=>setCustomAccentPanel(customAccentDisclosure.g
 $('#cancelCustomAccent').onclick=()=>setCustomAccentPanel(false);
 const closeAccentPickerWithCollapsedCustomPanel=closeAccentPicker;
 closeAccentPicker=()=>{closeAccentPickerWithCollapsedCustomPanel();setCustomAccentPanel(false)};
+
+// The preorder statistic is a current-collection filter, not the global
+// `preorder` secret search.
+document.querySelector('.preordered-stat-note')?.addEventListener('click',event=>{
+  event.preventDefault();event.stopImmediatePropagation();
+  document.querySelectorAll('.filters input').forEach(input=>input.checked=false);
+  $('#search').value='';
+  const preorderFilter=document.querySelector('.state-filter[value="preordered"]');
+  if(preorderFilter)preorderFilter.checked=true;
+  render()
+},true);
