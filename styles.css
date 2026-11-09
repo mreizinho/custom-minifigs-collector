@@ -38,7 +38,7 @@
   font-size:20px;
   line-height:1;
   font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;
-  transform:translate(-1.5px,.5px);
+  transform:translate(.5px,.5px);
 }
 .global-preorder-results #catalogue .card:hover .collection-preorder-jump,
 .collection-preorder-jump:focus-visible{opacity:1}
