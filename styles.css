@@ -14,7 +14,7 @@
 .collection-preorder-jump{
   position:absolute;
   top:9px;
-  left:36px;
+  right:9px;
   z-index:7;
   display:grid;
   place-items:center;
@@ -27,7 +27,7 @@
   outline-offset:-1px;
   background:var(--collection-accent);
   color:#fff;
-  font-size:17px;
+  font-size:16px;
   opacity:0;
   transition:opacity .14s ease,filter .14s ease;
 }
