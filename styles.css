@@ -33,6 +33,11 @@
   opacity:0;
   transition:opacity .14s ease,filter .14s ease;
 }
+.collection-preorder-jump::before{
+  content:'';
+  position:absolute;
+  inset:-20px;
+}
 .collection-preorder-jump .collection-preorder-jump-icon{
   display:block;
   font-size:20px;
