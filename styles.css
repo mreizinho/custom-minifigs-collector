@@ -23,15 +23,17 @@
   padding:0;
   border:0;
   border-radius:4px;
-  outline:1px solid var(--collection-accent);
+  outline:1px solid var(--line);
   outline-offset:-1px;
-  background:var(--collection-accent);
-  color:#fff;
+  background:color-mix(in srgb,#eeece4 80%,transparent);
+  color:#20211e;
   font-size:16px;
   opacity:0;
   transition:opacity .14s ease,filter .14s ease;
 }
 .global-preorder-results #catalogue .card:hover .collection-preorder-jump,
 .collection-preorder-jump:focus-visible{opacity:1}
-.collection-preorder-jump:hover{filter:brightness(1.12)}
+.collection-preorder-jump:hover{background:#d8d6cf;color:#20211e}
+.dark .collection-preorder-jump{background:#20211e;color:#fff}
+.dark .collection-preorder-jump:hover{background:#383934;color:#fff}
 @media(max-width:600px){.collection-preorder-jump{display:none}}
