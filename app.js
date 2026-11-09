@@ -1012,4 +1012,4 @@ document.querySelector('.preordered-stat-note')?.addEventListener('click',event=
   if(preorderFilter)preorderFilter.checked=true;
   render()
 },true);
-document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren('Minfigs preordered (all collections)');
+document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren('Minfigs pre-ordered (all collections)');
