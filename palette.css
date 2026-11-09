@@ -173,7 +173,7 @@ body.dark {
 #customHex { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 6px 7px; font-family: Outfit, sans-serif; font-size: 11px; text-transform: uppercase; }
 #accentEyeDropper { display:grid; place-items:center; width:28px; height:28px; border:1px solid var(--line); background:var(--paper); color:var(--ink); padding:0; }
 #accentEyeDropper[hidden] { display:none; }
-#accentEyeDropper:hover,#accentEyeDropper:focus-visible { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--paper)); }
+#accentEyeDropper:hover,#accentEyeDropper:focus-visible { border-color:var(--line); color:#20211e; background:#d8d6cf; }
 #accentEyeDropper img { display:block; width:17px; height:17px; object-fit:contain; }
 .dark #accentEyeDropper img { filter:invert(1); }
 @media(max-width:600px){.custom-color-value{grid-template-columns:28px 1fr}#accentEyeDropper{display:none}}
@@ -188,6 +188,8 @@ body.dark {
 .custom-color-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
 .custom-color-actions button { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 6px 10px; font-size: 11px; }
 .custom-color-actions button:last-child { border-color: var(--ink); background: var(--ink); color: var(--paper); font-weight: 600; }
+body:not(.dark) #cancelCustomAccent:hover { background:#d8d6cf; color:#20211e; }
+.dark #accentEyeDropper:hover,.dark #accentEyeDropper:focus-visible,.dark #cancelCustomAccent:hover { border-color:var(--line); background:#383934; color:#fff; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
 .header-actions button,.header-actions>a { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; background: var(--paper); color: var(--ink); padding: 0; font-size: 18px; text-decoration:none; }
 .header-actions .material-symbols-rounded { display: block; transform: translateY(0); }
