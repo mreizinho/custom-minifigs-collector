@@ -978,3 +978,17 @@ document.addEventListener('click',event=>{
   if(!rect||event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)return;
   event.preventDefault();event.stopImmediatePropagation();catalogueSearch.focus()
 },true);
+
+// Keep the custom accent editor as a reversible disclosure panel.
+const customAccentDisclosure=$('#openCustomAccent'),customAccentPanel=$('#customColorPanel');
+customAccentDisclosure.setAttribute('aria-controls','customColorPanel');
+customAccentDisclosure.setAttribute('aria-expanded','false');
+function setCustomAccentPanel(open){
+  if(open)stageCustomColor(savedCustomAccent());
+  customAccentPanel.hidden=!open;
+  customAccentDisclosure.setAttribute('aria-expanded',String(open))
+}
+customAccentDisclosure.onclick=()=>setCustomAccentPanel(customAccentPanel.hidden);
+$('#cancelCustomAccent').onclick=()=>setCustomAccentPanel(false);
+const closeAccentPickerWithCollapsedCustomPanel=closeAccentPicker;
+closeAccentPicker=()=>{closeAccentPickerWithCollapsedCustomPanel();customAccentDisclosure.setAttribute('aria-expanded','false')};
