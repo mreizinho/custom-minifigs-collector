@@ -1012,3 +1012,4 @@ document.querySelector('.preordered-stat-note')?.addEventListener('click',event=
   if(preorderFilter)preorderFilter.checked=true;
   render()
 },true);
+document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren('ALL pre-ordered minifigs');
