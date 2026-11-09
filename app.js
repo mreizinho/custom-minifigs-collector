@@ -955,7 +955,7 @@ render=()=>{
     card.style.setProperty('--collection-accent',accentForCollection(collection));
     card.title=`${figure.name} · ${collection}`;
     const jump=document.createElement('button');
-    jump.type='button';jump.className='collection-preorder-jump material-symbols-rounded';jump.textContent='developer_guide';jump.title=`Open ${collection} preorders`;jump.setAttribute('aria-label',jump.title);
+    jump.type='button';jump.className='collection-preorder-jump';jump.innerHTML='<span class="collection-preorder-jump-icon material-symbols-rounded" aria-hidden="true">developer_guide</span>';jump.title=`Open ${collection} preorders`;jump.setAttribute('aria-label',jump.title);
     jump.onclick=event=>{event.preventDefault();event.stopPropagation();showCollectionPreorders(collection)};
     card.append(jump)
   });
