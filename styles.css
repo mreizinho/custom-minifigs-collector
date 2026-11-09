@@ -40,9 +40,8 @@
   font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;
   transform:translate(0,0);
 }
-.global-preorder-results #catalogue .card:hover .collection-preorder-jump,
+.collection-preorder-jump:hover,
 .collection-preorder-jump:focus-visible{opacity:1}
-#catalogue .card:hover > .batch-selection-toggle{opacity:1}
 .collection-preorder-jump:hover{background:#d8d6cf;color:#20211e}
 body:not(.dark) #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#d8d6cf;color:#20211e}
 .dark .collection-preorder-jump{background:#20211e;color:#fff}

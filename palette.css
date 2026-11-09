@@ -1238,9 +1238,8 @@ html { scrollbar-gutter: stable; }
 .card.batch-selected::after { content:none; }
 .card:has(> .batch-selection-toggle) { position:relative; }
 .batch-selection-toggle { position:absolute; top:9px; left:9px; z-index:7; display:grid; place-items:center; box-sizing:border-box; width:20px; height:20px; border:0; border-radius:4px; background:#20211e; color:#fff; padding:0 0 2px; font-size:20px; line-height:1; opacity:0; transition:opacity .14s ease,background-color .14s ease,color .14s ease; }
-.batch-selection-toggle.is-selected,
-.batch-selection-toggle:not(.is-selected):hover,
-.batch-selection-toggle:not(.is-selected):focus-visible { opacity:1; }
+.batch-selection-toggle:hover,
+.batch-selection-toggle:focus-visible { opacity:1; }
 .batch-selection-toggle.is-selected { background:var(--accent); color:#fff; }
 body:not(.dark) .batch-selection-toggle:not(.is-selected) { border:0; outline:1px solid var(--line); outline-offset:-1px; background:color-mix(in srgb,#eeece4 80%,transparent); color:#20211e; }
 .dark .card.batch-selected,
