@@ -910,3 +910,51 @@ const saveFigureDetailsWithoutRowGuard=saveFigureDetails;
 saveFigureDetails=async(figure,entry,status)=>{await resolveFigureSheetRow(figure);return saveFigureDetailsWithoutRowGuard(figure,entry,status)};
 const deleteFigureWithoutRowGuard=deleteFigureFromActiveSheet;
 deleteFigureFromActiveSheet=async figure=>{await resolveFigureSheetRow(figure);return deleteFigureWithoutRowGuard(figure)};
+
+// The secret `preorder` search spans every collection. The Pre-ordered filter
+// checkbox deliberately continues to use only the currently loaded collection.
+let allCollectionPreorders=null,allCollectionPreordersRequest=null,allCollectionPreordersSheet='';
+const preorderSecretSearchActive=()=>$('#search').value.toLowerCase().trim().split(/\s+/).includes('preorder');
+function accentForCollection(collection){const accents=storedColorMap('minifig-collection-accents');return accents[collection]||localStorage.getItem(`minifig-accent-${collection}`)||localStorage.getItem('minifig-accent')||'#ff5a35'}
+function mapRowsForCollection(rows,collection){const previousCollection=activeCollection;activeCollection=collection;try{return mapRows(rows).map(figure=>({...figure,sheetCollection:collection,sourceCollection:collection}))}finally{activeCollection=previousCollection}}
+async function loadAllCollectionPreorders(){
+  if(!usesAuthenticatedCatalogue()||!window.collectorFirebaseUser)return figures.filter(isPreordered).map(figure=>({...figure,sourceCollection:activeCollection,sheetCollection:figure.sheetCollection||activeCollection}));
+  await restoreSheetsAccess();
+  const groups=await Promise.all(COLLECTIONS.map(async collection=>{
+    const escaped=collection.replace(/'/g,"''"),range=encodeURIComponent(`'${escaped}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS`),records=rowsFromSheetValues((await response.json()).values||[]),mapped=mapRowsForCollection(records.map(record=>record.raw),collection);
+    mapped.forEach((figure,index)=>figure.sheetRow=records[index].sheetRow);
+    return mapped.filter(isPreordered)
+  }));
+  return groups.flat()
+}
+function scheduleAllCollectionPreorders(){
+  if(!preorderSecretSearchActive())return;
+  if(allCollectionPreordersSheet!==SHEET_ID){allCollectionPreorders=null;allCollectionPreordersRequest=null;allCollectionPreordersSheet=SHEET_ID}
+  if(allCollectionPreorders||allCollectionPreordersRequest)return;
+  allCollectionPreordersRequest=loadAllCollectionPreorders().then(items=>{allCollectionPreorders=items;if(preorderSecretSearchActive())render()}).catch(error=>{console.error('Could not load pre-orders from every collection.',error);if(preorderSecretSearchActive())$('#resultCount').textContent='Could not load preorders from all collections'}).finally(()=>{allCollectionPreordersRequest=null})
+}
+const filteredForActiveCollection=filtered;
+filtered=()=>{
+  if(!preorderSecretSearchActive()||!allCollectionPreorders)return filteredForActiveCollection();
+  const currentFigures=figures;
+  figures=allCollectionPreorders;
+  try{return filteredForActiveCollection()}finally{figures=currentFigures}
+};
+const renderBeforeGlobalPreorders=render;
+render=()=>{
+  renderBeforeGlobalPreorders();
+  if(!preorderSecretSearchActive()){document.body.classList.remove('global-preorder-results');if(!allCollectionPreordersRequest)allCollectionPreorders=null;return}
+  scheduleAllCollectionPreorders();
+  document.body.classList.add('global-preorder-results');
+  if(!allCollectionPreorders){if(allCollectionPreordersRequest)$('#resultCount').textContent='Loading preorders from all collections…';return}
+  const items=filtered(),cards=[...document.querySelectorAll('#catalogue .card')];
+  cards.forEach((card,index)=>{const figure=items[index];if(!figure)return;card.dataset.sourceCollection=figure.sourceCollection||figure.sheetCollection||activeCollection;card.style.setProperty('--collection-accent',accentForCollection(card.dataset.sourceCollection));card.title=`${figure.name} · ${card.dataset.sourceCollection}`});
+  $('#resultCount').textContent=`ALL COLLECTIONS: Showing ${items.length} preordered minifigs`
+};
+$('#catalogue').addEventListener('click',event=>{
+  if(!preorderSecretSearchActive())return;
+  const card=event.target.closest('.card'),collection=card?.dataset.sourceCollection;
+  if(!collection||collection===activeCollection)return;
+  event.preventDefault();event.stopImmediatePropagation();selectCollection(collection)
+},true);
+window.addEventListener('collector-google-auth',()=>{allCollectionPreorders=null;allCollectionPreordersRequest=null;allCollectionPreordersSheet=''});
