@@ -970,3 +970,11 @@ function showCollectionPreorders(collection){
   if(!collectionChanged)render()
 }
 window.addEventListener('collector-google-auth',()=>{allCollectionPreorders=null;allCollectionPreordersRequest=null;allCollectionPreordersSheet=''});
+
+// The secret-search popover overlaps the search icon visually. Treat clicks
+// inside the icon's actual bounds as search-focus clicks, never as its first row.
+document.addEventListener('click',event=>{
+  const icon=document.querySelector('.search .material-symbols-rounded'),rect=icon?.getBoundingClientRect();
+  if(!rect||event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)return;
+  event.preventDefault();event.stopImmediatePropagation();catalogueSearch.focus()
+},true);

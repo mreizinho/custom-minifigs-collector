@@ -44,3 +44,4 @@ body:not(.dark) #catalogue .batch-selection-toggle:not(.is-selected):hover{backg
 .dark .collection-preorder-jump:hover{background:#383934;color:#fff}
 .dark #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#383934;color:#fff}
 @media(max-width:600px){.collection-preorder-jump{display:none}}
+.search>.material-symbols-rounded:first-child{position:relative;z-index:8}
