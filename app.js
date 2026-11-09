@@ -991,7 +991,7 @@ function setCustomAccentPanel(open){
     stageCustomColor(savedCustomAccent());
     customAccentPanel.hidden=true;
     customAccentDisclosure.setAttribute('aria-expanded','true');
-    customAccentRevealTimer=setTimeout(()=>{customAccentRevealTimer=0;if(customAccentDisclosure.getAttribute('aria-expanded')==='true')customAccentPanel.hidden=false},180);
+    customAccentRevealTimer=setTimeout(()=>{customAccentRevealTimer=0;if(customAccentDisclosure.getAttribute('aria-expanded')==='true')customAccentPanel.hidden=false},120);
     return
   }
   customAccentPanel.hidden=true;

@@ -160,7 +160,7 @@ body.dark {
 .accent-swatches button.active { box-shadow: 0 0 0 2px var(--ink); }
 .open-custom-accent { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--muted); padding: 7px 0 0; font-size: 12px; }
 .open-custom-accent .material-symbols-rounded { font-size: 17px; }
-.open-custom-accent .material-symbols-rounded { transition:transform .18s ease; }
+.open-custom-accent .material-symbols-rounded { transition:transform .12s ease; }
 .open-custom-accent[aria-expanded="true"] .material-symbols-rounded { transform:rotate(90deg); }
 .custom-color-panel { margin-top: 10px; }
 .color-picker-field { display: grid; grid-template-columns: 1fr; gap: 8px; }
