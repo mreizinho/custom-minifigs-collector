@@ -983,12 +983,21 @@ document.addEventListener('click',event=>{
 const customAccentDisclosure=$('#openCustomAccent'),customAccentPanel=$('#customColorPanel');
 customAccentDisclosure.setAttribute('aria-controls','customColorPanel');
 customAccentDisclosure.setAttribute('aria-expanded','false');
+let customAccentRevealTimer=0;
 function setCustomAccentPanel(open){
-  if(open)stageCustomColor(savedCustomAccent());
-  customAccentPanel.hidden=!open;
-  customAccentDisclosure.setAttribute('aria-expanded',String(open))
+  clearTimeout(customAccentRevealTimer);
+  customAccentRevealTimer=0;
+  if(open){
+    stageCustomColor(savedCustomAccent());
+    customAccentPanel.hidden=true;
+    customAccentDisclosure.setAttribute('aria-expanded','true');
+    customAccentRevealTimer=setTimeout(()=>{customAccentRevealTimer=0;if(customAccentDisclosure.getAttribute('aria-expanded')==='true')customAccentPanel.hidden=false},180);
+    return
+  }
+  customAccentPanel.hidden=true;
+  customAccentDisclosure.setAttribute('aria-expanded','false')
 }
-customAccentDisclosure.onclick=()=>setCustomAccentPanel(customAccentPanel.hidden);
+customAccentDisclosure.onclick=()=>setCustomAccentPanel(customAccentDisclosure.getAttribute('aria-expanded')!=='true');
 $('#cancelCustomAccent').onclick=()=>setCustomAccentPanel(false);
 const closeAccentPickerWithCollapsedCustomPanel=closeAccentPicker;
-closeAccentPicker=()=>{closeAccentPickerWithCollapsedCustomPanel();customAccentDisclosure.setAttribute('aria-expanded','false')};
+closeAccentPicker=()=>{closeAccentPickerWithCollapsedCustomPanel();setCustomAccentPanel(false)};
