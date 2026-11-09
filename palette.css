@@ -1258,6 +1258,13 @@ body:not(.dark) .batch-selection-toggle:not(.is-selected) .batch-selection-toggl
 .batch-tag-bar button { display:inline-flex; align-items:center; gap:5px; min-height:38px; border:1px solid var(--line); background:var(--paper); color:var(--ink); padding:0 12px; font-weight:600; }
 .batch-tag-bar [data-batch-add] { border-color:var(--accent); background:var(--accent); color:#fff; }
 .batch-tag-bar [data-batch-show].active { border-color:var(--ink); background:var(--ink); color:var(--paper); }
+@media(max-width:600px){
+  .batch-tag-bar{width:calc(100% - 20px);bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}
+  .batch-tag-bar:has([data-batch-show][hidden]){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .batch-tag-bar strong{grid-column:1/-1;padding:2px 4px 4px;text-align:center;white-space:normal;line-height:1.25}
+  .batch-tag-bar button{justify-content:center;width:100%;min-width:0;padding:0 6px;text-align:center;line-height:1.1}
+  .batch-tag-bar button[hidden]{display:none}
+}
 .batch-tag-dialog { width:min(440px,calc(100% - 32px)); max-width:440px; border:1px solid var(--line); background:var(--paper); color:var(--ink); }
 .batch-tag-dialog form { display:grid; gap:14px; padding:38px; }
 .batch-tag-dialog h2,.batch-tag-dialog p { margin:0; }
