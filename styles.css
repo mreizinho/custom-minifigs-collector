@@ -36,6 +36,8 @@
 .collection-preorder-jump:focus-visible{opacity:1}
 #catalogue .card:hover > .batch-selection-toggle{opacity:1}
 .collection-preorder-jump:hover{background:#d8d6cf;color:#20211e}
+body:not(.dark) #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#d8d6cf;color:#20211e}
 .dark .collection-preorder-jump{background:#20211e;color:#fff}
 .dark .collection-preorder-jump:hover{background:#383934;color:#fff}
+.dark #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#383934;color:#fff}
 @media(max-width:600px){.collection-preorder-jump{display:none}}
