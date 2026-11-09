@@ -16,41 +16,42 @@
 .global-preorder-results #catalogue .card{position:relative}
 .collection-preorder-jump{
   position:absolute;
-  top:9px;
-  right:9px;
+  top:-21px;
+  right:-21px;
   z-index:7;
+  display:grid;
+  place-items:center;
+  width:80px;
+  height:80px;
+  padding:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:inherit;
+}
+.collection-preorder-jump .collection-preorder-jump-icon{
   display:grid;
   place-items:center;
   width:20px;
   height:20px;
-  padding:0;
-  border:0;
   border-radius:4px;
   outline:1px solid var(--line);
   outline-offset:-1px;
   background:color-mix(in srgb,#eeece4 80%,transparent);
   color:#20211e;
   opacity:0;
-  transition:opacity .14s ease,filter .14s ease;
-}
-.collection-preorder-jump::before{
-  content:'';
-  position:absolute;
-  inset:-20px;
-}
-.collection-preorder-jump .collection-preorder-jump-icon{
-  display:block;
   font-size:20px;
   line-height:1;
   font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;
   transform:translate(0,0);
+  transition:opacity .14s ease,background-color .14s ease,color .14s ease;
 }
 .collection-preorder-jump:hover,
-.collection-preorder-jump:focus-visible{opacity:1}
-.collection-preorder-jump:hover{background:#d8d6cf;color:#20211e}
-body:not(.dark) #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#d8d6cf;color:#20211e}
-.dark .collection-preorder-jump{background:#20211e;color:#fff}
-.dark .collection-preorder-jump:hover{background:#383934;color:#fff}
-.dark #catalogue .batch-selection-toggle:not(.is-selected):hover{background:#383934;color:#fff}
+.collection-preorder-jump:focus-visible{outline:0}
+.collection-preorder-jump:hover .collection-preorder-jump-icon,
+.collection-preorder-jump:focus-visible .collection-preorder-jump-icon{opacity:1}
+.collection-preorder-jump:hover .collection-preorder-jump-icon{background:#d8d6cf;color:#20211e}
+.dark .collection-preorder-jump .collection-preorder-jump-icon{background:#20211e;color:#fff}
+.dark .collection-preorder-jump:hover .collection-preorder-jump-icon{background:#383934;color:#fff}
 @media(max-width:600px){.collection-preorder-jump{display:none}}
 .search>.material-symbols-rounded:first-child{position:relative;z-index:8}
