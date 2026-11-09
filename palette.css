@@ -160,6 +160,7 @@ body.dark {
 .accent-swatches button.active { box-shadow: 0 0 0 2px var(--ink); }
 @media(hover:hover){
   .accent-swatches button:hover,.accent-swatches button:focus-visible {
+    border-color:color-mix(in srgb,var(--accent) 9%,var(--paper));
     box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,var(--line)),0 4px 12px color-mix(in srgb,var(--accent) 18%,transparent);
   }
 }
