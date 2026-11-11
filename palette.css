@@ -1242,7 +1242,7 @@ html { scrollbar-gutter: stable; }
 .batch-selection-toggle-icon { display:grid; place-items:center; box-sizing:border-box; width:20px; height:20px; border:0; border-radius:4px; outline:1px solid var(--line); outline-offset:-1px; background:color-mix(in srgb,#eeece4 80%,transparent); color:#20211e; padding:0 0 2px; font-size:20px; line-height:1; opacity:0; transition:opacity .14s ease,background-color .14s ease,color .14s ease; }
 .batch-selection-toggle:hover .batch-selection-toggle-icon,
 .batch-selection-toggle:focus-visible .batch-selection-toggle-icon { opacity:1; }
-.batch-selection-toggle.is-selected .batch-selection-toggle-icon { background:var(--accent); color:#fff; }
+.batch-selection-toggle.is-selected .batch-selection-toggle-icon { background:var(--accent); color:#fff; opacity:1; }
 body:not(.dark) .batch-selection-toggle:not(.is-selected) .batch-selection-toggle-icon:hover { background:#d8d6cf; color:#20211e; }
 .dark .card.batch-selected,
 .dark .card.batch-selected:hover {
