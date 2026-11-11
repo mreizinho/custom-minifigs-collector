@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Privacy Policy — Custom Minifigs Collector</title>
+  <link id="privacyFavicon" rel="icon" type="image/svg+xml" href="lego-head.svg?v=8#favicon-outline">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +18,9 @@
           ?? localStorage.getItem(`minifig-theme-${device}`)
           ?? localStorage.getItem('minifig-theme')
           ?? 'light';
-        document.documentElement.classList.toggle('dark', saved === 'dark');
+        const dark = saved === 'dark';
+        document.documentElement.classList.toggle('dark', dark);
+        document.getElementById('privacyFavicon').href = `lego-head.svg?v=8&theme=${dark ? 'dark' : 'light'}#${dark ? 'filled' : 'favicon-outline'}`;
       };
       applyTheme();
       mobile.addEventListener('change', applyTheme);
