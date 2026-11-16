@@ -1041,7 +1041,7 @@ document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren(
 let pendingBricklinkFigure=null,bricklinkLookupBusy=false,bricklinkRequest=0;
 const bricklinkSection=document.createElement('section');
 bricklinkSection.className='bricklink-import';
-bricklinkSection.innerHTML='<div class="bricklink-entry"><label for="newBricklinkCode">Import from Bricklink</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="Ex. sw0218"><button type="button" id="fetchBricklinkFigure" aria-label="Import from Bricklink" title="Import from Bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span></button></div></div><div class="bricklink-result"><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p></div>';
+bricklinkSection.innerHTML='<div class="bricklink-entry"><label for="newBricklinkCode">Import from Bricklink</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="Ex. sw0218"><button type="button" id="fetchBricklinkFigure" aria-label="Import from Bricklink" title="Import from Bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span></button></div><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p></div><div class="bricklink-result"><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden></div>';
 $('#addFigureForm .add-figure-collection').after(bricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
 addFigureForm.addEventListener('reset',clearBricklinkImport);
@@ -1051,7 +1051,7 @@ $('#fetchBricklinkFigure').onclick=async()=>{
   const code=$('#newBricklinkCode').value.trim().toLowerCase(),status=$('#bricklinkLookupStatus');
   if(!/^sw\d+[a-z]?$/.test(code)){status.textContent='Enter a Star Wars BL code, for example sw0001a.';return}
   const request=++bricklinkRequest,collection=activeCollection,sheet=SHEET_ID;
-  pendingBricklinkFigure=null;bricklinkLookupBusy=true;$('#fetchBricklinkFigure').disabled=true;status.textContent='Looking up minifigure…';
+  pendingBricklinkFigure=null;bricklinkLookupBusy=true;$('#fetchBricklinkFigure').disabled=true;status.classList.remove('bricklink-imported');status.textContent='Looking up minifigure…';
   try{
     if(!window.collectorGetIdToken)throw Error('Sign in with Google first.');
     const token=await window.collectorGetIdToken(),response=await fetch('https://cmcollector-reminders.mreizinho.workers.dev/bricklink',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({code})}),data=await response.json();
@@ -1064,7 +1064,7 @@ $('#fetchBricklinkFigure').onclick=async()=>{
     $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
     conditionInput.value='New';
     const preview=$('#bricklinkPreview');preview.hidden=!data.photoUrl;if(data.photoUrl)preview.src=data.photoUrl;
-    status.textContent=data.averageNewPrice==null?'Imported. No new-condition sales in the last six months.':'Imported. Average new price · last 6 months · EUR.';
+    status.classList.add('bricklink-imported');status.textContent='Imported';
   }catch(error){if(request===bricklinkRequest)status.textContent=error.message}
   finally{if(request===bricklinkRequest){bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false}}
 };
