@@ -102,4 +102,10 @@
 #bricklinkImportDialog #bricklinkLookupStatus.bricklink-imported{color:var(--muted);opacity:.65}
 #bricklinkImportDialog .add-figure-actions button:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
 #bricklinkImportDialog .add-figure-actions button[type="submit"]:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 12%,var(--accent))}
+#addFigureDialog>#bricklinkImportDialog{position:absolute;inset:auto;margin:0;width:auto;max-width:none;height:auto;max-height:none;border:0;border-radius:0;z-index:4;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);padding:0}
+#addFigureDialog>#bricklinkImportDialog:not([open]){display:none}
+#addFigureDialog>#bricklinkImportDialog[open]{display:block}
+#addFigureDialog>#bricklinkImportDialog form{min-height:100%;height:auto;padding:0;align-content:start;grid-template-rows:auto auto auto auto 1fr}
+#bricklinkImportDialog #bricklinkOverlayTitle,#bricklinkImportDialog>#closeBricklinkOverlay{display:none}
+#bricklinkImportDialog .add-figure-actions{align-self:end;margin-top:16px}
 @media(max-width:400px){#bricklinkImportDialog form{padding-inline:18px}#bricklinkImportDialog .bricklink-import{grid-template-columns:minmax(0,1fr) 76px;gap:10px}#bricklinkImportDialog #bricklinkPreview{width:72px;height:100px}#bricklinkImportDialog #fetchBricklinkFigure{padding-inline:8px}}

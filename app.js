@@ -1051,16 +1051,18 @@ toggleBricklinkImport.innerHTML='<span class="material-symbols-rounded" aria-hid
 $('#closeAddFigure').before(toggleBricklinkImport);
 const bricklinkOverlay=document.createElement('dialog');bricklinkOverlay.id='bricklinkImportDialog';bricklinkOverlay.className='add-figure-dialog bricklink-overlay';bricklinkOverlay.setAttribute('aria-labelledby','bricklinkOverlayTitle');
 bricklinkOverlay.innerHTML='<button type="button" class="close" id="closeBricklinkOverlay" aria-label="Close BrickLink import"><span class="material-symbols-rounded">close</span></button><form id="bricklinkOverlayForm"><h2 id="bricklinkOverlayTitle">Import from BrickLink</h2><div id="bricklinkOverlayLookup"></div><label>Name<input id="bricklinkImportName" required autocomplete="off"></label><label>Est. value (€)<input id="bricklinkImportValue" type="number" min="0" step="0.01" inputmode="decimal"></label><p id="bricklinkImportSaveStatus" class="settings-status" role="status" aria-live="polite"></p><div class="add-figure-actions"><button type="button" id="cancelBricklinkOverlay">Cancel</button><button type="submit" id="saveBricklinkImport"><span class="material-symbols-rounded">add</span>Add minifig</button></div></form>';
-document.body.append(bricklinkOverlay);$('#bricklinkOverlayLookup').append(bricklinkSection);
+addFigureDialog.append(bricklinkOverlay);$('#bricklinkOverlayLookup').append(bricklinkSection);
 toggleBricklinkImport.setAttribute('aria-controls',bricklinkOverlay.id);toggleBricklinkImport.setAttribute('aria-haspopup','dialog');
 let bricklinkSaving=false;
 function collapseBricklinkSection(){if(bricklinkOverlay.open)bricklinkOverlay.close();bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')}
-toggleBricklinkImport.onclick=()=>{bricklinkSection.hidden=false;$('#bricklinkOverlayForm').reset();$('#newBricklinkCode').value='';clearBricklinkImport();$('#bricklinkImportSaveStatus').textContent='';toggleBricklinkImport.setAttribute('aria-expanded','true');bricklinkOverlay.showModal();$('#newBricklinkCode').focus()};
+function positionBricklinkLayer(){const subtitle=$('#addFigureForm .add-figure-collection'),dialogRect=addFigureDialog.getBoundingClientRect(),subtitleRect=subtitle.getBoundingClientRect(),formStyle=getComputedStyle(addFigureForm);bricklinkOverlay.style.top=`${subtitleRect.bottom-dialogRect.top+addFigureDialog.scrollTop+16}px`;bricklinkOverlay.style.left=formStyle.paddingLeft;bricklinkOverlay.style.right=formStyle.paddingRight;bricklinkOverlay.style.bottom=formStyle.paddingBottom}
+toggleBricklinkImport.onclick=()=>{if(bricklinkOverlay.open){closeBricklinkOverlay();return}bricklinkSection.hidden=false;$('#bricklinkOverlayForm').reset();$('#newBricklinkCode').value='';clearBricklinkImport();$('#bricklinkImportSaveStatus').textContent='';toggleBricklinkImport.setAttribute('aria-expanded','true');positionBricklinkLayer();addFigureForm.inert=true;bricklinkOverlay.show();$('#newBricklinkCode').focus()};
+window.addEventListener('resize',()=>{if(bricklinkOverlay.open)positionBricklinkLayer()});
 function closeBricklinkOverlay(){if(!bricklinkSaving)bricklinkOverlay.close()}
 $('#closeBricklinkOverlay').onclick=closeBricklinkOverlay;$('#cancelBricklinkOverlay').onclick=closeBricklinkOverlay;
 bricklinkOverlay.addEventListener('cancel',event=>{if(bricklinkSaving)event.preventDefault()});
 bricklinkOverlay.addEventListener('click',event=>{if(event.target===bricklinkOverlay)closeBricklinkOverlay()});
-bricklinkOverlay.addEventListener('close',()=>{clearBricklinkImport();$('#newBricklinkCode').value='';bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')});
+bricklinkOverlay.addEventListener('close',()=>{addFigureForm.inert=false;clearBricklinkImport();$('#newBricklinkCode').value='';bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')});
 $('#bricklinkOverlayForm').addEventListener('submit',async event=>{
   event.preventDefault();if(bricklinkSaving)return;
   const status=$('#bricklinkImportSaveStatus'),bl=pendingBricklinkFigure,code=$('#newBricklinkCode').value.trim().toLowerCase();
