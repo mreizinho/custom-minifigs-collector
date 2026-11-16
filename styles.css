@@ -65,7 +65,9 @@
 #addFigureForm .bricklink-code-row input{width:153px;min-width:0;flex:1;padding-right:12px}
 #newBricklinkCode::placeholder{color:var(--muted,#888);opacity:.6}
 #fetchBricklinkFigure{position:static;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-weight:600;cursor:pointer}
-#fetchBricklinkFigure .material-symbols-rounded{font-size:20px;line-height:1}
+#fetchBricklinkFigure .material-symbols-rounded{font-size:20px;line-height:1;transform:scaleX(1.2)}
+#addFigureForm .add-figure-actions button:not(:disabled):hover,#addFigureForm .add-figure-actions button:focus-visible{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
+#addFigureForm .add-figure-actions button[type="submit"]:not(:disabled):hover,#addFigureForm .add-figure-actions button[type="submit"]:focus-visible{background:color-mix(in srgb,var(--ink) 12%,var(--accent));border-color:color-mix(in srgb,var(--ink) 12%,var(--accent));color:#fff}
 #fetchBricklinkFigure:not(:disabled):hover,#fetchBricklinkFigure:focus-visible{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
 #fetchBricklinkFigure:disabled{opacity:.45;cursor:wait}
 #fetchBricklinkFigure:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
