@@ -6,4 +6,5 @@ const source=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const context=vm.createContext({});
 vm.runInContext(source.slice(source.indexOf('function collectionSwipeAction('),source.indexOf('let mobileCollectionSwipe=',source.indexOf('function collectionSwipeAction('))),context);
 test('left swipe deletes and right swipe opens rename',()=>{assert.equal(context.collectionSwipeAction(-80,10),'delete');assert.equal(context.collectionSwipeAction(80,-10),'rename')});
-test('taps, short drags, vertical scrolling and diagonal gestures do not trigger actions',()=>{for(const [dx,dy] of [[0,0],[45,2],[20,90],[-70,60],[60,40]])assert.equal(context.collectionSwipeAction(dx,dy),'')});
+test('taps, short drags, vertical scrolling and diagonal gestures do not trigger actions',()=>{for(const [dx,dy] of [[0,0],[25,2],[20,90],[-70,60],[40,40]])assert.equal(context.collectionSwipeAction(dx,dy),'')});
+test('a short deliberate horizontal swipe reaches the action threshold',()=>{assert.equal(context.collectionSwipeAction(-44,5),'delete');assert.equal(context.collectionSwipeAction(44,5),'rename')});
