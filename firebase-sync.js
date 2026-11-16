@@ -43,6 +43,7 @@ const nativeSetItem = Storage.prototype.setItem;
 const nativeRemoveItem = Storage.prototype.removeItem;
 let currentUser = null;
 let currentUserPremium = false;
+let bricklinkPremiumVerified = false;
 let remoteFingerprint = '';
 let saveTimer = 0;
 let applyingRemote = false;
@@ -109,6 +110,8 @@ function announceGoogleAuth(user, accessToken = '', premium = currentUserPremium
   window.collectorFirebaseAuthenticatedUser = user?.uid || '';
   window.collectorFirebaseUser = user && premium ? user.uid : '';
   window.collectorPremiumUser = Boolean(user && premium);
+  window.collectorBricklinkPremium = Boolean(user && bricklinkPremiumVerified);
+  window.dispatchEvent(new CustomEvent('collector-bricklink-access', { detail: { premium: window.collectorBricklinkPremium } }));
   window.dispatchEvent(new CustomEvent('collector-google-auth', {
     detail: { uid: user && premium ? user.uid : '', signedInUid: user?.uid || '', email: user?.email || '', premium: Boolean(user && premium), accessToken: premium ? accessToken : '' }
   }));
@@ -495,6 +498,9 @@ async function connectUser(user) {
   if (user) promptOnNextUserConnection = false;
   currentUser = user;
   currentUserPremium = false;
+  bricklinkPremiumVerified = false;
+  window.collectorBricklinkPremium = false;
+  window.dispatchEvent(new CustomEvent('collector-bricklink-access', { detail: { premium: false } }));
   cloudSyncPaused = Boolean(user);
   renderAccount(user);
   if (!user) {
@@ -527,6 +533,8 @@ async function connectUser(user) {
   }
 
   currentUserPremium = PREMIUM_ENTITLEMENTS_ENABLED ? await hasPremiumAccess(user) : true;
+  try { bricklinkPremiumVerified = PREMIUM_ENTITLEMENTS_ENABLED ? currentUserPremium : await hasPremiumAccess(user); }
+  catch (error) { bricklinkPremiumVerified = false; console.warn('BrickLink premium access could not be verified.', error); }
   if (revision !== authStateRevision) return;
   renderAccount(user, currentUserPremium);
   if (!currentUserPremium) {

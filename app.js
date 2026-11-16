@@ -1049,6 +1049,9 @@ toggleBricklinkImport.type='button';toggleBricklinkImport.id='toggleBricklinkImp
 toggleBricklinkImport.setAttribute('aria-controls',bricklinkSection.id);toggleBricklinkImport.setAttribute('aria-expanded','false');
 toggleBricklinkImport.innerHTML='<span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Import from BrickLink</span>';
 $('#closeAddFigure').before(toggleBricklinkImport);
+function syncBricklinkPremiumAccess(){const allowed=window.collectorBricklinkPremium===true;toggleBricklinkImport.hidden=!allowed;const pill=document.getElementById('bricklinkImportPill');if(pill)pill.hidden=!allowed;if(!allowed&&typeof bricklinkMode!=='undefined'&&bricklinkMode)collapseBricklinkSection()}
+window.addEventListener('collector-bricklink-access',syncBricklinkPremiumAccess);
+toggleBricklinkImport.hidden=window.collectorBricklinkPremium!==true;
 // Switch the existing fields in place; retain one form and one footer.
 const addFigureFieldArea=document.createElement('div');addFigureFieldArea.className='add-figure-field-area';
 const manualFieldNodes=[...addFigureForm.children].filter(node=>!node.matches('h2,.add-figure-collection,.add-figure-actions,input[type="file"]')&&node!==bricklinkSection&&node!==addFigureStatus);
@@ -1056,6 +1059,7 @@ bricklinkSection.before(addFigureFieldArea);addFigureFieldArea.append(bricklinkS
 const valueRow=$('#newFigureValue').closest('.add-figure-value'),currencyField=$('#newFigureCurrency').closest('label');
 const importHiddenFields=[$('#newFigureCharacter').closest('label'),brandConditionRow,$('#newFigureOrigin').closest('label'),currencyField];
 const importPill=document.createElement('div');importPill.id='bricklinkImportPill';toggleBricklinkImport.before(importPill);importPill.append(toggleBricklinkImport);
+importPill.hidden=window.collectorBricklinkPremium!==true;
 const pillEntry=document.createElement('div');pillEntry.className='bricklink-pill-entry';pillEntry.hidden=true;importPill.append(pillEntry);
 pillEntry.append($('#newBricklinkCode'),$('#fetchBricklinkFigure'));$('#fetchBricklinkFigure').innerHTML='<span class="material-symbols-rounded" aria-hidden="true">check</span>';$('#fetchBricklinkFigure').title='Get BrickLink minifigure';$('#fetchBricklinkFigure').setAttribute('aria-label','Get BrickLink minifigure');
 importPill.append($('#bricklinkLookupStatus'));
@@ -1073,6 +1077,7 @@ function applyBricklinkFieldLayout(){
   importHiddenFields.forEach(field=>field.hidden=true);valueRow.append(conditionField);importPhoto.hidden=false;addFigureFieldArea.classList.add('is-bricklink');closeBricklinkPill();
 }
 toggleBricklinkImport.onclick=()=>{
+  if(window.collectorBricklinkPremium!==true)return;
   if($('#submitAddFigure').disabled)return;
   if(!manualAddSnapshot)manualAddSnapshot=manualAddInputs.map(input=>input.value);
   bricklinkMode=true;toggleBricklinkImport.hidden=true;pillEntry.hidden=false;importPill.classList.add('is-editing');toggleBricklinkImport.setAttribute('aria-expanded','true');$('#newBricklinkCode').focus();
@@ -1086,6 +1091,7 @@ $('#newBricklinkCode').setAttribute('autocapitalize','none');
 $('#newBricklinkCode').addEventListener('input',event=>{const input=event.target,start=input.selectionStart,end=input.selectionEnd;input.value=input.value.toLowerCase();input.setSelectionRange(start,end);clearBricklinkImport()});
 $('#newBricklinkCode').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.isComposing)return;event.preventDefault();event.stopPropagation();if(!bricklinkLookupBusy)$('#fetchBricklinkFigure').click()});
 $('#fetchBricklinkFigure').onclick=async()=>{
+  if(window.collectorBricklinkPremium!==true)return;
   const code=$('#newBricklinkCode').value.trim().toLowerCase(),status=$('#bricklinkLookupStatus');
   if(!/^sw\d+[a-z]?$/.test(code)){status.textContent='Enter a Star Wars BL code, for example sw0001a.';return}
   const request=++bricklinkRequest,collection=activeCollection,sheet=SHEET_ID;
