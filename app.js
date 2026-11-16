@@ -102,6 +102,7 @@ function useCardFallback(root,image,imageWrap){
 }
 let privateCataloguePhotoObserver=null;
 function setCatalogueImageSource(image,url){image.classList.toggle('bricklink-photo',/^https?:\/\/img\.bricklink\.com\//i.test(clean(url)));image.src=imageSource(url)}
+function bricklinkCatalogueUrl(imageUrl){try{const url=new URL(imageUrl);if(url.hostname.toLowerCase()!=='img.bricklink.com'||!['https:','http:'].includes(url.protocol))return '';const filename=decodeURIComponent(url.pathname.split('/').pop()),code=filename.replace(/\.(png|jpe?g|gif|webp)$/i,'').replace(/\.t\d+$/i,'');if(code===filename||!code||!/^[a-z0-9_-]+$/i.test(code))return '';return `https://www.bricklink.com/v2/catalog/catalogitem.page?M=${encodeURIComponent(code)}`}catch{return ''}}
 function render(){
   const items=filtered(),template=$('#cardTemplate'),catalogue=$('#catalogue');
   catalogue.replaceChildren();
@@ -141,6 +142,8 @@ function render(){
       photoAction.onkeydown=event=>{if(event.key==='Enter'||event.key===' ')activate(event)};
       root.querySelector('.image-button').append(photoAction);
     }
+    const catalogueUrl=bricklinkCatalogueUrl(f.image);
+    if(catalogueUrl){const link=document.createElement('a');link.className='collection-preorder-jump bricklink-catalogue-link';link.href=catalogueUrl;link.target='_blank';link.rel='noopener noreferrer';link.title=`Open ${f.character||f.name} on BrickLink`;link.setAttribute('aria-label',link.title);link.innerHTML='<span class="collection-preorder-jump-icon material-symbols-rounded" aria-hidden="true">open_in_new</span>';link.addEventListener('click',event=>event.stopPropagation());root.append(link)}
     const own=root.querySelector('.own'),wish=root.querySelector('.wish');
     const preordered=isPreordered(f),owned=isOwned(f);own.classList.toggle('selected',owned||preordered);own.classList.toggle('preordered',preordered);wish.classList.toggle('selected',isWished(f));
     own.querySelector('.material-symbols-rounded').textContent=preordered?'deployed_code_history':'check';own.title=preordered?'Pre-ordered':'Owned';own.setAttribute('aria-label',preordered?'Pre-ordered; click to mark as owned':'Toggle owned status');
@@ -980,6 +983,7 @@ render=()=>{
     const jump=document.createElement('button');
     jump.type='button';jump.className='collection-preorder-jump';jump.innerHTML='<span class="collection-preorder-jump-icon material-symbols-rounded" aria-hidden="true">developer_guide</span>';jump.title=`Open ${collection} preorders`;jump.setAttribute('aria-label',jump.title);
     jump.onclick=event=>{event.preventDefault();event.stopPropagation();showCollectionPreorders(collection)};
+    if(card.querySelector('.bricklink-catalogue-link'))jump.classList.add('beside-bricklink-link');
     card.append(jump)
   });
   $('#resultCount').textContent=`ALL COLLECTIONS: Showing ${items.length} preordered minifigs`
