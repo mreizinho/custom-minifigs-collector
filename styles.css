@@ -112,6 +112,8 @@
 #bricklinkImportPill #bricklinkLookupStatus:empty{display:none}
 #addFigureForm>#bricklinkLookupStatus{position:static;width:100%;max-width:none;margin:0;color:var(--muted);font-size:12px;line-height:1.4;overflow-wrap:anywhere;background:none;padding:0}
 #addFigureForm>#bricklinkLookupStatus:empty{display:none}
+#catalogue .image-wrap img.bricklink-photo:not(.fallback-image){width:100%;height:100%;object-fit:contain;object-position:center}
+#catalogue .card:hover .image-wrap img.bricklink-photo:not(.fallback-image){transform:none}
 .add-figure-field-area.is-bricklink{grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
 .add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 140px;grid-row:3}
 .bricklink-import-photo{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}

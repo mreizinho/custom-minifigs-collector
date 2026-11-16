@@ -101,7 +101,7 @@ function useCardFallback(root,image,imageWrap){
   root.classList.add('fallback-card');
 }
 let privateCataloguePhotoObserver=null;
-function setCatalogueImageSource(image,url){image.src=imageSource(url)}
+function setCatalogueImageSource(image,url){image.classList.toggle('bricklink-photo',/^https?:\/\/img\.bricklink\.com\//i.test(clean(url)));image.src=imageSource(url)}
 function render(){
   const items=filtered(),template=$('#cardTemplate'),catalogue=$('#catalogue');
   catalogue.replaceChildren();
