@@ -70,7 +70,8 @@
 #addFigureForm .bricklink-entry label{display:block;margin-bottom:6px}
 .bricklink-code-row{position:relative;display:flex;align-items:stretch;gap:8px;width:calc(75% + 23px)}
 #addFigureForm .bricklink-code-row input{width:153px;min-width:0;flex:1;padding-right:12px}
-#newBricklinkCode::placeholder{color:var(--muted,#888);opacity:.6}
+#newBricklinkCode{line-height:normal}
+#newBricklinkCode::placeholder{color:color-mix(in srgb,var(--muted,#888) 70%,var(--bg));opacity:1;line-height:normal}
 #fetchBricklinkFigure{position:static;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-weight:600;cursor:pointer}
 #fetchBricklinkFigure .material-symbols-rounded{font-size:20px;line-height:1;transform:scaleX(1.2)}
 #addFigureForm .add-figure-actions button:not(:disabled):hover,#addFigureForm .add-figure-actions button:focus-visible{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
