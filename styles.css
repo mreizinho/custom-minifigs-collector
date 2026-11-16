@@ -67,6 +67,10 @@
 #addFigureForm .add-figure-tabs button[aria-selected="true"]:hover{color:var(--accent)}
 .add-figure-tab-panel,.add-figure-shared-fields{display:grid;gap:16px;min-width:0}
 .add-figure-tab-panel[hidden]{display:none}
+#addFigureForm .add-figure-collection{display:none}
+#addFigureTitle{padding-right:24px}
+.add-figure-panel-stage{min-width:0}
+#addFigureForm .add-figure-shared-fields>[hidden]{display:none}
 .add-figure-tab-panel .bricklink-import{margin-top:12px}
 #toggleBricklinkImport{position:absolute;top:12px;right:60px;z-index:3;display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:19px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 #toggleBricklinkImport{background:#fff;transition:background-color .15s ease,color .15s ease,border-color .15s ease}
