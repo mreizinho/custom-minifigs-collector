@@ -87,25 +87,13 @@
 @media(max-width:600px){.bricklink-import{grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px}.bricklink-result{height:72px}#bricklinkPreview{width:101.5px;height:133px}#addFigureForm #bricklinkLookupStatus{font-size:.72rem}#fetchBricklinkFigure{padding-inline:10px}}
 #addFigureForm #bricklinkLookupStatus:not(:empty):not(.bricklink-imported){position:relative;top:auto;width:200%;max-width:calc(100vw - 80px)}
 @media(max-width:600px){.bricklink-import{grid-template-columns:minmax(0,1fr) 76px}.bricklink-code-row{width:100%}}
-#bricklinkImportDialog{position:fixed;inset:0;margin:auto;width:min(520px,calc(100% - 24px));max-width:520px;height:auto;max-height:calc(100dvh - 24px);border:1px solid var(--line);border-radius:12px;overflow-y:auto;background:var(--paper);color:var(--ink)}
-#bricklinkImportDialog::backdrop{background:#0006}
-#bricklinkImportDialog form{height:auto;min-height:0;padding:38px 28px 28px;overflow:visible;gap:16px}
-#bricklinkImportDialog h2{font-size:25px;padding-right:24px}
-#bricklinkImportDialog>.close{top:12px;right:12px}
-#bricklinkImportDialog .bricklink-import{grid-template-columns:minmax(0,1fr) 100px;gap:16px;min-height:140px;margin:0;padding-bottom:18px}
-#bricklinkImportDialog .bricklink-code-row{width:100%}
-#bricklinkImportDialog .bricklink-code-row input{min-width:0;flex:1;width:100%}
-#bricklinkImportDialog .bricklink-entry label{display:block;margin-bottom:6px}
-#bricklinkImportDialog .bricklink-result{height:auto;display:flex;align-items:center;justify-content:center}
-#bricklinkImportDialog #bricklinkPreview{position:static;transform:none;width:90px;height:120px}
-#bricklinkImportDialog #bricklinkLookupStatus{position:static;width:auto;max-width:none;margin:5px 0 0;font-size:.8rem;line-height:1.4}
-#bricklinkImportDialog #bricklinkLookupStatus.bricklink-imported{color:var(--muted);opacity:.65}
-#bricklinkImportDialog .add-figure-actions button:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
-#bricklinkImportDialog .add-figure-actions button[type="submit"]:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 12%,var(--accent))}
-#addFigureDialog>#bricklinkImportDialog{position:absolute;inset:auto;margin:0;width:auto;max-width:none;height:auto;max-height:none;border:0;border-radius:0;z-index:4;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);padding:0}
-#addFigureDialog>#bricklinkImportDialog:not([open]){display:none}
-#addFigureDialog>#bricklinkImportDialog[open]{display:block}
-#addFigureDialog>#bricklinkImportDialog form{min-height:100%;height:auto;padding:0;align-content:start;grid-template-rows:auto auto auto auto 1fr}
-#bricklinkImportDialog #bricklinkOverlayTitle,#bricklinkImportDialog>#closeBricklinkOverlay{display:none}
-#bricklinkImportDialog .add-figure-actions{align-self:end;margin-top:16px}
-@media(max-width:400px){#bricklinkImportDialog form{padding-inline:18px}#bricklinkImportDialog .bricklink-import{grid-template-columns:minmax(0,1fr) 76px;gap:10px}#bricklinkImportDialog #bricklinkPreview{width:72px;height:100px}#bricklinkImportDialog #fetchBricklinkFigure{padding-inline:8px}}
+
+.add-figure-field-area{display:grid;gap:16px;min-width:0;align-content:start}
+#addFigureForm .add-figure-field-area [hidden]{display:none}
+.add-figure-field-area.is-bricklink{overflow-y:auto;overscroll-behavior:contain}
+.add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr)}
+.add-figure-field-area .bricklink-import{margin:0;padding-bottom:18px;min-height:140px;grid-template-columns:minmax(0,1fr) 110px}
+.add-figure-field-area .bricklink-code-row{width:min(100%,245px)}
+.add-figure-field-area .bricklink-result{height:120px;display:flex;align-items:center;justify-content:center}
+.add-figure-field-area #bricklinkPreview{position:static;transform:none;width:90px;height:120px}
+@media(max-width:600px){.add-figure-field-area .bricklink-import{grid-template-columns:minmax(0,1fr) 76px;gap:12px}.add-figure-field-area #bricklinkPreview{width:72px;height:100px}}
