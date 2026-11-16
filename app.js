@@ -1044,19 +1044,13 @@ bricklinkSection.className='bricklink-import';
 bricklinkSection.innerHTML='<div class="bricklink-entry"><label for="newBricklinkCode">Import from Bricklink</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="Ex. sw0971"><button type="button" id="fetchBricklinkFigure" aria-label="Import from Bricklink" title="Import from Bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Get</span></button></div><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p></div><div class="bricklink-result"><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden></div>';
 $('#addFigureForm .add-figure-collection').after(bricklinkSection);
 bricklinkSection.id='bricklinkImportSection';bricklinkSection.hidden=true;
-const addFigureTabs=document.createElement('div');addFigureTabs.className='settings-tabs add-figure-tabs';addFigureTabs.setAttribute('role','tablist');addFigureTabs.setAttribute('aria-label','Add minifigure method');
-addFigureTabs.innerHTML='<button type="button" id="addFigureTabRegular" role="tab" aria-controls="addFigurePanelRegular" data-add-tab="regular"><span class="material-symbols-rounded" aria-hidden="true">add</span><span>Regular add</span></button><button type="button" id="addFigureTabBricklink" role="tab" aria-controls="addFigurePanelBricklink" data-add-tab="bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>BrickLink import</span></button>';
-const regularAddPanel=document.createElement('div'),bricklinkAddPanel=document.createElement('div'),sharedAddFields=document.createElement('div');
-regularAddPanel.id='addFigurePanelRegular';bricklinkAddPanel.id='addFigurePanelBricklink';sharedAddFields.className='add-figure-shared-fields';
-for(const [panel,tab] of [[regularAddPanel,'addFigureTabRegular'],[bricklinkAddPanel,'addFigureTabBricklink']]){panel.className='add-figure-tab-panel';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',tab)}
-for(const child of [...addFigureForm.children]){if(child.matches('h2,.add-figure-collection,.add-figure-actions,input[type="file"]')||child===bricklinkSection)continue;sharedAddFields.append(child)}
-bricklinkAddPanel.append(bricklinkSection);regularAddPanel.append(sharedAddFields);
-$('#addFigureForm .add-figure-collection').after(addFigureTabs,regularAddPanel,bricklinkAddPanel);
-function activateAddFigureTab(name){const importing=name==='bricklink';regularAddPanel.hidden=importing;bricklinkAddPanel.hidden=!importing;bricklinkSection.hidden=!importing;(importing?bricklinkAddPanel:regularAddPanel).append(sharedAddFields);addFigureTabs.style.setProperty('--settings-tab-index',importing?'1':'0');addFigureTabs.querySelectorAll('[role="tab"]').forEach(button=>{const active=button.dataset.addTab===name;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1})}
-function collapseBricklinkSection(){activateAddFigureTab('regular')}
-addFigureTabs.addEventListener('click',event=>{const tab=event.target.closest('[data-add-tab]');if(tab)activateAddFigureTab(tab.dataset.addTab)});
-addFigureTabs.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=[...addFigureTabs.querySelectorAll('[role="tab"]')],current=tabs.indexOf(document.activeElement),next=event.key==='Home'?0:event.key==='End'?1:1-Math.max(0,current);activateAddFigureTab(tabs[next].dataset.addTab);tabs[next].focus()});
-activateAddFigureTab('regular');
+const toggleBricklinkImport=document.createElement('button');
+toggleBricklinkImport.type='button';toggleBricklinkImport.id='toggleBricklinkImport';
+toggleBricklinkImport.setAttribute('aria-controls',bricklinkSection.id);toggleBricklinkImport.setAttribute('aria-expanded','false');
+toggleBricklinkImport.innerHTML='<span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Import from BrickLink</span>';
+$('#closeAddFigure').before(toggleBricklinkImport);
+function collapseBricklinkSection(){bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')}
+toggleBricklinkImport.onclick=()=>{const expanded=bricklinkSection.hidden;bricklinkSection.hidden=!expanded;toggleBricklinkImport.setAttribute('aria-expanded',String(expanded));if(expanded)$('#newBricklinkCode').focus()};
 addFigureForm.addEventListener('reset',collapseBricklinkSection);
 addFigureDialog.addEventListener('close',collapseBricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
