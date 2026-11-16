@@ -1,3 +1,4 @@
+import { lookup } from './bricklink.js';
 const APP_ID = 'd9dcde89-f32c-46c1-89f8-61d98a8267f1';
 const FIREBASE_PROJECT_ID = 'custom-figures-collector';
 const ALLOWED_ORIGINS = new Set([
@@ -145,6 +146,17 @@ export default {
 
     try {
       const user = await authenticatedUser(request);
+      if (url.pathname === '/bricklink') {
+        if (!env.BRICKLINK_ALLOWED_UID || user.localId !== env.BRICKLINK_ALLOWED_UID) return json(origin, { error: 'BrickLink lookup is not enabled for this account.' }, 403);
+        const { code } = await request.json();
+        if (!/^sw\d+[a-z]?$/i.test(String(code || '').trim())) return json(origin, { error: 'Enter a valid BL code, for example sw0001a.' }, 400);
+        const cacheKey = new Request(`${url.origin}/bricklink-cache/${String(code).trim().toLowerCase()}`);
+        const cached = await caches.default.match(cacheKey);
+        if (cached) return json(origin, await cached.json());
+        const result = await lookup(code, { consumerKey: env.BRICKLINK_CONSUMER_KEY, consumerSecret: env.BRICKLINK_CONSUMER_SECRET, token: env.BRICKLINK_TOKEN, tokenSecret: env.BRICKLINK_TOKEN_SECRET });
+        await caches.default.put(cacheKey, new Response(JSON.stringify(result), { headers: { 'Cache-Control': 'public, max-age=86400' } }));
+        return json(origin, result);
+      }
       const body = await request.json();
       await cancelNotification(body.previousMessageId, env);
 

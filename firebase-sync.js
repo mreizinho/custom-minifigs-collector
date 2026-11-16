@@ -102,6 +102,10 @@ function cachedGoogleAccessToken() {
 }
 
 function announceGoogleAuth(user, accessToken = '', premium = currentUserPremium) {
+  window.collectorGetIdToken = async () => {
+    if (!auth.currentUser) throw new Error('Sign in with Google first.');
+    return auth.currentUser.getIdToken();
+  };
   window.collectorFirebaseAuthenticatedUser = user?.uid || '';
   window.collectorFirebaseUser = user && premium ? user.uid : '';
   window.collectorPremiumUser = Boolean(user && premium);

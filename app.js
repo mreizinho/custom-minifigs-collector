@@ -306,7 +306,7 @@ async function resolveFigureSheetRow(figure){
   figure.sheetRow=matches[0];figure.sheetCollection=collection;
   return matches[0]
 }
-function nextSequentialFigureId(rows,idIndex){const usedIds=new Set(rows.slice(1).map(row=>Number(clean(row[idIndex]).replace(/^#/,''))).filter(id=>Number.isSafeInteger(id)&&id>0));let nextId=1;while(usedIds.has(nextId))nextId++;if(!Number.isSafeInteger(nextId))throw Error('No safe minifig ID is available.');return nextId}
+function nextSequentialFigureId(rows,idIndex,hidden=false){const direction=hidden?-1:1,usedIds=new Set(rows.slice(1).map(row=>Number(clean(row[idIndex]).replace(/^#/,''))).filter(id=>Number.isSafeInteger(id)&&id*direction>0));let nextId=direction;while(usedIds.has(nextId))nextId+=direction;if(!Number.isSafeInteger(nextId))throw Error('No safe minifig ID is available.');return nextId}
 function lastFigureSheetRow(rows,idIndex){let lastRow=1;rows.slice(1).forEach((row,index)=>{if(comparableFigureId(row[idIndex]))lastRow=index+2});return lastRow}
 function loadImageFile(file){return new Promise((resolve,reject)=>{const image=new Image(),url=URL.createObjectURL(file);image.onload=()=>{URL.revokeObjectURL(url);resolve(image)};image.onerror=()=>{URL.revokeObjectURL(url);reject(Error('The selected photo could not be read.'))};image.src=url})}
 async function photoAsPng(file){if(!file?.type.startsWith('image/'))throw Error('Choose a PNG, JPEG, or WebP image.');const image=await loadImageFile(file),canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;if(!canvas.width||!canvas.height)throw Error('The selected photo has no usable image data.');canvas.getContext('2d').drawImage(image,0,0);return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('The selected photo could not be converted to PNG.')),'image/png'))}
@@ -343,8 +343,16 @@ async function appendFigureToActiveSheet(entry){
   const headers=before[0]||[],idIndex=headerIndex(headers,['id','number','setnumber','figureid']);
   if(!headers.length)throw Error(`The ${collection} sheet needs a header row before figures can be added.`);
   if(idIndex<0)throw Error(`The ${collection} sheet is missing an ID column.`);
+  if(entry.bricklink){
+    const extraHeaders=['BrickLink Code','BL Price Basis','BL Price Updated','Photo URL'];
+    const missing=extraHeaders.filter(header=>!headers.some(existing=>normalizedHeader(existing)===normalizedHeader(header)));
+    if(missing.length){const start=headers.length;headers.push(...missing);assertContext();await sheetsRequest(`${base}/values/${encodeURIComponent(`'${escapedCollection}'!${sheetColumn(start)}1:${sheetColumn(headers.length-1)}1`)}?valueInputOption=RAW`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[missing]})});assertContext()}
+    const blIndex=headerIndex(headers,['bricklinkcode']);
+    if(before.slice(1).some(row=>clean(row[blIndex]).toLowerCase()===entry.bricklink.bricklinkCode))throw Error('This BrickLink code already exists in this collection.');
+  }
   const currencyIndex=headerIndex(headers,['currency','currencycode','curr']),lastExistingFigureRow=lastFigureSheetRow(before,idIndex),nextId=nextSequentialFigureId(before,idIndex),fields=[{names:['id','number','setnumber','figureid'],value:nextId,required:true},{names:['name','figurname','title'],value:entry.name,required:true},{names:['character'],value:entry.character},{names:['brand','maker','company','theme'],value:entry.brand,required:true},{names:['value','price','worth','estimatedvalue','estvalue'],value:entry.value&&currencyIndex<0?`${entry.value} ${entry.currency}`:entry.value},{names:['currency','currencycode','curr'],value:entry.currency},{names:['condition','status'],value:entry.condition||'New'},{names:['origin','seller','source'],value:entry.origin}],row=Array(headers.length).fill('');
   for(const field of fields){const index=headerIndex(headers,field.names);if(index<0){if(field.required)throw Error(`The ${collection} sheet is missing a ${field.names[0]} column.`);continue}row[index]=field.value}
+  if(entry.bricklink){const bl=entry.bricklink;for(const [names,value] of [[['bricklinkcode'],bl.bricklinkCode],[['blpricebasis'],bl.priceBasis],[['blpriceupdated'],bl.retrievedAt],[['imageurl','photourl','thumbnail','thumb','picture'],bl.photoUrl]]){const index=headerIndex(headers,names);if(index>=0)row[index]=value}}
   const appendRange=encodeURIComponent(`'${escapedCollection}'!A:${sheetColumn(headers.length-1)}`);
   assertContext();
   appendStarted=true;
@@ -371,18 +379,29 @@ async function updateFigureHiddenInSheet(figure,hidden){
   if(!window.collectorFirebaseUser)throw Error('Sign in with Google before hiding figures in your spreadsheet.');
   await resolveFigureSheetRow(figure);
   await restoreSheetsAccess();
-  const escapedCollection=activeCollection.replace(/'/g,"''"),headerRange=encodeURIComponent(`'${escapedCollection}'!1:1`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${headerRange}?majorDimension=ROWS`),headers=(await response.json()).values?.[0]||[];
+  const collection=activeCollection,spreadsheetId=SHEET_ID,googleUser=window.collectorFirebaseUser,escapedCollection=collection.replace(/'/g,"''"),range=encodeURIComponent(`'${escapedCollection}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?majorDimension=ROWS`),rows=(await response.json()).values||[],headers=rows[0]||[],idIndex=headerIndex(headers,['id','number','setnumber','figureid']);
+  if(activeCollection!==collection||SHEET_ID!==spreadsheetId||window.collectorFirebaseUser!==googleUser)throw Error('The collection or Google account changed. Reload the collection and try again.');
+  if(idIndex<0)throw Error(`The ${collection} sheet is missing an ID column.`);
+  const matches=rows.flatMap((row,index)=>index>0&&comparableFigureId(row[idIndex])===comparableFigureId(figureNumber(figure))?[index+1]:[]);
+  if(matches.length!==1)throw Error('The minifig ID is missing or duplicated. Reload the collection and try again.');
+  figure.sheetRow=matches[0];
+  const nextId=nextSequentialFigureId(rows,idIndex,hidden);
   let hiddenIndex=headerIndex(headers,['hidden','hide']);
   if(hiddenIndex<0){
     hiddenIndex=headers.length;
-    const headerCell=encodeURIComponent(`'${escapedCollection}'!${sheetColumn(hiddenIndex)}1`);
-    await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${headerCell}?valueInputOption=RAW`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({majorDimension:'ROWS',values:[['Hidden']]})});
   }
-  const cell=encodeURIComponent(`'${escapedCollection}'!${sheetColumn(hiddenIndex)}${figure.sheetRow}`);
-  await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${cell}?valueInputOption=RAW`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({majorDimension:'ROWS',values:[[hidden?'TRUE':'']]})});
+  const cell=column=>`'${escapedCollection}'!${sheetColumn(column)}${figure.sheetRow}`,data=[{range:cell(idIndex),values:[[nextId]]},{range:cell(hiddenIndex),values:[[hidden?'TRUE':'']]}];
+  if(hiddenIndex===headers.length)data.push({range:`'${escapedCollection}'!${sheetColumn(hiddenIndex)}1`,values:[['Hidden']]});
+  await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data})});
+  const oldId=figure.id,newId=collection===COLLECTIONS[0]?String(nextId):`${collection}::${nextId}`;
+  for(const set of [selected,wished,removedOwned,removedWished])if(set.delete(oldId))set.add(newId);
+  if(Object.hasOwn(customTagsByFigure,oldId)){customTagsByFigure[newId]=customTagsByFigure[oldId];delete customTagsByFigure[oldId]}
+  figure.id=newId;
+  figure.raw[headers[idIndex]]=String(nextId);
   figure.hidden=hidden;
   const rawHiddenKey=Object.keys(figure.raw).find(key=>['hidden','hide'].includes(normalizedHeader(key)));
   if(rawHiddenKey)figure.raw[rawHiddenKey]=hidden?'TRUE':'';else figure.raw.Hidden=hidden?'TRUE':'';
+  persist();persistCustomTags();
 }
 
 async function toggleFigureHidden(figure,trigger){
@@ -872,7 +891,7 @@ const uploadMobileCameraPhotoWithNewFigureSupport=uploadMobileCameraPhoto;
 uploadMobileCameraPhoto=(photo,figure)=>{if(figure===pendingNewFigurePhotoTarget){setPendingNewFigurePhoto(photo);return Promise.resolve()}return uploadMobileCameraPhotoWithNewFigureSupport(photo,figure)};
 const openAddFigureWithPhotoReset=openAddFigure;openAddFigure=()=>{clearPendingNewFigurePhoto();$('#submitAddFigure').disabled=false;newFigurePhotoButton.disabled=false;openAddFigureWithPhotoReset()};addFigureButton.onclick=openAddFigure;
 const closeAddFigureWithPhotoReset=closeAddFigure;closeAddFigure=()=>{clearPendingNewFigurePhoto();closeAddFigureWithPhotoReset()};$('#closeAddFigure').onclick=closeAddFigure;$('#cancelAddFigure').onclick=closeAddFigure;
-addFigureForm.addEventListener('submit',async event=>{event.preventDefault();event.stopImmediatePropagation();if(addFigureAlreadySaved)return;const submit=$('#submitAddFigure'),entry={name:clean($('#newFigureName').value),character:clean($('#newFigureCharacter').value),brand:clean(newFigureBrand.value),condition:clean(conditionInput.value)||'New',value:$('#newFigureValue').value,currency:$('#newFigureCurrency').value,origin:clean($('#newFigureOrigin').value)},photo=pendingNewFigurePhoto;if(!entry.name)return;submit.disabled=true;newFigurePhotoButton.disabled=true;addFigureStatus.textContent=`Adding to ${activeCollection}…`;let added=null;try{added=await appendFigureToActiveSheet(entry);addFigureAlreadySaved=true;if(photo){addFigureStatus.textContent=`Uploading photo for ${entry.name}…`;const figure={id:added.id,sheetRow:added.sheetRow,sheetCollection:added.sheetCollection,name:entry.name,image:'',altImage:'',raw:{'#':added.id}},uploaded=await uploadFigurePhoto(photo,figure);try{await saveFigurePhoto(figure,uploaded.url)}catch(error){if(!uploaded.replaced)await deleteDriveFile(uploaded.fileId);throw error}}addFigureStatus.textContent=photo?'Minifig and photo added. Refreshing the collection…':'Minifig added. Refreshing the collection…';figures=[];$('#catalogue').replaceChildren();load();clearPendingNewFigurePhoto();setTimeout(()=>addFigureDialog.close(),500)}catch(error){if(added){addFigureStatus.textContent=`Minifig #${added.id} was added, but its photo was not saved: ${error.message} Close this window and add the photo from the minifig. Do not add it again.`;figures=[];$('#catalogue').replaceChildren();load();clearPendingNewFigurePhoto()}else{if(error.mayHaveAdded)addFigureAlreadySaved=true;addFigureStatus.textContent=error.message}}finally{submit.disabled=false;newFigurePhotoButton.disabled=addFigureAlreadySaved}},{capture:true});
+addFigureForm.addEventListener('submit',async event=>{event.preventDefault();event.stopImmediatePropagation();if(addFigureAlreadySaved)return;if(bricklinkLookupBusy||($('#newBricklinkCode').value.trim()&&pendingBricklinkFigure?.bricklinkCode!==$('#newBricklinkCode').value.trim().toLowerCase())){addFigureStatus.textContent='Fetch the entered BrickLink code before saving, or clear it to add manually.';return}const submit=$('#submitAddFigure'),entry={name:clean($('#newFigureName').value),character:clean($('#newFigureCharacter').value),brand:clean(newFigureBrand.value),condition:clean(conditionInput.value)||'New',value:$('#newFigureValue').value,currency:$('#newFigureCurrency').value,origin:clean($('#newFigureOrigin').value),bricklink:pendingBricklinkFigure},photo=pendingNewFigurePhoto;if(!entry.name)return;submit.disabled=true;newFigurePhotoButton.disabled=true;addFigureStatus.textContent=`Adding to ${activeCollection}…`;let added=null;try{added=await appendFigureToActiveSheet(entry);addFigureAlreadySaved=true;if(photo){addFigureStatus.textContent=`Uploading photo for ${entry.name}…`;const figure={id:added.id,sheetRow:added.sheetRow,sheetCollection:added.sheetCollection,name:entry.name,image:'',altImage:'',raw:{'#':added.id}},uploaded=await uploadFigurePhoto(photo,figure);try{await saveFigurePhoto(figure,uploaded.url)}catch(error){if(!uploaded.replaced)await deleteDriveFile(uploaded.fileId);throw error}}addFigureStatus.textContent=photo?'Minifig and photo added. Refreshing the collection…':'Minifig added. Refreshing the collection…';figures=[];$('#catalogue').replaceChildren();load();clearPendingNewFigurePhoto();setTimeout(()=>addFigureDialog.close(),500)}catch(error){if(added){addFigureStatus.textContent=`Minifig #${added.id} was added, but its photo was not saved: ${error.message} Close this window and add the photo from the minifig. Do not add it again.`;figures=[];$('#catalogue').replaceChildren();load();clearPendingNewFigurePhoto()}else{if(error.mayHaveAdded)addFigureAlreadySaved=true;addFigureStatus.textContent=error.message}}finally{submit.disabled=false;newFigurePhotoButton.disabled=addFigureAlreadySaved}},{capture:true});
 
 // Hand a public Drive photo URL to the user's ChatGPT Project without API usage.
 const PHOTO_CLEANING_PROJECT_URL='https://chatgpt.com/g/g-p-6a46b3d92aac8191b713d358ec0a1790-toy-photos/project';
@@ -1017,3 +1036,33 @@ document.querySelector('.preordered-stat-note')?.addEventListener('click',event=
   render()
 },true);
 document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren('Minifigs pre-ordered (all collections)');
+
+// BrickLink import: credentials stay on the authenticated backend.
+let pendingBricklinkFigure=null,bricklinkLookupBusy=false,bricklinkRequest=0;
+const bricklinkSection=document.createElement('section');
+bricklinkSection.className='bricklink-import';
+bricklinkSection.innerHTML='<label for="newBricklinkCode">BrickLink code (optional)</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="sw0001a"><button type="button" id="fetchBricklinkFigure">Fetch from BrickLink</button></div><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden>';
+$('#addFigureForm .add-figure-collection').after(bricklinkSection);
+function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
+addFigureForm.addEventListener('reset',clearBricklinkImport);
+addFigureDialog.addEventListener('close',clearBricklinkImport);
+$('#newBricklinkCode').addEventListener('input',()=>{clearBricklinkImport()});
+$('#fetchBricklinkFigure').onclick=async()=>{
+  const code=$('#newBricklinkCode').value.trim().toLowerCase(),status=$('#bricklinkLookupStatus');
+  if(!/^sw\d+[a-z]?$/.test(code)){status.textContent='Enter a Star Wars BL code, for example sw0001a.';return}
+  const request=++bricklinkRequest,collection=activeCollection,sheet=SHEET_ID;
+  pendingBricklinkFigure=null;bricklinkLookupBusy=true;$('#fetchBricklinkFigure').disabled=true;status.textContent='Looking up minifigure…';
+  try{
+    if(!window.collectorGetIdToken)throw Error('Sign in with Google first.');
+    const token=await window.collectorGetIdToken(),response=await fetch('https://cmcollector-reminders.mreizinho.workers.dev/bricklink',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({code})}),data=await response.json();
+    if(!response.ok)throw Error(data.error||'BrickLink lookup failed.');
+    if(request!==bricklinkRequest||!addFigureDialog.open||collection!==activeCollection||sheet!==SHEET_ID)return;
+    pendingBricklinkFigure=data;
+    $('#newFigureName').value=data.name;$('#newFigureCharacter').value=data.name.split(' - ')[0];newFigureBrand.value='LEGO';
+    $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
+    conditionInput.value='New';
+    const preview=$('#bricklinkPreview');preview.hidden=!data.photoUrl;if(data.photoUrl)preview.src=data.photoUrl;
+    status.textContent=data.averageNewPrice==null?'Details loaded. No new-condition sales in the last six months; enter a value if needed.':'Details loaded. Price: average new-condition sales over the last six months, in EUR. Review before adding.';
+  }catch(error){if(request===bricklinkRequest)status.textContent=error.message}
+  finally{if(request===bricklinkRequest){bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false}}
+};

@@ -10,10 +10,11 @@ const code = [
   extract('async function appendFigureToActiveSheet(', "addFigureForm.addEventListener('submit'"),
 ].join('\n');
 
-function fixture({ updatedRow = 5, duplicate = false, changeCollection = false, expectedCondition = 'New' } = {}) {
+function fixture({ updatedRow = 5, duplicate = false, changeCollection = false, expectedCondition = 'New', bricklink = false, duplicateBricklink = false } = {}) {
   const headers = ['#', 'Name', 'Brand', 'Value', 'Currency', 'Condition'];
   const before = [headers, ['1', 'Old figure', 'LEGO'], ['2', 'Another figure', 'LEGO'], ['4', 'Phoenix Flyer', 'LEGO']];
   const after = [headers, ...before.slice(1), ['3', 'Wolven Wingman', 'LEGO']];
+  if (duplicateBricklink) { headers.push('BrickLink Code'); before[1][6]='sw0001a'; }
   if (duplicate) after.push(['3', 'Duplicate', 'LEGO']);
   let reads = 0;
   const calls = [];
@@ -22,10 +23,12 @@ function fixture({ updatedRow = 5, duplicate = false, changeCollection = false, 
     clean: value => String(value ?? '').trim(), encodeURIComponent, console,
     sheetsRequest: async (url, options = {}) => {
       calls.push({ url, options });
+      if (options.method === 'PUT') return { json: async () => ({}) };
       if (url.includes('/values/') && options.method === 'POST') {
         assert.match(url, /insertDataOption=INSERT_ROWS/);
         assert.equal(JSON.parse(options.body).values[0][0], 3);
         assert.equal(JSON.parse(options.body).values[0][5], expectedCondition);
+        if(bricklink){const row=JSON.parse(options.body).values[0];assert.equal(row[headers.indexOf('BrickLink Code')],'sw0001a');assert.equal(row[headers.indexOf('Photo URL')],'https://img.bricklink.com/ML/sw0001a.jpg');assert.equal(row[headers.indexOf('BL Price Updated')],'2026-11-16');}
         if (changeCollection) context.activeCollection = 'Other';
         return { json: async () => ({ updates: { updatedRange: `'Star Wars'!A${updatedRow}:E${updatedRow}`, updatedRows: 1 } }) };
       }
@@ -66,4 +69,16 @@ test('rejects duplicate IDs after the write', async () => {
 test('stops if the selected collection changes while the request is in flight', async () => {
   const { context } = fixture({ changeCollection: true });
   await assert.rejects(context.appendFigureToActiveSheet(entry), /collection or Google account changed/);
+});
+
+const bl={bricklinkCode:'sw0001a',photoUrl:'https://img.bricklink.com/ML/sw0001a.jpg',priceBasis:'Last 6 months sales, new, average',retrievedAt:'2026-11-16'};
+test('adds missing BrickLink metadata headers and saves the code, photo, and price date',async()=>{
+  const {context,calls}=fixture({bricklink:true});
+  await context.appendFigureToActiveSheet({...entry,bricklink:bl});
+  assert.equal(calls.filter(call=>call.options.method==='PUT').length,1);
+});
+test('rejects an existing BrickLink code before appending a duplicate figure',async()=>{
+  const {context,calls}=fixture({duplicateBricklink:true});
+  await assert.rejects(context.appendFigureToActiveSheet({...entry,bricklink:bl}),/already exists/);
+  assert.equal(calls.filter(call=>call.options.method==='POST').length,0);
 });
