@@ -1049,8 +1049,29 @@ toggleBricklinkImport.type='button';toggleBricklinkImport.id='toggleBricklinkImp
 toggleBricklinkImport.setAttribute('aria-controls',bricklinkSection.id);toggleBricklinkImport.setAttribute('aria-expanded','false');
 toggleBricklinkImport.innerHTML='<span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Import from BrickLink</span>';
 $('#closeAddFigure').before(toggleBricklinkImport);
-function collapseBricklinkSection(){bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')}
-toggleBricklinkImport.onclick=()=>{const expanded=bricklinkSection.hidden;bricklinkSection.hidden=!expanded;toggleBricklinkImport.setAttribute('aria-expanded',String(expanded));if(expanded)$('#newBricklinkCode').focus()};
+const bricklinkOverlay=document.createElement('dialog');bricklinkOverlay.id='bricklinkImportDialog';bricklinkOverlay.className='add-figure-dialog bricklink-overlay';bricklinkOverlay.setAttribute('aria-labelledby','bricklinkOverlayTitle');
+bricklinkOverlay.innerHTML='<button type="button" class="close" id="closeBricklinkOverlay" aria-label="Close BrickLink import"><span class="material-symbols-rounded">close</span></button><form id="bricklinkOverlayForm"><h2 id="bricklinkOverlayTitle">Import from BrickLink</h2><div id="bricklinkOverlayLookup"></div><label>Name<input id="bricklinkImportName" required autocomplete="off"></label><label>Est. value (€)<input id="bricklinkImportValue" type="number" min="0" step="0.01" inputmode="decimal"></label><p id="bricklinkImportSaveStatus" class="settings-status" role="status" aria-live="polite"></p><div class="add-figure-actions"><button type="button" id="cancelBricklinkOverlay">Cancel</button><button type="submit" id="saveBricklinkImport"><span class="material-symbols-rounded">add</span>Add minifig</button></div></form>';
+document.body.append(bricklinkOverlay);$('#bricklinkOverlayLookup').append(bricklinkSection);
+toggleBricklinkImport.setAttribute('aria-controls',bricklinkOverlay.id);toggleBricklinkImport.setAttribute('aria-haspopup','dialog');
+let bricklinkSaving=false;
+function collapseBricklinkSection(){if(bricklinkOverlay.open)bricklinkOverlay.close();bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')}
+toggleBricklinkImport.onclick=()=>{bricklinkSection.hidden=false;$('#bricklinkOverlayForm').reset();$('#newBricklinkCode').value='';clearBricklinkImport();$('#bricklinkImportSaveStatus').textContent='';toggleBricklinkImport.setAttribute('aria-expanded','true');bricklinkOverlay.showModal();$('#newBricklinkCode').focus()};
+function closeBricklinkOverlay(){if(!bricklinkSaving)bricklinkOverlay.close()}
+$('#closeBricklinkOverlay').onclick=closeBricklinkOverlay;$('#cancelBricklinkOverlay').onclick=closeBricklinkOverlay;
+bricklinkOverlay.addEventListener('cancel',event=>{if(bricklinkSaving)event.preventDefault()});
+bricklinkOverlay.addEventListener('click',event=>{if(event.target===bricklinkOverlay)closeBricklinkOverlay()});
+bricklinkOverlay.addEventListener('close',()=>{clearBricklinkImport();$('#newBricklinkCode').value='';bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')});
+$('#bricklinkOverlayForm').addEventListener('submit',async event=>{
+  event.preventDefault();if(bricklinkSaving)return;
+  const status=$('#bricklinkImportSaveStatus'),bl=pendingBricklinkFigure,code=$('#newBricklinkCode').value.trim().toLowerCase();
+  if(bricklinkLookupBusy||!bl||bl.bricklinkCode!==code){status.textContent='Get the BrickLink reference before adding.';return}
+  const entry={name:clean($('#bricklinkImportName').value),character:code,brand:'LEGO',condition:'New',value:$('#bricklinkImportValue').value,currency:bl.currency||'EUR',origin:'',bricklink:bl};
+  if(!entry.name)return;
+  bricklinkSaving=true;$('#saveBricklinkImport').disabled=true;$('#fetchBricklinkFigure').disabled=true;$('#newBricklinkCode').disabled=true;status.textContent=`Adding to ${activeCollection}…`;
+  try{await appendFigureToActiveSheet(entry);figures=[];$('#catalogue').replaceChildren();load();bricklinkOverlay.close();addFigureDialog.close()}
+  catch(error){status.textContent=error.message;if(error.mayHaveAdded){$('#saveBricklinkImport').disabled=true;status.textContent+=' Check the spreadsheet before trying again.'}}
+  finally{bricklinkSaving=false;$('#newBricklinkCode').disabled=false;$('#fetchBricklinkFigure').disabled=false;if(!status.textContent.includes('Check the spreadsheet'))$('#saveBricklinkImport').disabled=false}
+});
 addFigureForm.addEventListener('reset',collapseBricklinkSection);
 addFigureDialog.addEventListener('close',collapseBricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
@@ -1068,13 +1089,13 @@ $('#fetchBricklinkFigure').onclick=async()=>{
     if(!window.collectorGetIdToken)throw Error('Sign in with Google first.');
     const token=await window.collectorGetIdToken(),response=await fetch('https://cmcollector-reminders.mreizinho.workers.dev/bricklink',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({code})}),data=await response.json();
     if(!response.ok)throw Error(data.error||'BrickLink lookup failed.');
-    if(request!==bricklinkRequest||!addFigureDialog.open||collection!==activeCollection||sheet!==SHEET_ID)return;
+    if(request!==bricklinkRequest||!bricklinkOverlay.open||collection!==activeCollection||sheet!==SHEET_ID)return;
     pendingBricklinkFigure=data;
     const nameDecoder=document.createElement('textarea');nameDecoder.innerHTML=data.name;
     const character=nameDecoder.value.split(' - ')[0].trim();
-    $('#newFigureName').value=character;newFigureBrand.value='LEGO';
-    $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
-    conditionInput.value='New';
+    $('#bricklinkImportName').value=character;
+    $('#bricklinkImportValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);
+    $('#saveBricklinkImport').disabled=false;
     const preview=$('#bricklinkPreview');preview.hidden=!data.photoUrl;if(data.photoUrl)preview.src=data.photoUrl;
     status.classList.add('bricklink-imported');status.textContent='Imported';
   }catch(error){if(request===bricklinkRequest)status.textContent=error.message}
