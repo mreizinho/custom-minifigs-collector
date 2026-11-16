@@ -1047,6 +1047,7 @@ function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;b
 addFigureForm.addEventListener('reset',clearBricklinkImport);
 addFigureDialog.addEventListener('close',clearBricklinkImport);
 $('#newBricklinkCode').addEventListener('input',()=>{clearBricklinkImport()});
+$('#newBricklinkCode').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.isComposing)return;event.preventDefault();event.stopPropagation();if(!bricklinkLookupBusy)$('#fetchBricklinkFigure').click()});
 $('#fetchBricklinkFigure').onclick=async()=>{
   const code=$('#newBricklinkCode').value.trim().toLowerCase(),status=$('#bricklinkLookupStatus');
   if(!/^sw\d+[a-z]?$/.test(code)){status.textContent='Enter a Star Wars BL code, for example sw0001a.';return}
