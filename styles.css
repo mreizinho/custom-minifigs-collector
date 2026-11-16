@@ -115,3 +115,4 @@
 .bricklink-import-photo{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
 #addFigureForm .bricklink-import-photo #bricklinkPreview{position:static;transform:none;width:auto;height:100%;max-width:100%;max-height:360px;object-fit:contain;background:transparent}
 @media(max-width:600px){#bricklinkImportPill{top:24px;right:70px}.add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 120px}#bricklinkImportPill #newBricklinkCode{width:115px}}
+@media(max-width:600px){#addFigureDialog>#closeAddFigure{top:12px;right:12px;height:38px}#addFigureDialog>#bricklinkImportPill{top:12px;right:60px}#bricklinkImportPill #toggleBricklinkImport,#bricklinkImportPill .bricklink-pill-entry{height:38px;box-sizing:border-box}}
