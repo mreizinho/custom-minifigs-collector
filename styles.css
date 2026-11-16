@@ -61,8 +61,10 @@
 .bricklink-import::after{content:'';position:absolute;left:0;right:0;bottom:-6px;border-bottom:1px solid var(--line,#8885)}
 .bricklink-import[hidden]{display:none}
 #toggleBricklinkImport{position:absolute;top:12px;right:60px;z-index:3;display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:19px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
-#toggleBricklinkImport .material-symbols-rounded{font-size:20px}
-#toggleBricklinkImport:hover,#toggleBricklinkImport:focus-visible,#toggleBricklinkImport[aria-expanded="true"]{background:color-mix(in srgb,var(--ink) 8%,var(--paper))}
+#toggleBricklinkImport{background:#fff;transition:background-color .15s ease,color .15s ease,border-color .15s ease}
+.dark #toggleBricklinkImport{background:var(--bg)}
+#toggleBricklinkImport .material-symbols-rounded{font-size:20px;transform:scaleX(1.1)}
+#toggleBricklinkImport:hover,#toggleBricklinkImport:focus-visible,.dark #toggleBricklinkImport:hover,.dark #toggleBricklinkImport:focus-visible{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 @media(max-width:600px){#toggleBricklinkImport{top:24px;right:70px}}
 .bricklink-entry{position:relative;min-width:0;align-self:start}
 #addFigureForm .bricklink-entry label{display:block;margin-bottom:6px}
