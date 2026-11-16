@@ -114,6 +114,7 @@
 #addFigureForm>#bricklinkLookupStatus:empty{display:none}
 #catalogue .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){position:absolute;inset:5%;display:block;width:90%;height:90%;max-width:90%;max-height:90%;object-fit:contain;object-position:center;transform:none}
 #catalogue .card:hover .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){transform:none}
+#catalogue .image-wrap:has(img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image)),#catalogue .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){background-color:#fff}
 #collectionMenu [data-collection]::before{display:none}
 .collection-edit-slot{grid-column:1;grid-row:1;display:grid;place-items:center;width:22px;min-height:28px}
 .collection-edit-slot>span{grid-area:1/1;font-size:18px;line-height:1}
