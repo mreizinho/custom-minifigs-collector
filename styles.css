@@ -100,13 +100,18 @@
 #bricklinkImportPill{position:absolute;top:12px;right:60px;z-index:3}
 #bricklinkImportPill #toggleBricklinkImport{position:static}
 #bricklinkImportPill [hidden]{display:none!important}
-.bricklink-pill-entry{display:flex;align-items:center;gap:6px;padding:3px 5px 3px 12px;border:1px solid var(--line);border-radius:22px;background:var(--paper)}
+.bricklink-pill-entry{display:flex;align-items:stretch;gap:0;padding:0 0 0 12px;border:1px solid var(--line);border-radius:22px;background:#fff;overflow:hidden}
+.dark .bricklink-pill-entry{background:var(--bg)}
 #bricklinkImportPill #newBricklinkCode{width:130px;min-width:0;height:30px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:0;outline-offset:0}
-#bricklinkImportPill #fetchBricklinkFigure{position:static;min-height:30px;padding:0 10px;border-radius:16px;font-size:13px}
+#bricklinkImportPill #fetchBricklinkFigure{position:static;min-height:36px;width:38px;padding:0;border:0;border-left:1px solid var(--line);border-radius:0;background:#fff;color:var(--ink);transition:background-color .15s ease,color .15s ease}
+.dark #bricklinkImportPill #fetchBricklinkFigure{background:var(--bg)}
+#bricklinkImportPill #fetchBricklinkFigure .material-symbols-rounded{font-size:21px;transform:none}
+#bricklinkImportPill #fetchBricklinkFigure:not(:disabled):hover,#bricklinkImportPill #fetchBricklinkFigure:focus-visible{background:var(--ink);color:var(--paper)}
+#bricklinkImportPill #newBricklinkCode{align-self:center}
 #bricklinkImportPill #bricklinkLookupStatus{position:absolute;top:100%;right:0;left:auto;max-width:240px;width:max-content;margin:5px 0 0;padding:3px 6px;border-radius:4px;background:var(--paper);font-size:12px;color:var(--muted)}
 #bricklinkImportPill #bricklinkLookupStatus:empty{display:none}
-.add-figure-field-area.is-bricklink{grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden}
-.add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 140px;grid-row:4}
-.bricklink-import-photo{grid-row:3;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
-#addFigureForm .bricklink-import-photo #bricklinkPreview{position:static;transform:none;width:auto;height:100%;max-width:100%;max-height:230px;object-fit:contain;background:transparent}
+.add-figure-field-area.is-bricklink{grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 140px;grid-row:3}
+.bricklink-import-photo{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
+#addFigureForm .bricklink-import-photo #bricklinkPreview{position:static;transform:none;width:auto;height:100%;max-width:100%;max-height:360px;object-fit:contain;background:transparent}
 @media(max-width:600px){#bricklinkImportPill{top:24px;right:70px}.add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 120px}#bricklinkImportPill #newBricklinkCode{width:115px}}

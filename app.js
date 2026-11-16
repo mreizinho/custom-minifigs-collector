@@ -1054,10 +1054,10 @@ const addFigureFieldArea=document.createElement('div');addFigureFieldArea.classN
 const manualFieldNodes=[...addFigureForm.children].filter(node=>!node.matches('h2,.add-figure-collection,.add-figure-actions,input[type="file"]')&&node!==bricklinkSection&&node!==addFigureStatus);
 bricklinkSection.before(addFigureFieldArea);addFigureFieldArea.append(bricklinkSection,...manualFieldNodes);
 const valueRow=$('#newFigureValue').closest('.add-figure-value'),currencyField=$('#newFigureCurrency').closest('label');
-const importHiddenFields=[brandConditionRow,$('#newFigureOrigin').closest('label'),currencyField];
+const importHiddenFields=[$('#newFigureCharacter').closest('label'),brandConditionRow,$('#newFigureOrigin').closest('label'),currencyField];
 const importPill=document.createElement('div');importPill.id='bricklinkImportPill';toggleBricklinkImport.before(importPill);importPill.append(toggleBricklinkImport);
 const pillEntry=document.createElement('div');pillEntry.className='bricklink-pill-entry';pillEntry.hidden=true;importPill.append(pillEntry);
-pillEntry.append($('#newBricklinkCode'),$('#fetchBricklinkFigure'));$('#fetchBricklinkFigure').textContent='OK';$('#fetchBricklinkFigure').title='Get BrickLink minifigure';
+pillEntry.append($('#newBricklinkCode'),$('#fetchBricklinkFigure'));$('#fetchBricklinkFigure').innerHTML='<span class="material-symbols-rounded" aria-hidden="true">check</span>';$('#fetchBricklinkFigure').title='Get BrickLink minifigure';$('#fetchBricklinkFigure').setAttribute('aria-label','Get BrickLink minifigure');
 importPill.append($('#bricklinkLookupStatus'));
 const importPhoto=document.createElement('div');importPhoto.className='bricklink-import-photo';importPhoto.hidden=true;importPhoto.append($('#bricklinkPreview'));valueRow.before(importPhoto);bricklinkSection.remove();
 let bricklinkMode=false,manualAddSnapshot=null;
