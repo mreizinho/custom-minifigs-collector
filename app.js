@@ -1041,7 +1041,7 @@ document.querySelector('[data-secret-search="preorder"] span')?.replaceChildren(
 let pendingBricklinkFigure=null,bricklinkLookupBusy=false,bricklinkRequest=0;
 const bricklinkSection=document.createElement('section');
 bricklinkSection.className='bricklink-import';
-bricklinkSection.innerHTML='<label for="newBricklinkCode">BrickLink code (optional)</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="sw0001a"><button type="button" id="fetchBricklinkFigure">Fetch from BrickLink</button></div><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden>';
+bricklinkSection.innerHTML='<div class="bricklink-entry"><label for="newBricklinkCode">Import from Bricklink</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="Ex. sw0218"><button type="button" id="fetchBricklinkFigure" aria-label="Import from Bricklink" title="Import from Bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span></button></div></div><div class="bricklink-result"><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p></div>';
 $('#addFigureForm .add-figure-collection').after(bricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
 addFigureForm.addEventListener('reset',clearBricklinkImport);
@@ -1060,11 +1060,11 @@ $('#fetchBricklinkFigure').onclick=async()=>{
     pendingBricklinkFigure=data;
     const nameDecoder=document.createElement('textarea');nameDecoder.innerHTML=data.name;
     const character=nameDecoder.value.split(' - ')[0].trim();
-    $('#newFigureName').value=character;$('#newFigureCharacter').value=character;newFigureBrand.value='LEGO';
+    $('#newFigureName').value=character;newFigureBrand.value='LEGO';
     $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
     conditionInput.value='New';
     const preview=$('#bricklinkPreview');preview.hidden=!data.photoUrl;if(data.photoUrl)preview.src=data.photoUrl;
-    status.textContent=data.averageNewPrice==null?'Details loaded. No new-condition sales in the last six months; enter a value if needed.':'Details loaded. Price: average new-condition sales over the last six months, in EUR. Review before adding.';
+    status.textContent=data.averageNewPrice==null?'Imported. No new-condition sales in the last six months.':'Imported. Average new price · last 6 months · EUR.';
   }catch(error){if(request===bricklinkRequest)status.textContent=error.message}
   finally{if(request===bricklinkRequest){bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false}}
 };

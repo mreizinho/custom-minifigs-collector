@@ -57,11 +57,19 @@
 @media(max-width:600px){.collection-preorder-jump{display:none}}
 .search>.material-symbols-rounded:first-child{position:relative;z-index:8}
 /* BrickLink catalogue import in the Add New form. */
-.bricklink-import{border-bottom:1px solid var(--border,#8885);padding-bottom:14px;margin-bottom:14px}
-.bricklink-code-row{display:flex;gap:8px;align-items:center}
-.bricklink-code-row input{min-width:0;flex:1}
-.bricklink-code-row button{flex-shrink:0}
-.bricklink-import p{font-size:.85rem;line-height:1.4}
-#bricklinkPreview{width:110px;height:130px;object-fit:contain;background:white;border-radius:8px}
+.bricklink-import{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:18px;align-items:center;border-bottom:1px solid var(--line,#8885);padding-bottom:18px;margin-bottom:14px}
+.bricklink-entry{min-width:0;align-self:start}
+#addFigureForm .bricklink-entry label{display:block;margin-bottom:6px}
+.bricklink-code-row{position:relative;display:flex;align-items:center}
+#addFigureForm .bricklink-code-row input{width:100%;min-width:0;padding-right:48px}
+#newBricklinkCode::placeholder{color:var(--muted,#888);opacity:.6}
+#fetchBricklinkFigure{position:absolute;right:1px;top:1px;bottom:1px;width:44px;display:grid;place-items:center;padding:0;border:0;background:transparent;color:var(--ink);cursor:pointer}
+#fetchBricklinkFigure .material-symbols-rounded{font-size:25px;line-height:1}
+#fetchBricklinkFigure:disabled{opacity:.45;cursor:wait}
+#fetchBricklinkFigure:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.bricklink-result{display:flex;gap:12px;align-items:center;min-width:0}
+#addFigureForm .bricklink-result p{margin:0;font-size:.8rem;line-height:1.4;overflow-wrap:anywhere}
+#bricklinkPreview{flex:0 0 54px;width:54px;height:72px;object-fit:contain;background:white;border-radius:8px}
 #bricklinkPreview[hidden]{display:none}
-@media(max-width:400px){.bricklink-code-row{flex-wrap:wrap}.bricklink-code-row button{width:100%}}
+@media(max-width:600px){.bricklink-import{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}.bricklink-result{gap:8px}#bricklinkPreview{flex-basis:40px;width:40px;height:58px}#addFigureForm .bricklink-result p{font-size:.72rem}}
+@media(max-width:360px){.bricklink-result{flex-wrap:wrap}}
