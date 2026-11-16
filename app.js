@@ -1053,21 +1053,29 @@ $('#closeAddFigure').before(toggleBricklinkImport);
 const addFigureFieldArea=document.createElement('div');addFigureFieldArea.className='add-figure-field-area';
 const manualFieldNodes=[...addFigureForm.children].filter(node=>!node.matches('h2,.add-figure-collection,.add-figure-actions,input[type="file"]')&&node!==bricklinkSection&&node!==addFigureStatus);
 bricklinkSection.before(addFigureFieldArea);addFigureFieldArea.append(bricklinkSection,...manualFieldNodes);
-const importHiddenFields=[$('#newFigureCharacter').closest('label'),brandConditionRow,$('#newFigureOrigin').closest('label'),$('#newFigureCurrency').closest('label')];
+const valueRow=$('#newFigureValue').closest('.add-figure-value'),currencyField=$('#newFigureCurrency').closest('label');
+const importHiddenFields=[brandConditionRow,$('#newFigureOrigin').closest('label'),currencyField];
+const importPill=document.createElement('div');importPill.id='bricklinkImportPill';toggleBricklinkImport.before(importPill);importPill.append(toggleBricklinkImport);
+const pillEntry=document.createElement('div');pillEntry.className='bricklink-pill-entry';pillEntry.hidden=true;importPill.append(pillEntry);
+pillEntry.append($('#newBricklinkCode'),$('#fetchBricklinkFigure'));$('#fetchBricklinkFigure').textContent='OK';$('#fetchBricklinkFigure').title='Get BrickLink minifigure';
+importPill.append($('#bricklinkLookupStatus'));
+const importPhoto=document.createElement('div');importPhoto.className='bricklink-import-photo';importPhoto.hidden=true;importPhoto.append($('#bricklinkPreview'));valueRow.before(importPhoto);bricklinkSection.remove();
 let bricklinkMode=false,manualAddSnapshot=null;
 const manualAddInputs=[$('#newFigureName'),$('#newFigureCharacter'),newFigureBrand,conditionInput,$('#newFigureValue'),$('#newFigureCurrency'),$('#newFigureOrigin')];
+function closeBricklinkPill(){pillEntry.hidden=true;toggleBricklinkImport.hidden=false;importPill.classList.remove('is-editing');toggleBricklinkImport.setAttribute('aria-expanded','false')}
 function collapseBricklinkSection(){
-  bricklinkMode=false;bricklinkSection.hidden=true;addFigureFieldArea.classList.remove('is-bricklink');importHiddenFields.forEach(field=>field.hidden=false);
+  bricklinkMode=false;addFigureFieldArea.classList.remove('is-bricklink');importHiddenFields.forEach(field=>field.hidden=false);brandConditionRow.append(conditionField);importPhoto.hidden=true;
   if(manualAddSnapshot){manualAddInputs.forEach((input,index)=>input.value=manualAddSnapshot[index]);manualAddSnapshot=null;syncCurrencyControl()}
-  addFigureFieldArea.style.height='';toggleBricklinkImport.setAttribute('aria-expanded','false');clearBricklinkImport();$('#newBricklinkCode').value='';
+  addFigureFieldArea.style.height='';closeBricklinkPill();clearBricklinkImport();$('#newBricklinkCode').value='';
+}
+function applyBricklinkFieldLayout(){
+  if(!addFigureFieldArea.classList.contains('is-bricklink'))addFigureFieldArea.style.height=Math.ceil(addFigureFieldArea.getBoundingClientRect().height)+'px';
+  importHiddenFields.forEach(field=>field.hidden=true);valueRow.append(conditionField);importPhoto.hidden=false;addFigureFieldArea.classList.add('is-bricklink');closeBricklinkPill();
 }
 toggleBricklinkImport.onclick=()=>{
   if($('#submitAddFigure').disabled)return;
-  if(bricklinkMode){collapseBricklinkSection();return}
-  manualAddSnapshot=manualAddInputs.map(input=>input.value);
-  addFigureFieldArea.style.height=Math.ceil(addFigureFieldArea.getBoundingClientRect().height)+'px';
-  bricklinkMode=true;bricklinkSection.hidden=false;addFigureFieldArea.classList.add('is-bricklink');importHiddenFields.forEach(field=>field.hidden=true);
-  closeBrandSuggestions();closeConditionSuggestions();toggleBricklinkImport.setAttribute('aria-expanded','true');$('#newBricklinkCode').focus();
+  if(!manualAddSnapshot)manualAddSnapshot=manualAddInputs.map(input=>input.value);
+  bricklinkMode=true;toggleBricklinkImport.hidden=true;pillEntry.hidden=false;importPill.classList.add('is-editing');toggleBricklinkImport.setAttribute('aria-expanded','true');$('#newBricklinkCode').focus();
 };
 addFigureForm.addEventListener('reset',collapseBricklinkSection);
 addFigureDialog.addEventListener('close',collapseBricklinkSection);
@@ -1093,7 +1101,7 @@ $('#fetchBricklinkFigure').onclick=async()=>{
     $('#newFigureName').value=character;$('#newFigureCharacter').value=data.bricklinkCode;newFigureBrand.value='LEGO';conditionInput.value='New';$('#newFigureOrigin').value='';
     $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
     const preview=$('#bricklinkPreview');preview.hidden=!data.photoUrl;if(data.photoUrl)preview.src=data.photoUrl;
-    status.classList.add('bricklink-imported');status.textContent='Imported';
+    status.classList.add('bricklink-imported');status.textContent='';applyBricklinkFieldLayout();
   }catch(error){if(request===bricklinkRequest)status.textContent=error.message}
   finally{if(request===bricklinkRequest){bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false}}
 };
