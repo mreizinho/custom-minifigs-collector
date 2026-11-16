@@ -1043,6 +1043,16 @@ const bricklinkSection=document.createElement('section');
 bricklinkSection.className='bricklink-import';
 bricklinkSection.innerHTML='<div class="bricklink-entry"><label for="newBricklinkCode">Import from Bricklink</label><div class="bricklink-code-row"><input id="newBricklinkCode" autocomplete="off" spellcheck="false" placeholder="Ex. sw0971"><button type="button" id="fetchBricklinkFigure" aria-label="Import from Bricklink" title="Import from Bricklink"><span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Get</span></button></div><p id="bricklinkLookupStatus" role="status" aria-live="polite"></p></div><div class="bricklink-result"><img id="bricklinkPreview" alt="BrickLink catalogue photo" hidden></div>';
 $('#addFigureForm .add-figure-collection').after(bricklinkSection);
+bricklinkSection.id='bricklinkImportSection';bricklinkSection.hidden=true;
+const toggleBricklinkImport=document.createElement('button');
+toggleBricklinkImport.type='button';toggleBricklinkImport.id='toggleBricklinkImport';
+toggleBricklinkImport.setAttribute('aria-controls',bricklinkSection.id);toggleBricklinkImport.setAttribute('aria-expanded','false');
+toggleBricklinkImport.innerHTML='<span class="material-symbols-rounded" aria-hidden="true">sim_card_download</span><span>Import from BrickLink</span>';
+$('#closeAddFigure').before(toggleBricklinkImport);
+function collapseBricklinkSection(){bricklinkSection.hidden=true;toggleBricklinkImport.setAttribute('aria-expanded','false')}
+toggleBricklinkImport.onclick=()=>{const expanded=bricklinkSection.hidden;bricklinkSection.hidden=!expanded;toggleBricklinkImport.setAttribute('aria-expanded',String(expanded));if(expanded)$('#newBricklinkCode').focus()};
+addFigureForm.addEventListener('reset',collapseBricklinkSection);
+addFigureDialog.addEventListener('close',collapseBricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
 addFigureForm.addEventListener('reset',clearBricklinkImport);
 addFigureDialog.addEventListener('close',clearBricklinkImport);
