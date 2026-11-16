@@ -143,7 +143,7 @@ function render(){
       root.querySelector('.image-button').append(photoAction);
     }
     const catalogueUrl=bricklinkCatalogueUrl(f.image);
-    if(catalogueUrl){const link=document.createElement('a');link.className='collection-preorder-jump bricklink-catalogue-link';link.href=catalogueUrl;link.target='_blank';link.rel='noopener noreferrer';link.title=`Open ${f.character||f.name} on BrickLink`;link.setAttribute('aria-label',link.title);link.innerHTML='<span class="collection-preorder-jump-icon material-symbols-rounded" aria-hidden="true">tab_move</span>';link.addEventListener('click',event=>event.stopPropagation());root.append(link)}
+    if(catalogueUrl){const link=document.createElement('a');link.className='collection-preorder-jump bricklink-catalogue-link';link.href=catalogueUrl;link.target='_blank';link.rel='noopener noreferrer';link.title=`Open ${f.character||f.name} on BrickLink`;link.setAttribute('aria-label',link.title);link.innerHTML='<span class="collection-preorder-jump-icon material-symbols-rounded" aria-hidden="true">exit_to_app</span>';link.addEventListener('click',event=>event.stopPropagation());root.append(link)}
     const own=root.querySelector('.own'),wish=root.querySelector('.wish');
     const preordered=isPreordered(f),owned=isOwned(f);own.classList.toggle('selected',owned||preordered);own.classList.toggle('preordered',preordered);wish.classList.toggle('selected',isWished(f));
     own.querySelector('.material-symbols-rounded').textContent=preordered?'deployed_code_history':'check';own.title=preordered?'Pre-ordered':'Owned';own.setAttribute('aria-label',preordered?'Pre-ordered; click to mark as owned':'Toggle owned status');
