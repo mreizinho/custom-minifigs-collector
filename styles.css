@@ -61,7 +61,7 @@
 .bricklink-import::after{content:'';position:absolute;left:0;right:0;bottom:-6px;border-bottom:1px solid var(--line,#8885)}
 .bricklink-entry{position:relative;min-width:0;align-self:start}
 #addFigureForm .bricklink-entry label{display:block;margin-bottom:6px}
-.bricklink-code-row{position:relative;display:flex;align-items:stretch;gap:8px}
+.bricklink-code-row{position:relative;display:flex;align-items:stretch;gap:8px;width:calc(75% + 23px)}
 #addFigureForm .bricklink-code-row input{width:153px;min-width:0;flex:1;padding-right:12px}
 #newBricklinkCode::placeholder{color:var(--muted,#888);opacity:.6}
 #fetchBricklinkFigure{position:static;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-weight:600;cursor:pointer}
