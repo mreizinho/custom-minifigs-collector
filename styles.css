@@ -78,3 +78,4 @@
 #bricklinkPreview[hidden]{display:none}
 @media(max-width:600px){.bricklink-import{grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px}.bricklink-result{height:72px}#bricklinkPreview{width:101.5px;height:133px}#addFigureForm #bricklinkLookupStatus{font-size:.72rem}#fetchBricklinkFigure{padding-inline:10px}}
 #addFigureForm #bricklinkLookupStatus:not(:empty):not(.bricklink-imported){position:relative;top:auto;width:200%;max-width:calc(100vw - 80px)}
+@media(max-width:600px){.bricklink-import{grid-template-columns:minmax(0,1fr) 76px}.bricklink-code-row{width:100%}}

@@ -1046,7 +1046,8 @@ $('#addFigureForm .add-figure-collection').after(bricklinkSection);
 function clearBricklinkImport(){bricklinkRequest++;pendingBricklinkFigure=null;bricklinkLookupBusy=false;$('#fetchBricklinkFigure').disabled=false;$('#bricklinkLookupStatus').textContent='';$('#bricklinkPreview').hidden=true;$('#bricklinkPreview').removeAttribute('src')}
 addFigureForm.addEventListener('reset',clearBricklinkImport);
 addFigureDialog.addEventListener('close',clearBricklinkImport);
-$('#newBricklinkCode').addEventListener('input',()=>{clearBricklinkImport()});
+$('#newBricklinkCode').setAttribute('autocapitalize','none');
+$('#newBricklinkCode').addEventListener('input',event=>{const input=event.target,start=input.selectionStart,end=input.selectionEnd;input.value=input.value.toLowerCase();input.setSelectionRange(start,end);clearBricklinkImport()});
 $('#newBricklinkCode').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.isComposing)return;event.preventDefault();event.stopPropagation();if(!bricklinkLookupBusy)$('#fetchBricklinkFigure').click()});
 $('#fetchBricklinkFigure').onclick=async()=>{
   const code=$('#newBricklinkCode').value.trim().toLowerCase(),status=$('#bricklinkLookupStatus');
