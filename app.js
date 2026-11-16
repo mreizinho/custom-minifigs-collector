@@ -1058,7 +1058,8 @@ $('#fetchBricklinkFigure').onclick=async()=>{
     if(!response.ok)throw Error(data.error||'BrickLink lookup failed.');
     if(request!==bricklinkRequest||!addFigureDialog.open||collection!==activeCollection||sheet!==SHEET_ID)return;
     pendingBricklinkFigure=data;
-    const character=data.name.split(' - ')[0].trim();
+    const nameDecoder=document.createElement('textarea');nameDecoder.innerHTML=data.name;
+    const character=nameDecoder.value.split(' - ')[0].trim();
     $('#newFigureName').value=character;$('#newFigureCharacter').value=character;newFigureBrand.value='LEGO';
     $('#newFigureValue').value=data.averageNewPrice==null?'':Number(data.averageNewPrice).toFixed(2);$('#newFigureCurrency').value=data.currency||'EUR';syncCurrencyControl();
     conditionInput.value='New';
