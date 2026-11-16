@@ -115,7 +115,7 @@
 #catalogue .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){position:absolute;inset:5%;display:block;width:90%;height:90%;max-width:90%;max-height:90%;object-fit:contain;object-position:center;transform:none}
 #catalogue .card:hover .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){transform:none}
 #detail .detail-image img[src*="img.bricklink.com/"]:not(.fallback-image){object-fit:contain;transform:scale(.9);transform-origin:center}
-@media(min-width:601px) and (pointer:fine){#collectionMenu [data-collection][draggable="true"]{cursor:grab}#collectionMenu .collection-name{user-select:none}#collectionMenu .collection-dragging{opacity:.4;cursor:grabbing}#collectionMenu .collection-drop-before{box-shadow:inset 0 3px var(--accent)}#collectionMenu .collection-drop-after{box-shadow:inset 0 -3px var(--accent)}}
+@media(min-width:601px) and (pointer:fine){#collectionMenu [data-collection][draggable="true"]{cursor:move}#collectionMenu .collection-name{user-select:none}#collectionMenu .collection-dragging{opacity:.4;cursor:move}#collectionMenu .collection-drop-before{box-shadow:inset 0 3px var(--accent)}#collectionMenu .collection-drop-after{box-shadow:inset 0 -3px var(--accent)}}
 .add-figure-field-area.is-bricklink{grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
 .add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 140px;grid-row:3}
 .bricklink-import-photo{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
