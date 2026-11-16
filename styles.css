@@ -114,6 +114,15 @@
 #addFigureForm>#bricklinkLookupStatus:empty{display:none}
 #catalogue .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){position:absolute;inset:5%;display:block;width:90%;height:90%;max-width:90%;max-height:90%;object-fit:contain;object-position:center;transform:none}
 #catalogue .card:hover .image-wrap img:is(.bricklink-photo,[src*="img.bricklink.com/"]):not(.fallback-image){transform:none}
+#collectionMenu [data-collection]::before{display:none}
+.collection-edit-slot{grid-column:1;grid-row:1;display:grid;place-items:center;width:22px;min-height:28px}
+.collection-edit-slot>span{grid-area:1/1;font-size:18px;line-height:1}
+.collection-current-check{visibility:hidden}
+.active .collection-current-check{visibility:visible}
+.collection-rename{display:none;cursor:pointer}
+@media(min-width:601px) and (pointer:fine){.collection-rename{display:block;visibility:hidden}.collection-edit-slot:hover .collection-rename,.collection-rename:focus-visible{visibility:visible;color:var(--accent)}.collection-edit-slot:hover .collection-current-check,.collection-edit-slot:focus-within .collection-current-check{visibility:hidden}}
+.rename-collection-dialog{width:min(440px,calc(100% - 24px))}
+.rename-collection-dialog form{height:auto;padding:30px}
 #detail .detail-image img[src*="img.bricklink.com/"]:not(.fallback-image){object-fit:contain;transform:scale(.9);transform-origin:center}
 @media(min-width:601px) and (pointer:fine){#collectionMenu [data-collection][draggable="true"]{cursor:default}#collectionMenu .collection-name{user-select:none}#collectionMenu .collection-dragging{opacity:.4;cursor:default}#collectionMenu .collection-drop-before{box-shadow:inset 0 3px var(--accent)}#collectionMenu .collection-drop-after{box-shadow:inset 0 -3px var(--accent)}}
 .add-figure-field-area.is-bricklink{grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
