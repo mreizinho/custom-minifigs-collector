@@ -14,6 +14,7 @@ import {
   doc,
   getDoc,
   getFirestore,
+  onSnapshot,
   serverTimestamp,
   setDoc
 } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
@@ -38,7 +39,7 @@ const GUEST_SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${GUEST_SP
 const GUEST_COLLECTIONS = ['Star Wars'];
 const ignoredKeys = new Set(['minifig-exchange-rates', 'minifig-google-client-id', 'minifig-firebase-user-id']);
 const locallyProtectedKeys = new Set(['minifig-custom-tags', 'minifig-custom-tag-vocabulary']);
-const isCloudSettingKey = key => String(key).startsWith('minifig-') && !String(key).startsWith('minifig-theme') && !ignoredKeys.has(String(key));
+const isCloudSettingKey = key => String(key).startsWith('minifig-') && !String(key).startsWith('minifig-theme') && !String(key).startsWith('minifig-collection-order-') && !ignoredKeys.has(String(key));
 const nativeSetItem = Storage.prototype.setItem;
 const nativeRemoveItem = Storage.prototype.removeItem;
 let currentUser = null;
@@ -650,3 +651,31 @@ setPersistence(auth, browserLocalPersistence)
     onAuthStateChanged(auth, user => connectUser(user).catch(error => status(`Sync failed: ${error.message}`, true)));
   })
   .catch(error => status(`Sign-in persistence failed: ${error.message}`, true));
+
+// Collection menu order sync is independent of manual settings upload/download.
+let unsubscribeCollectionOrder=null;
+const validMenuOrder=value=>Array.isArray(value)&&value.every(name=>typeof name==='string')? [...new Set(value)]:null;
+window.addEventListener('collector-collection-order-changed',async event=>{
+  const user=auth.currentUser,{spreadsheetId,order}=event.detail||{};
+  if(!user||typeof spreadsheetId!=='string'||!validMenuOrder(order))return;
+  try{await setDoc(doc(db,'users',user.uid),{collectionMenuOrders:{[spreadsheetId]:validMenuOrder(order)}},{merge:true})}
+  catch(error){console.warn('Collection order sync failed.',error);window.dispatchEvent(new CustomEvent('collector-collection-order-error'))}
+});
+onAuthStateChanged(auth,user=>{
+  unsubscribeCollectionOrder?.();unsubscribeCollectionOrder=null;
+  if(!user)return;
+  unsubscribeCollectionOrder=onSnapshot(doc(db,'users',user.uid),snapshot=>{
+    if(auth.currentUser?.uid!==user.uid)return;
+    const orders=snapshot.data()?.collectionMenuOrders||{};
+    for(const [spreadsheetId,value] of Object.entries(orders)){
+      const order=validMenuOrder(value);if(!order)continue;
+      nativeSetItem.call(localStorage,'minifig-collection-order-'+spreadsheetId,JSON.stringify(order));
+    }
+    window.dispatchEvent(new CustomEvent('collector-collection-order-updated'));
+    // Migrate the desktop's existing saved order once if it has no cloud copy.
+    const spreadsheetId=localStorage.getItem('minifig-spreadsheet-id');
+    if(!spreadsheetId||Object.hasOwn(orders,spreadsheetId))return;
+    let local;try{local=validMenuOrder(JSON.parse(localStorage.getItem('minifig-collection-order-'+spreadsheetId)||'null'))}catch{return}
+    if(local)setDoc(doc(db,'users',user.uid),{collectionMenuOrders:{[spreadsheetId]:local}},{merge:true}).catch(error=>console.warn('Collection order migration failed.',error));
+  },error=>console.warn('Collection order subscription failed.',error));
+});
