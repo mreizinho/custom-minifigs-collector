@@ -1062,7 +1062,7 @@ const importPill=document.createElement('div');importPill.id='bricklinkImportPil
 importPill.hidden=window.collectorBricklinkPremium!==true;
 const pillEntry=document.createElement('div');pillEntry.className='bricklink-pill-entry';pillEntry.hidden=true;importPill.append(pillEntry);
 pillEntry.append($('#newBricklinkCode'),$('#fetchBricklinkFigure'));$('#fetchBricklinkFigure').innerHTML='<span class="material-symbols-rounded" aria-hidden="true">check</span>';$('#fetchBricklinkFigure').title='Get BrickLink minifigure';$('#fetchBricklinkFigure').setAttribute('aria-label','Get BrickLink minifigure');
-importPill.append($('#bricklinkLookupStatus'));
+$('#addFigureForm .add-figure-collection').after($('#bricklinkLookupStatus'));
 const importPhoto=document.createElement('div');importPhoto.className='bricklink-import-photo';importPhoto.hidden=true;importPhoto.append($('#bricklinkPreview'));valueRow.before(importPhoto);bricklinkSection.remove();
 let bricklinkMode=false,manualAddSnapshot=null;
 const manualAddInputs=[$('#newFigureName'),$('#newFigureCharacter'),newFigureBrand,conditionInput,$('#newFigureValue'),$('#newFigureCurrency'),$('#newFigureOrigin')];

@@ -110,6 +110,8 @@
 #bricklinkImportPill #newBricklinkCode{align-self:center}
 #bricklinkImportPill #bricklinkLookupStatus{position:absolute;top:100%;right:0;left:auto;max-width:240px;width:max-content;margin:5px 0 0;padding:3px 6px;border-radius:4px;background:var(--paper);font-size:12px;color:var(--muted)}
 #bricklinkImportPill #bricklinkLookupStatus:empty{display:none}
+#addFigureForm>#bricklinkLookupStatus{position:static;width:100%;max-width:none;margin:0;color:var(--muted);font-size:12px;line-height:1.4;overflow-wrap:anywhere;background:none;padding:0}
+#addFigureForm>#bricklinkLookupStatus:empty{display:none}
 .add-figure-field-area.is-bricklink{grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
 .add-figure-field-area.is-bricklink .add-figure-value{grid-template-columns:minmax(0,1fr) 140px;grid-row:3}
 .bricklink-import-photo{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
