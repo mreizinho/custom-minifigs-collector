@@ -6,6 +6,8 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const outputDirectory = path.join(projectRoot, 'dist');
 const productionFiles = [
   'index.html',
+  'manifest.webmanifest',
+  'icons',
   'app.js',
   'brickset-collection.js',
   'brickset-collection.css',

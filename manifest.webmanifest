@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Custom Minifigs Collector",
+  "short_name": "CM Collector",
+  "description": "Manage your minifigure collections, photos, tags and wishlist.",
+  "lang": "en-GB",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f2",
+  "theme_color": "#f5f5f2",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
