@@ -8,6 +8,7 @@ const productionFiles = [
   'index.html',
   'app.js',
   'demo-catalogue.js',
+  'assets/demo',
   'firebase-sync.js',
   'release-calendar.js',
   'OneSignalSDKWorker.js',
