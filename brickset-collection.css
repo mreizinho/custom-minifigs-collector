@@ -1,5 +1,7 @@
 .brickset-sync-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 20px;color:var(--muted);font-size:14px}
 .brickset-sync-bar[hidden]{display:none}
+.brickset-sync-bar{flex-wrap:wrap}
+.brickset-price-status{flex-basis:100%;font-size:12px}
 .brickset-sync-bar>span{min-width:0}
 .brickset-sync-bar button{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;border:1px solid var(--line,#ccc);padding:10px 14px;background:transparent;color:inherit;font:inherit;cursor:pointer}
 .brickset-sync-bar button:hover{background:var(--ink,#242622);color:var(--paper,#f5f5f2)}

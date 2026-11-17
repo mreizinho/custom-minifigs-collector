@@ -2,6 +2,10 @@
 (() => {
   const OWNER = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
   const CACHE_KEY = `collector-brickset-cache-v1-${OWNER}`;
+  const PRICE_KEY = `collector-brickset-prices-v1-${OWNER}`;
+  let prices = {};
+  try { prices = JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}; } catch {}
+  let priceRevision = 0, priceController = null;
   let snapshot = null, requestRevision = 0;
   const bar = document.createElement('div');
   bar.className = 'brickset-sync-bar';
@@ -9,6 +13,9 @@
   bar.innerHTML = '<span role="status" aria-live="polite"></span><button type="button"><span class="material-symbols-rounded" aria-hidden="true">sync</span>Refresh</button>';
   $('#catalogue').before(bar);
   const status = bar.querySelector('[role="status"]'), refresh = bar.querySelector('button');
+  const priceStatus = document.createElement('span');
+  priceStatus.className = 'brickset-price-status'; priceStatus.setAttribute('role', 'status');
+  bar.append(priceStatus);
   refresh.onclick = () => loadBricksetCollection(true);
 
   function readCache() {
@@ -21,12 +28,70 @@
     snapshot = data;
     figures = data.figures.map(row => ({
       id: `Brickset::${row.code}`, source: 'brickset', name: row.name, character: row.code,
-      brand: 'LEGO', origin: 'Brickset', value: 0, currencyCode: 'EUR', currency: '€',
+      brand: 'LEGO', origin: 'Brickset', value: validPrice(prices[row.code]) ? prices[row.code].averageNewPrice : 0, currencyCode: 'EUR', currency: '€',
+      priceAvailable: validPrice(prices[row.code]),
       condition: '', collection: 'owned', hidden: false, tags: row.tags || [], image: row.photoUrl,
       altImage: '', notes: '', ownedQuantity: row.ownedTotal, ownedInSets: row.ownedInSets,
       ownedLoose: row.ownedLoose, raw: { '#': row.code, Name: row.name, Character: row.code, Owned: 'Owned' }
     }));
-    renderFilters(); render();
+    renderFilters(); render(); loadExchangeRates();
+  }
+  function validPrice(price) { return price?.currency === 'EUR' && typeof price.averageNewPrice === 'number' && Number.isFinite(price.averageNewPrice) && price.averageNewPrice >= 0; }
+  function freshPrice(price) { const age = Date.now() - Date.parse(price?.retrievedAt); return age >= 0 && age < 86400000 && (validPrice(price) || ['no_sales','not_found'].includes(price?.priceStatus)); }
+  function priceSummary() {
+    const priced = figures.filter(figure => figure.priceAvailable).length;
+    return `${priced.toLocaleString()} / ${figures.length.toLocaleString()} figures valued · BL average new price, last 6 months · Total includes all owned copies`;
+  }
+  function stopPriceRefresh() { ++priceRevision; priceController?.abort(); priceController = null; }
+  function applyPrices(updatedCodes) {
+    const updated = new Set(updatedCodes);
+    for (const figure of figures) {
+      if (!updated.has(figure.character)) continue;
+      const price = prices[figure.character]; figure.priceAvailable = validPrice(price);
+      figure.value = figure.priceAvailable ? price.averageNewPrice : 0;
+      const card = document.querySelector(`#catalogue [data-brickset-code="${figure.character}"] .price`);
+      if (card) card.textContent = money(figure.value, figure.currency);
+    }
+    const currentCode = $('#detail .detail-character')?.textContent?.trim();
+    const current = figures.find(figure => figure.character === currentCode);
+    const detailValue = $('#detailInfo p:last-child span');
+    if (current && detailValue) detailValue.textContent = money(current.value, current.currency);
+    updateStats();
+  }
+  async function refreshPrices() {
+    stopPriceRefresh();
+    const revision = priceRevision;
+    const pending = [...new Set([...filtered(), ...figures].map(figure => figure.character))].filter(code => !freshPrice(prices[code]));
+    priceStatus.textContent = pending.length ? `Updating prices… ${priceSummary()}` : priceSummary();
+    if (!pending.length) return;
+    priceController = new AbortController();
+    const signal = priceController.signal;
+    try {
+      for (let offset = 0; offset < pending.length; offset += 8) {
+        if (revision !== priceRevision || !isBricksetCollection() || window.collectorFirebaseUser !== OWNER) return;
+        const token = await window.collectorGetIdToken();
+        const response = await fetch('https://cmcollector-reminders.mreizinho.workers.dev/brickset/prices', {
+          method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codes: pending.slice(offset, offset + 8) }), signal
+        });
+        const data = await response.json();
+        if (!response.ok || !Array.isArray(data.prices)) throw Error(data.error || 'BrickLink price refresh failed.');
+        if (revision !== priceRevision || !isBricksetCollection() || window.collectorFirebaseUser !== OWNER) return;
+        for (const price of data.prices) if (pending.includes(price.code) && price.currency === 'EUR') prices[price.code] = price;
+        try { localStorage.setItem(PRICE_KEY, JSON.stringify(prices)); } catch {}
+        applyPrices(data.prices.map(price => price.code));
+        priceStatus.textContent = `Updating prices… ${priceSummary()}`;
+        if (data.rateLimited || !data.prices.length) throw Error(data.errors?.[0]?.error || 'BrickLink price refresh paused.');
+        // One small batch at a time; no per-card fetches or image downloads.
+        if (offset + 8 < pending.length) await new Promise(resolve => {
+          const timer = setTimeout(resolve, 1000);
+          signal.addEventListener('abort', () => { clearTimeout(timer); resolve(); }, { once: true });
+        });
+      }
+      if (revision === priceRevision) priceStatus.textContent = priceSummary() + (pending.some(code => !freshPrice(prices[code])) ? ' · Some prices unavailable; choose Refresh to retry' : ' · Prices updated');
+    } catch (error) {
+      if (revision === priceRevision && isBricksetCollection()) priceStatus.textContent = `${priceSummary()} · ${error.message} Choose Refresh to retry.`;
+    }
   }
   function lastSync(data) {
     const date = new Date(data.fetchedAt);
@@ -35,6 +100,7 @@
   async function loadBricksetCollection(force = false) {
     if (!isBricksetCollection()) return;
     const revision = ++requestRevision;
+    stopPriceRefresh();
     // Invalidate any pending Google Sheet load before changing the displayed figures.
     ++authenticatedLoadRevision;
     bar.hidden = false; refresh.disabled = true;
@@ -63,6 +129,7 @@
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
       status.textContent = `Synced ${lastSync(data)} · ${data.figures.length.toLocaleString()} minifigures · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
+      void refreshPrices();
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
       status.textContent = cached ? `Showing saved collection from ${lastSync(cached)}. ${error.message}` : error.message;
@@ -76,12 +143,23 @@
   }
   window.collectorLoadBrickset = loadBricksetCollection;
 
+  const previousStats = updateStats;
+  updateStats = () => {
+    previousStats();
+    if (!isBricksetCollection()) return;
+    const label = $('#ownedValue');
+    if (figures.some(figure => !figure.priceAvailable)) label.textContent = label.textContent.replace(' estimated', ' partial estimate');
+    label.title = 'BrickLink average new-condition sales price over the last six months × owned quantity. Figures without an available price are excluded.';
+  };
+
   const previousRender = render;
   render = () => {
     previousRender();
     const active = isBricksetCollection();
     document.body.classList.toggle('brickset-collection-active', active); bar.hidden = !active;
     if (!active) return;
+    const visible = filtered();
+    document.querySelectorAll('#catalogue .card').forEach((card,index) => { if (visible[index]) card.dataset.bricksetCode = visible[index].character; });
     document.querySelectorAll('#catalogue .own, #catalogue .wish').forEach(button => {
       button.disabled = true; button.title = 'Ownership managed in Brickset';
       button.setAttribute('aria-label', button.classList.contains('own') ? 'Owned in Brickset' : 'Wishlist managed in Brickset');
@@ -121,13 +199,14 @@
   const previousSelect = selectCollection;
   selectCollection = name => {
     ++requestRevision;
+    stopPriceRefresh();
     document.body.classList.toggle('brickset-collection-active', isBricksetCollection(name));
     bar.hidden = !isBricksetCollection(name); refresh.disabled = false;
     return previousSelect(name);
   };
   window.addEventListener('collector-google-auth', event => {
     if (event.detail?.uid === OWNER) rebuildCollectionChoices();
-    else { ++requestRevision; snapshot = null; bar.hidden = true; document.body.classList.remove('brickset-collection-active'); }
+    else { ++requestRevision; stopPriceRefresh(); snapshot = null; prices = {}; bar.hidden = true; document.body.classList.remove('brickset-collection-active'); }
   });
   rebuildCollectionChoices();
   if (isBricksetCollection()) queueMicrotask(() => loadBricksetCollection());

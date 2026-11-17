@@ -4,9 +4,13 @@ The owner's collection menu includes `Brickset`, an external read-only source.
 It reads every owned minifigure, uses the first category component as a theme
 tag, and splits Brickset notes on commas, semicolons, pipes, or newlines into
 additional tags. Stable IDs are `Brickset::<BL reference>`; quantities are
-shown in details. Images load directly from BrickLink. Prices are unavailable
-from the Brickset minifigure API and are left blank rather than zero-valued
-estimates. No bulk BrickLink price requests are made.
+shown in details. Images load directly from BrickLink. Brickset does not provide
+minifigure prices, so `/brickset/prices` loads the BrickLink six-month average
+new-condition sold price in EUR. Batches contain at most eight owned references,
+with two upstream requests at a time and 24-hour server/device caching. Card and
+detail prices are per figure; the owned total includes duplicate copies. Missing
+prices remain unavailable, and incomplete totals are labelled as partial estimates.
+Refreshing resumes missing or stale prices without discarding successful results.
 
 The Worker POST `/brickset` route validates the Firebase ID token and restricts
 access to `BRICKSET_ALLOWED_UID`. It uses only Brickset read methods, caches
@@ -26,5 +30,5 @@ The previous CSV-imported Google Sheet collection remains untouched.
 
 Validation:
 
-    node --test scripts/brickset-collection.test.mjs
+    node --test scripts/brickset-collection.test.mjs scripts/brickset-client.test.mjs scripts/brickset-prices.test.mjs
     node scripts/build-static.mjs
