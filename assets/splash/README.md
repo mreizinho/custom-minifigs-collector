@@ -1,1 +1,1 @@
-Source: user-supplied lego-splash-color-only.zip. SVG and style block preserved verbatim. Only the demo main/replay script is replaced by a same-origin completion message; the parent app controls dismissal.
+Source: user-supplied lego-splash-reference-colors.zip. SVG and style block preserved verbatim. Only the demo main/replay script is replaced by a same-origin completion message; the parent app controls dismissal.

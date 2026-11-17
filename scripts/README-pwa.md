@@ -36,7 +36,7 @@ image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
 
 Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
 isolated iframe. Its SVG and style block are verbatim from the supplied
-`lego-splash-color-only.zip`; only the demo UI/controller were replaced. The
+`lego-splash-reference-colors.zip`; only the demo UI/controller were replaced. The
 white background and 2.4-second artwork animation are intentionally unchanged.
 The frame signals completion at the supplied 2.75-second mark (250ms with
 reduced motion). `pwa-splash.js` then waits for the initial demo/sheet/Brickset
