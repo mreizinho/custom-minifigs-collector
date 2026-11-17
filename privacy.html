@@ -9,8 +9,9 @@
   <meta name="color-scheme" content="light">
   <script src="/pwa-theme.js?v=20261117-03"></script>
   <link rel="stylesheet" href="/pwa-theme.css?v=20261117-02">
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <link id="privacyFavicon" rel="icon" type="image/svg+xml" href="lego-head.svg?v=8#favicon-outline">
+  <link rel="apple-touch-icon" href="/icons/head2-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/head2-32.png">
+  <link id="privacyFavicon" rel="icon" type="image/svg+xml" href="/icons/head2.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,7 +27,6 @@
           ?? 'light';
         const dark = saved === 'dark';
         document.documentElement.classList.toggle('dark', dark);
-        document.getElementById('privacyFavicon').href = `lego-head.svg?v=8&theme=${dark ? 'dark' : 'light'}#${dark ? 'filled' : 'favicon-outline'}`;
       };
       applyTheme();
       mobile.addEventListener('change', applyTheme);

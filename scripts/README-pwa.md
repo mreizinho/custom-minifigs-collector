@@ -29,8 +29,18 @@ The manifest response requires HTTP revalidation on each request rather than
 allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
-Icons are rasterized from the existing vector head mark with no third-party
-image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
+The browser favicon, Apple touch icon, and installed PWA icons all derive from
+`assets/splash/head2.svg`. `icons/head2.svg` preserves its original paths/styles
+with square framing and a light background; matching PNGs cover 32, 180, 192,
+and 512 pixels. The same framing leaves room for Android icon masks. Old icon
+files remain available for older installations, but current metadata references
+only the new head2 family. Theme changes no longer substitute another favicon.
+
+To regenerate icons, install the pinned renderer into the ignored temporary
+tools folder, then run the generator. No runtime/site dependency is added:
+
+    npm install --prefix tmp/icon-tools --no-save --package-lock=false --ignore-scripts @resvg/resvg-js@2.6.2
+    node scripts/build-app-icons.mjs
 
 ## Supplied animated splash
 
