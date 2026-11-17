@@ -56,7 +56,9 @@
       if (!layer || finished) { layer?.remove(); return; }
       layer.hidden = false;
       frame = layer.querySelector('iframe');
-      frame.src = frame.dataset.src;
+      const source = new URL(frame.dataset.src, location.origin);
+      source.searchParams.set('platform', window.collectorPwaPlatform || (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent || '') ? 'mobile' : 'desktop'));
+      frame.src = source.href;
       frame.addEventListener('error', () => { animationReady = true; maybeFinish(); }, { once: true });
       document.addEventListener('DOMContentLoaded', () => {
         if (finished) return;

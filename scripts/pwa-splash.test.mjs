@@ -11,7 +11,7 @@ function launch({installed=true,reduced=false}={}) {
   const main={tagName:'MAIN',inert:false},dialog={tagName:'DIALOG',inert:true};
   const document={documentElement:{classList:{add:name=>classes.add(name),remove:name=>classes.delete(name)}},body:{children:[layer,main,dialog]},getElementById:()=>layer,addEventListener:(name,fn)=>listeners.set(name,fn),dispatchEvent:event=>events.push(event.type)};
   const window={navigator:{},matchMedia:query=>({matches:query.includes('reduced')?reduced:query.includes('standalone')&&installed}),addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
-  const context={window,document,location:{origin:'https://test.example',search:''},URLSearchParams,CustomEvent:class{constructor(type){this.type=type;}},setTimeout:(fn,ms)=>{timers.set(++id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id)};
+  const context={window,document,location:{origin:'https://test.example',search:''},URL,URLSearchParams,CustomEvent:class{constructor(type){this.type=type;}},setTimeout:(fn,ms)=>{timers.set(++id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id)};
   vm.runInNewContext(source,context);
   const tick=ms=>{const target=now+ms;while(true){const next=[...timers].sort((a,b)=>a[1].at-b[1].at).find(([,timer])=>timer.at<=target);if(!next)break;now=next[1].at;timers.delete(next[0]);next[1].fn();}now=target;};
   const message=(overrides={})=>listeners.get('message')?.({origin:context.location.origin,source:frame.contentWindow,data:{type:'collector-splash-animation-complete'},...overrides});
@@ -74,28 +74,31 @@ test('ordinary browser sign-in retains synchronous popup launch',async()=>{
 });
 test('production build ships the isolated supplied animation and splash resources',()=>{
   const root=new URL('../dist/',import.meta.url),html=fs.readFileSync(new URL('index.html',root),'utf8');
-  for(const file of ['pwa-splash.js','pwa-splash.css','assets/splash/lego-splash.html','assets/splash/head1.svg','assets/splash/head2.svg','assets/splash/head3.svg'])assert.ok(fs.statSync(new URL(file,root)).size>0);
+  for(const file of ['pwa-splash.js','pwa-splash.css','assets/splash/lego-splash.html','assets/splash/splash2.svg'])assert.ok(fs.statSync(new URL(file,root)).size>0);
   assert.match(html,/window\.collectorSplash\?\.mount\(\)/);
   const art=fs.readFileSync(new URL('assets/splash/lego-splash.html',root),'utf8');
   assert.ok(!art.includes('id="replay"'));assert.match(art,/prefers-reduced-motion:reduce/);
-  assert.match(art,/head-motion 3\.4s/);
-  assert.match(art,/show-eyes\{0%,30%\{opacity:0\}43%,100%\{opacity:1\}/);
-  assert.match(art,/show-two\{0%,30%\{opacity:0\}43%,63%\{opacity:1\}/);
-  assert.ok(!art.includes('<div class="controls">'));
+  assert.match(art,/head-bounce 2\.35s/);
+  assert.match(art,/#final-outline\{opacity:0\}/);
+  assert.match(art,/@keyframes final\{0%,65%\{opacity:0\}79%,100%\{opacity:1\}/);
+  assert.ok(!art.includes('<section class="controls">'));
+  assert.ok(!art.includes('serviceWorker.register'));
+  const icon=fs.readFileSync(new URL('icons/splash2.svg',root),'utf8');
+  assert.equal(art.match(/viewBox="([^"]+)"/)[1],icon.match(/viewBox="([^"]+)"/)[1]);
 });
 function morph({reduced=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
-  const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
   const messages=[],microtasks=[];let end,changed;
   const art={addEventListener:(name,fn)=>{assert.equal(name,'animationend');end=fn;}};
   const reduce={matches:reduced,addEventListener:(name,fn)=>{assert.equal(name,'change');changed=fn;}};
-  vm.runInNewContext(script,{document:{querySelector:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
+  vm.runInNewContext(script,{document:{getElementById:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
   return{art,messages,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
 }
-test('morph reports completion once, only when its root head-motion animation finishes',()=>{
+test('morph reports completion once, only when its root head-bounce animation finishes',()=>{
   const p=morph();assert.equal(p.messages.length,0);
-  p.end({target:p.art,animationName:'show-eyes'});p.end({target:{},animationName:'head-motion'});assert.equal(p.messages.length,0);
-  p.end({target:p.art,animationName:'head-motion'});p.end({target:p.art,animationName:'head-motion'});
+  p.end({target:p.art,animationName:'third'});p.end({target:{},animationName:'head-bounce'});assert.equal(p.messages.length,0);
+  p.end({target:p.art,animationName:'head-bounce'});p.end({target:p.art,animationName:'head-bounce'});
   assert.equal(p.messages.length,1);assert.equal(p.messages[0].message.type,'collector-splash-animation-complete');assert.equal(p.messages[0].origin,'https://test.example');
 });
 test('morph reduced-motion completes without waiting for an animationend, including preference changes',()=>{

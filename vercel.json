@@ -4,6 +4,13 @@
   "outputDirectory": "dist",
   "headers": [
     {
+      "source": "/manifest-:platform.webmanifest",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }
+      ]
+    },
+    {
       "source": "/manifest.webmanifest",
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },

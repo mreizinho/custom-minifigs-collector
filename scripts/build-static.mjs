@@ -1,4 +1,4 @@
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -7,6 +7,9 @@ const outputDirectory = path.join(projectRoot, 'dist');
 const productionFiles = [
   'index.html',
   'manifest.webmanifest',
+  'manifest-mobile.webmanifest',
+  'manifest-desktop.webmanifest',
+  'pwa-install.js',
   'pwa-theme.js',
   'pwa-theme.css',
   'pwa-splash.js',
@@ -54,4 +57,13 @@ for (const entry of productionFiles) {
   });
 }
 
+// Both install entry points use the same application and shared-origin data.
+const appHtml = await readFile(path.join(outputDirectory, 'index.html'), 'utf8');
+for (const platform of ['mobile', 'desktop']) {
+  const directory = path.join(outputDirectory, platform);
+  await mkdir(directory, { recursive: true });
+  const html = appHtml.replace('<head>', '<head>\n  <base href="/">')
+    .replace('/manifest-desktop.webmanifest', `/manifest-${platform}.webmanifest`);
+  await writeFile(path.join(directory, 'index.html'), html);
+}
 console.log(`Static production site created at ${outputDirectory}`);

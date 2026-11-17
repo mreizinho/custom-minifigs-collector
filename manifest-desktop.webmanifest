@@ -1,0 +1,17 @@
+{
+  "id": "/desktop/",
+  "name": "Collector",
+  "short_name": "Collector",
+  "description": "Your desktop minifigure collection.",
+  "lang": "en-GB",
+  "start_url": "/desktop/",
+  "scope": "/desktop/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#181917",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/splash2-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/splash2-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
