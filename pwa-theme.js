@@ -8,10 +8,13 @@
   // Regular browser tabs and other platforms retain their current viewport.
   const androidApp = /Android/i.test(window.navigator?.userAgent || '')
     && window.matchMedia('(display-mode: standalone)').matches;
+  const viewport = document.querySelector('meta[name="viewport"]');
   if (androidApp) {
-    const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport && !/viewport-fit\s*=/.test(viewport.content)) viewport.content += ',viewport-fit=cover';
     root.classList.add('pwa-edge-to-edge');
+  } else if (viewport) {
+    // Retain the previous inset viewport outside the installed Android app.
+    viewport.content = viewport.content.replace(/,?\s*viewport-fit\s*=\s*cover\s*/gi, '');
   }
   let currentDark = null;
   function apply(dark, color) {

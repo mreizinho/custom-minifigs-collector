@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../pwa-theme.js',import.meta.url),'utf8');
 function page({saved='light',mobile=true,android=false,standalone=false}={}){
   const events=new Map(),observed=[],meta={},scheme={};let mutation;
-  const classes=new Set(),viewport={content:'width=device-width,initial-scale=1'};
+  const classes=new Set(),viewport={content:'width=device-width,initial-scale=1,viewport-fit=cover'};
   const root={style:{setProperty(key,value){this[key]=value;}},dark:false,classList:{contains:()=>root.dark,add:name=>classes.add(name)}},body={dark:false,classList:{contains:()=>body.dark}};
   const context={document:{documentElement:root,body,readyState:'loading',querySelector:selector=>selector.includes('viewport')?viewport:selector.includes('theme-color')?meta:scheme,addEventListener:(name,handler)=>events.set(name,handler)},
     window:{navigator:{userAgent:android?'Android':'Desktop'},matchMedia:query=>({matches:query.includes('display-mode')?standalone:mobile}),addEventListener:(name,handler)=>events.set(name,handler)},localStorage:{getItem:key=>key===`minifig-theme-${mobile?'mobile':'desktop'}-anonymous`?saved:null},

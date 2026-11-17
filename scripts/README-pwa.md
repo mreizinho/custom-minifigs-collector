@@ -18,7 +18,13 @@ standalone edge-to-edge, the page canvas can paint behind the navigation bar.
 and full-height mobile forms. This is a device-verification trial: Chrome's
 standalone edge-to-edge rollout varies, and browser versions may ignore it.
 Normal browser tabs and non-Android platforms retain their existing viewport.
-The unsuccessful dark manifest fallback trial has been removed.
+Following comparison with BrickGEST, both the initial HTML theme-color and
+manifest theme_color now use #181917. The manifest background remains light
+(launch background is separate from system-bar theme colour). The viewport
+declares cover in HTML so it is available before JavaScript; the early script
+removes it outside installed Android apps. Runtime light/dark switching remains.
+This trials BrickGEST's matching startup declarations; it does not establish
+that dynamic navigation-bar changes work on physical Android hardware.
 
 Icons are rasterized from the existing vector head mark with no third-party
 image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
