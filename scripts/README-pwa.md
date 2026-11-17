@@ -12,6 +12,13 @@ Google sign-in use the normal online website; this change adds no offline cache.
 from the site's saved/selected theme. Android/Chrome may apply additional rules
 to native navigation bars, so their final appearance remains platform-dependent.
 
+The manifest uses a dark launch/background fallback (#181917). This is a
+workaround trial for installed Android apps retaining the manifest colour on
+their navigation bar despite page-level theme changes. The page still selects
+its own light/dark colours normally. Installed apps may need a manifest update
+or reinstallation to pick up this fallback; actual Android behaviour needs
+device verification.
+
 Icons are rasterized from the existing vector head mark with no third-party
 image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
 
