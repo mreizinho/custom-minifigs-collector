@@ -12,17 +12,20 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, coll
   if (cached) storage.set(`collector-brickset-cache-v1-${owner}`, JSON.stringify(cached));
   if (cachedPrices) storage.set(`collector-brickset-prices-v1-${owner}`, JSON.stringify(cachedPrices));
   const element = () => ({ hidden: false, disabled: false, textContent: '', innerHTML: '',
-    classList: { toggle() {}, remove() {}, add() {} }, before() {}, after() {}, append() {}, setAttribute() {}, replaceChildren() {}, querySelectorAll: () => [] });
+    classList: { toggle() {}, remove() {}, add() {} }, style:{removeProperty(){}},before() {}, after() {}, append() {}, setAttribute() {}, replaceChildren() {}, querySelectorAll: () => [] });
   const totalCard=element();
+  totalCard.closest=()=>totalCard;
+  const ownedButton=element(),valueButton=element();
+  ownedButton.closest=valueButton.closest=()=>totalCard;
   const status = element(), refresh = element(), bar = element();
   bar.querySelector = selector => selector === 'button' ? refresh : status;
-  const $ = selector => { if (!elements.has(selector)) elements.set(selector, element());const result=elements.get(selector);result.closest=()=>totalCard;return result; };
-  const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener() {} },
+  const $ = selector => { if (!elements.has(selector)) elements.set(selector, element());const result=elements.get(selector);result.closest=()=>selector==='#ownedStat'?ownedButton:selector==='#ownedValue'?valueButton:totalCard;return result; };
+  const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener() {}, matchMedia:()=>({matches:false}) },
     document: { createElement: tag => tag === 'div' ? bar : element(), body: element(), querySelectorAll: () => [], querySelector: () => null }, $,
     fetch: (url, options) => url.endsWith('/prices') ? (priceFetcher ? priceFetcher(url, options) : Promise.resolve(Response.json({prices:[],errors:[{error:'No test prices'}]}))) : fetcher(url, options),
     localStorage: { getItem: k => storage.get(k) || null, setItem: (k,v) => storage.set(k,v) },
     activeCollection: 'Brickset', COLLECTIONS: [...collections], figures: [], authenticatedLoadRevision: 0,
-    canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() {}, openDetail() {},
+    canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() { context.updateStats(); }, openDetail() {},
     collectionMenuElement: { querySelectorAll: () => [] }, rebuildCollectionChoices() {},
     toggleOwned() {}, toggleWished() {}, openRenameCollection() {}, deleteCollection() {}, selectCollection() {},
     queueMicrotask() {}, AbortSignal, AbortController, setTimeout, clearTimeout, updateStats() {}, loadExchangeRates() {}, money: n => String(n),formatFigureCount:n=>Number(n).toLocaleString('de-DE')
@@ -43,7 +46,9 @@ test('renders the external collection with stable IDs, tags, and no sheet row; r
   assert.deepEqual([...context.figures[0].tags], ['Star Wars']);
   assert.equal(request.options.headers.Authorization, 'Bearer firebase-test-token');
   assert.equal(JSON.parse(request.options.body).refresh, true);
-  assert.match(status.textContent, /Ownership managed in Brickset/);
+  assert.equal(status.textContent, '');
+  assert.equal(elements.get('#ownedStat').closest('button').title,'Ownership managed in Brickset');
+  assert.equal(elements.get('#ownedStat').closest('button').disabled,true);
   assert.ok(!status.textContent.includes('Synced'));
   assert.match(refresh.title,/Refresh Brickset\nSynced /);
   assert.match(elements.get('#ownedValue').title,/\nSynced /);

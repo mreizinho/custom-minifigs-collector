@@ -1,6 +1,6 @@
 .brickset-sync-bar{display:contents;color:var(--muted);font-size:14px}
 .brickset-sync-bar[hidden]{display:none}
-.brickset-sync-bar>span:first-child::before{content:' · '}
+.brickset-sync-bar>span:first-child:not(:empty)::before{content:' · '}
 .brickset-total-card{position:relative}
 .brickset-refresh{display:none;position:absolute;top:12px;right:12px;align-items:center;justify-content:center;width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--ink,#242622);cursor:pointer}
 .brickset-collection-active .brickset-refresh{display:inline-flex}
@@ -11,4 +11,6 @@
 .brickset-collection-active #addFigure,.brickset-collection-active .add-photo-overlay{display:none!important}
 .brickset-collection-active .own:disabled,.brickset-collection-active #detailOwn:disabled{opacity:1;cursor:default}
 .brickset-collection-active .wish{display:none}
+.brickset-collection-active [data-stat-filter="owned"]{cursor:default;opacity:1}
+@media(min-width:601px){.brickset-refresh .material-symbols-rounded{font-size:19px}}
 @media(max-width:600px){.brickset-sync-bar{font-size:12px}.brickset-refresh{top:10px;right:10px}}

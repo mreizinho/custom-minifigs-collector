@@ -20,6 +20,26 @@
   refresh.setAttribute('aria-label', 'Refresh Brickset');
   refresh.title = 'Refresh Brickset';
   totalCard.append(refresh);
+  function alignRefreshWithHeading() {
+    if (!window.matchMedia('(min-width:601px)').matches) { refresh.style.removeProperty('top'); return; }
+    const heading = totalCard.querySelector('span');
+    if (heading) refresh.style.top = `${heading.offsetTop + (heading.offsetHeight - refresh.offsetHeight) / 2}px`;
+  }
+  window.addEventListener('resize', alignRefreshWithHeading);
+  const ownedControl = $('#ownedStat').closest('button');
+  function syncOwnedControl() {
+    const active = isBricksetCollection();
+    ownedControl.disabled = active;
+    ownedControl.title = active ? 'Ownership managed in Brickset' : 'Filter by owned';
+    ownedControl.setAttribute('aria-label', active ? 'Ownership managed in Brickset' : 'Filter catalogue by owned minifigs');
+    ownedControl.closest('article').title = active ? 'Ownership managed in Brickset' : '';
+    const filter = document.querySelector('.state-filter[value="owned"]');
+    if (filter) {
+      filter.disabled = active;
+      filter.closest('label').hidden = active;
+      if (active) filter.checked = false;
+    }
+  }
   let priceNotice = '';
   function setPriceStatus(message) { priceNotice = message; updatePriceTooltip(); }
   function updatePriceTooltip() {
@@ -145,7 +165,7 @@
       }
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
-      status.textContent = `Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
+      status.textContent = data.notesAvailable ? '' : 'Notes could not be refreshed';
       void refreshPrices();
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
@@ -163,6 +183,7 @@
   const previousStats = updateStats;
   updateStats = () => {
     previousStats();
+    syncOwnedControl();
     const label = $('#ownedValue');
     if (!isBricksetCollection()) {
       label.removeAttribute('title'); updateOwnedValueCycleLabel(); return;
@@ -177,6 +198,7 @@
     const active = isBricksetCollection();
     document.body.classList.toggle('brickset-collection-active', active); bar.hidden = !active;
     if (!active) return;
+    alignRefreshWithHeading();
     const visible = filtered();
     document.querySelectorAll('#catalogue .card').forEach((card,index) => {
       const figure=visible[index];if(!figure)return;
