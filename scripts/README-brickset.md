@@ -1,6 +1,8 @@
 # Brickset collection
 
 The owner's collection menu includes `Brickset`, an external read-only source.
+Its menu entry requires the owner's active Firebase sign-in. The refresh icon is
+in the Total Minifigs card; sync information follows the catalogue count summary.
 It reads every owned minifigure, uses the first category component as a theme
 tag, and splits Brickset notes on commas, semicolons, pipes, or newlines into
 additional tags. Stable IDs are `Brickset::<BL reference>`; quantities are

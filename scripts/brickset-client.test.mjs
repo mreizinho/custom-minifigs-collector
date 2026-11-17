@@ -7,20 +7,21 @@ const owner = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
 const snapshot = { source: 'brickset', fetchedAt: '2026-11-17T00:00:00Z', notesAvailable: true, figures: [
   { code: 'sw0971', name: 'Luke', theme: 'Star Wars', tags: ['Star Wars'], ownedTotal: 2, ownedInSets: 1, ownedLoose: 1, photoUrl: 'https://img.bricklink.com/ItemImage/MN/0/sw0971.png' }
 ] };
-function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices } = {}) {
+function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, collections=['Star Wars'] } = {}) {
   const storage = new Map(), elements = new Map();
   if (cached) storage.set(`collector-brickset-cache-v1-${owner}`, JSON.stringify(cached));
   if (cachedPrices) storage.set(`collector-brickset-prices-v1-${owner}`, JSON.stringify(cachedPrices));
   const element = () => ({ hidden: false, disabled: false, textContent: '', innerHTML: '',
-    classList: { toggle() {}, remove() {} }, before() {}, append() {}, setAttribute() {}, replaceChildren() {}, querySelectorAll: () => [] });
+    classList: { toggle() {}, remove() {}, add() {} }, before() {}, after() {}, append() {}, setAttribute() {}, replaceChildren() {}, querySelectorAll: () => [] });
+  const totalCard=element();
   const status = element(), refresh = element(), bar = element();
   bar.querySelector = selector => selector === 'button' ? refresh : status;
-  const $ = selector => { if (!elements.has(selector)) elements.set(selector, element()); return elements.get(selector); };
+  const $ = selector => { if (!elements.has(selector)) elements.set(selector, element());const result=elements.get(selector);result.closest=()=>totalCard;return result; };
   const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener() {} },
     document: { createElement: tag => tag === 'div' ? bar : element(), body: element(), querySelectorAll: () => [], querySelector: () => null }, $,
     fetch: (url, options) => url.endsWith('/prices') ? (priceFetcher ? priceFetcher(url, options) : Promise.resolve(Response.json({prices:[],errors:[{error:'No test prices'}]}))) : fetcher(url, options),
     localStorage: { getItem: k => storage.get(k) || null, setItem: (k,v) => storage.set(k,v) },
-    activeCollection: 'Brickset', COLLECTIONS: ['Star Wars'], figures: [], authenticatedLoadRevision: 0,
+    activeCollection: 'Brickset', COLLECTIONS: [...collections], figures: [], authenticatedLoadRevision: 0,
     canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() {}, openDetail() {},
     collectionMenuElement: { querySelectorAll: () => [] }, rebuildCollectionChoices() {},
     toggleOwned() {}, toggleWished() {}, openRenameCollection() {}, deleteCollection() {}, selectCollection() {},
@@ -63,7 +64,7 @@ test('a late Brickset response cannot overwrite a different selected collection'
 });
 test('another account cannot load or add the owner collection', async () => {
   let fetched = false;
-  const { context } = client(async () => { fetched = true; }, { uid: 'someone-else' });
+  const { context } = client(async () => { fetched = true; }, { uid: 'someone-else',collections:['Star Wars','Brickset'] });
   await context.window.collectorLoadBrickset();
   assert.equal(fetched, false);
   assert.ok(!context.COLLECTIONS.includes('Brickset'));

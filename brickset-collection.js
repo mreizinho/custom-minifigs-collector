@@ -11,8 +11,15 @@
   bar.className = 'brickset-sync-bar';
   bar.hidden = true;
   bar.innerHTML = '<span role="status" aria-live="polite"></span><button type="button"><span class="material-symbols-rounded" aria-hidden="true">sync</span>Refresh</button>';
-  $('#catalogue').before(bar);
+  $('#resultCount').after(bar);
   const status = bar.querySelector('[role="status"]'), refresh = bar.querySelector('button');
+  const totalCard = $('#totalCount').closest('article');
+  totalCard.classList.add('brickset-total-card');
+  refresh.className = 'brickset-refresh';
+  refresh.innerHTML = '<span class="material-symbols-rounded" aria-hidden="true">sync</span>';
+  refresh.setAttribute('aria-label', 'Refresh Brickset');
+  refresh.title = 'Refresh Brickset';
+  totalCard.append(refresh);
   const priceStatus = document.createElement('span');
   priceStatus.className = 'brickset-price-status'; priceStatus.setAttribute('role', 'status');
   bar.append(priceStatus);
@@ -131,7 +138,7 @@
       }
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
-      status.textContent = `Synced ${lastSync(data)} · ${formatFigureCount(data.figures.length)} minifigures · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
+      status.textContent = `Synced ${lastSync(data)} · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
       void refreshPrices();
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
@@ -192,6 +199,7 @@
   };
   const previousRebuild = rebuildCollectionChoices;
   rebuildCollectionChoices = () => {
+    if (!canReadBricksetCollection()) COLLECTIONS = COLLECTIONS.filter(name => name !== 'Brickset');
     if (canReadBricksetCollection() && !COLLECTIONS.includes('Brickset')) COLLECTIONS.push('Brickset');
     previousRebuild();
     if (!canReadBricksetCollection()) return;
@@ -215,8 +223,13 @@
     return previousSelect(name);
   };
   window.addEventListener('collector-google-auth', event => {
-    if (event.detail?.uid === OWNER) rebuildCollectionChoices();
-    else { ++requestRevision; stopPriceRefresh(); snapshot = null; prices = {}; bar.hidden = true; document.body.classList.remove('brickset-collection-active'); }
+    if (canReadBricksetCollection()) rebuildCollectionChoices();
+    else {
+      ++requestRevision; stopPriceRefresh(); snapshot = null; prices = {}; bar.hidden = true;
+      document.body.classList.remove('brickset-collection-active');
+      rebuildCollectionChoices();
+      if (activeCollection === 'Brickset') selectCollection(COLLECTIONS[0] || GUEST_COLLECTIONS[0]);
+    }
   });
   rebuildCollectionChoices();
   if (isBricksetCollection()) queueMicrotask(() => loadBricksetCollection());

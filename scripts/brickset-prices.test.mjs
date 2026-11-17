@@ -72,12 +72,25 @@ test('rechecks legacy no-sales cache entries without discarding successful cache
 });
 test('owned total multiplies Brickset prices by quantity and keeps regular collections unchanged',()=>{
   const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
-  const source=app.match(/function formatFigureCount\(value\)\{[^\n]+/)[0]+'\n'+app.match(/function updateStats\(\)\{[^\n]+/)[0];
+  const source=app.match(/function formatFigureCount\(value\)\{[^\n]+/)[0]+'\n'+app.match(/function money\(n,c='€'\)\{[^\n]+/)[0]+'\n'+app.match(/function updateStats\(\)\{[^\n]+/)[0];
   const elements=new Map();const $=key=>{if(!elements.has(key))elements.set(key,{});return elements.get(key);};
   const context={figures:[{source:'brickset',value:10,ownedQuantity:3,currencyCode:'EUR',brand:'LEGO'},{value:7,ownedQuantity:100,currencyCode:'EUR',brand:'Custom'}],isHidden:()=>false,isOwned:()=>true,isPreordered:()=>false,isWished:()=>false,totalCurrency:'EUR',exchangeRates:{EUR:1},ratesReady:true,money:n=>`${n}€`,currencySymbol:()=> '€',$,document:{querySelectorAll:()=>[]}};
   vm.createContext(context);vm.runInContext(source+'\nupdateStats();',context);
   assert.equal($('#ownedValue').textContent,'37€ estimated');
+  assert.equal(vm.runInContext('money(1456)',context),'1.456€');
+  assert.equal(vm.runInContext("money(1456,'$')",context),'$1.456');
   context.figures.push(...Array.from({length:1454},()=>({value:0,currencyCode:'EUR',brand:'LEGO'})));
   vm.runInContext('updateStats()',context);
   assert.equal($('#totalCount').textContent,'1.456');assert.equal($('#ownedStat').textContent,'1.456');
+});
+test('Brickset visibility requires a live owner sign-in, not a remembered account',()=>{
+  const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+  const helper=app.match(/function canReadBricksetCollection\(\)\{[^\n]+/)[0];
+  const context={SECRET_DEMO_MODE:false,window:{collectorFirebaseServices:{auth:{currentUser:null}}},localStorage:{getItem:()=> 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2'}};
+  vm.createContext(context);vm.runInContext(helper,context);
+  assert.equal(vm.runInContext('canReadBricksetCollection()',context),false);
+  context.window.collectorFirebaseServices.auth.currentUser={uid:'other'};
+  assert.equal(vm.runInContext('canReadBricksetCollection()',context),false);
+  context.window.collectorFirebaseServices.auth.currentUser={uid:'rh8WrITlLTXrsDj5mbJHzA1D4Bk2'};
+  assert.equal(vm.runInContext('canReadBricksetCollection()',context),true);
 });

@@ -5,7 +5,7 @@ const SECRET_DEMO_MODE = new URLSearchParams(location.search).has('realDB');
 const hasPersistedFirebaseUser = !!localStorage.getItem('minifig-firebase-user-id');
 const restoredFirebaseSheetId = sessionStorage.getItem('collector-restored-spreadsheet-id') || '';
 const GUEST_COLLECTIONS = ['Star Wars'];
-function canReadBricksetCollection(){return !SECRET_DEMO_MODE&&(window.collectorFirebaseAuthenticatedUser||window.collectorFirebaseUser||localStorage.getItem('minifig-firebase-user-id'))==='rh8WrITlLTXrsDj5mbJHzA1D4Bk2'}
+function canReadBricksetCollection(){return !SECRET_DEMO_MODE&&window.collectorFirebaseServices?.auth.currentUser?.uid==='rh8WrITlLTXrsDj5mbJHzA1D4Bk2'}
 function isBricksetCollection(name=activeCollection){return name==='Brickset'&&canReadBricksetCollection()}
 let SHEET_ID = SECRET_DEMO_MODE ? SECRET_DEMO_SHEET_ID : restoredFirebaseSheetId || (hasPersistedFirebaseUser ? localStorage.getItem('minifig-spreadsheet-id') || DEFAULT_SHEET_ID : DEFAULT_SHEET_ID);
 const isDemoMode = () => !SECRET_DEMO_MODE && SHEET_ID === DEFAULT_SHEET_ID;
@@ -67,7 +67,7 @@ function showLoadError(err){$('#resultCount').textContent='Could not load the Go
 function load(){updateDemoBadge();if(!SECRET_DEMO_MODE&&(hasPersistedFirebaseUser||restoredFirebaseSheetId))return;if(isDemoMode()){activeCollection='Star Wars';COLLECTIONS=['Star Wars'];figures=mapRows(window.DEMO_CATALOGUE||[]);renderFilters();render();loadExchangeRates();return}const callback=`sheetCallback${Date.now()}`;const script=document.createElement('script');window[callback]=json=>{try{figures=mapRows(googleRows(json));renderFilters();render();loadExchangeRates();}catch(err){showLoadError(err)}finally{delete window[callback];script.remove()}};script.src=endpoint(activeCollection,callback);script.onerror=()=>{delete window[callback];script.remove();showLoadError(new Error('Sheet request failed'))};document.head.append(script);}
 async function loadExchangeRates(){const codes=[...new Set(figures.map(f=>f.currencyCode).concat('USD',totalCurrency))].filter(code=>code!=='EUR');const cached=JSON.parse(localStorage.getItem('minifig-exchange-rates')||'null');if(cached?.rates){exchangeRates={EUR:1,...cached.rates};ratesReady=true;updateStats()}if(!codes.length)return;try{const response=await fetch(`https://api.frankfurter.dev/v2/rates?base=EUR&quotes=${codes.join(',')}`);if(!response.ok)throw Error('Exchange-rate request failed');const data=await response.json();exchangeRates={EUR:1,...Object.fromEntries(data.map(item=>[item.quote,item.rate]))};ratesReady=true;localStorage.setItem('minifig-exchange-rates',JSON.stringify({rates:exchangeRates,updated:Date.now()}));updateStats()}catch(err){console.warn('Using cached or unconverted currency values',err)}}
 function formatFigureCount(value){return Number(value||0).toLocaleString('de-DE',{maximumFractionDigits:0})}
-function money(n,c='€'){if(!n)return '—';const value=n.toLocaleString('en-US',{maximumFractionDigits:0});if(c==='€')return `${value}€`;if(c==='$'||c==='£')return `${c}${value}`;return `${value} ${c}`;}
+function money(n,c='€'){if(!n)return '—';const value=n.toLocaleString('de-DE',{maximumFractionDigits:0});if(c==='€')return `${value}€`;if(c==='$'||c==='£')return `${c}${value}`;return `${value} ${c}`;}
 function persist(){localStorage.setItem('minifig-owned',JSON.stringify([...selected]));localStorage.setItem('minifig-wished',JSON.stringify([...wished]));localStorage.setItem('minifig-not-owned',JSON.stringify([...removedOwned]));localStorage.setItem('minifig-not-wished',JSON.stringify([...removedWished]));}
 function spreadsheetId(value){const input=clean(value);const match=input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);return match?match[1]:/^[a-zA-Z0-9_-]{20,}$/.test(input)?input:''}
 const APP_NAME='Custom Minifigs Collector',LEGACY_APP_NAMES=[['Custom','Figure'+'s','Collector'].join(' '),['Custom','Minifig','Collector'].join(' ')];
@@ -818,7 +818,7 @@ rememberPhotoRefresh=fileId=>{
   privatePhotoRequests.delete(fileId);
 };
 load=async()=>{
-  if(isBricksetCollection())return window.collectorLoadBrickset?.();
+  if(activeCollection==='Brickset'){if(canReadBricksetCollection())return window.collectorLoadBrickset?.();return;}
   if(!usesAuthenticatedCatalogue())return publicCatalogueLoad();
   const revision=++authenticatedLoadRevision;
   updateDemoBadge();
