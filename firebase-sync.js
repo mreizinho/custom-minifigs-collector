@@ -330,6 +330,8 @@ function installSettingsUi() {
         explicitSignOutPending = true;
         await signOut(auth);
       } else {
+        const splashFinished = window.collectorSplash?.beforeInteraction();
+        if (splashFinished) await splashFinished;
         promptOnNextUserConnection = true;
         if (useRedirectSignIn) {
           sessionStorage.setItem(REDIRECT_SIGN_IN_KEY, '1');

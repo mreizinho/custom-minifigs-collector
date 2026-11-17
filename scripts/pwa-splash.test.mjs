@@ -43,6 +43,35 @@ test('onboarding is an actionable ready state; no pageshow/visibility replay han
   const p=launch();p.window.collectorSplash.mount();p.message();p.listeners.get('collector-onboarding-needed')();assert.equal(p.events.length,1);
   assert.equal(p.listeners.has('pageshow'),false);assert.equal(p.listeners.has('visibilitychange'),false);
 });
+test('interactive authorization waits for the animation and fade without waiting for collection data',async()=>{
+  const p=launch();p.window.collectorSplash.mount();let authorized=false;
+  const waiting=p.window.collectorSplash.beforeInteraction();waiting.then(()=>{authorized=true;});
+  assert.equal(authorized,false);p.message();p.tick(319);await Promise.resolve();assert.equal(authorized,false);
+  p.tick(1);await waiting;assert.equal(authorized,true);assert.equal(p.layer.removed,true);
+  assert.equal(p.window.collectorSplash.beforeInteraction(),null);
+});
+test('a failed animation still releases queued authorization at the safety deadline',async()=>{
+  const p=launch();p.window.collectorSplash.mount();const waiting=p.window.collectorSplash.beforeInteraction();
+  p.tick(8320);await waiting;assert.equal(p.layer.removed,true);
+});
+function sheetsAuthorization(p){
+  const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+  const acquire=app.split(/\r?\n/).find(line=>line.startsWith('function acquireSheetsToken('));
+  let popupCount=0;
+  p.window.collectorFirebaseUser='test-user';
+  p.window.google={accounts:{oauth2:{initTokenClient:options=>({requestAccessToken(){popupCount++;options.callback({access_token:'test-token',expires_in:3600});}})}}};
+  const request=vm.runInNewContext(acquire+'\nacquireSheetsToken',{window:p.window,google:p.window.google,APP_GOOGLE_CLIENT_ID:'test-client',GOOGLE_DRIVE_FILE_SCOPE:'drive.file',GOOGLE_IDENTITY_SCOPE:'openid',cacheSheetsAccessToken(){},rememberGoogleUser:async()=>{},sheetsAccessToken:''});
+  return{request,popupCount:()=>popupCount};
+}
+test('actual Sheets token entry point opens Google only after splash removal',async()=>{
+  const p=launch();p.window.collectorSplash.mount();const auth=sheetsAuthorization(p),result=auth.request();
+  assert.equal(auth.popupCount(),0);p.message();p.tick(319);await Promise.resolve();assert.equal(auth.popupCount(),0);
+  p.tick(1);assert.equal(await result,'test-token');assert.equal(auth.popupCount(),1);assert.equal(p.layer.removed,true);
+});
+test('ordinary browser sign-in retains synchronous popup launch',async()=>{
+  const auth=sheetsAuthorization(launch({installed:false})),result=auth.request();
+  assert.equal(auth.popupCount(),1);assert.equal(await result,'test-token');
+});
 test('production build ships the isolated supplied animation and splash resources',()=>{
   const root=new URL('../dist/',import.meta.url),html=fs.readFileSync(new URL('index.html',root),'utf8');
   for(const file of ['pwa-splash.js','pwa-splash.css','assets/splash/lego-splash.html','assets/splash/head1.svg','assets/splash/head2.svg','assets/splash/head3.svg'])assert.ok(fs.statSync(new URL(file,root)).size>0);

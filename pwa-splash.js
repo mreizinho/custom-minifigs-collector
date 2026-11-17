@@ -8,6 +8,8 @@
   const root = document.documentElement;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   let appReady = false, animationReady = false, finished = false, layer, frame;
+  let dismissed = false, releaseInteraction;
+  const interactionReady = new Promise(resolve => { releaseInteraction = resolve; });
   const inertElements = new Map();
   root.classList.add('pwa-splash-pending');
   function finish() {
@@ -17,11 +19,16 @@
     window.removeEventListener('message', animationComplete);
     root.classList.remove('pwa-splash-pending');
     for (const [element, wasInert] of inertElements) element.inert = wasInert;
+    function release() {
+      layer?.remove();
+      dismissed = true;
+      releaseInteraction();
+    }
     if (layer) {
       layer.classList.add('is-leaving');
       layer.setAttribute('aria-hidden', 'true');
-      setTimeout(() => layer.remove(), reduce.matches ? 0 : 320);
-    }
+      setTimeout(release, reduce.matches ? 0 : 320);
+    } else release();
     document.dispatchEvent(new CustomEvent('pwa-splash-complete'));
   }
   function maybeFinish() { if (appReady && animationReady) finish(); }
@@ -36,6 +43,14 @@
   const deadline = setTimeout(finish, 8000);
   window.collectorSplash = {
     ready() { appReady = true; maybeFinish(); },
+    beforeInteraction() {
+      if (dismissed) return null;
+      // Authorization needs user interaction, so reveal that state after the
+      // complete animation instead of waiting for a token behind the splash.
+      appReady = true;
+      maybeFinish();
+      return interactionReady;
+    },
     mount() {
       layer = document.getElementById('pwaSplash');
       if (!layer || finished) { layer?.remove(); return; }

@@ -42,8 +42,13 @@ HTML. The white background, synchronized expressions, and 3.4-second morph
 animation are unchanged. The frame signals completion on the supplied
 head-motion animationend (immediately with reduced motion). `pwa-splash.js`
 then waits for the initial demo/sheet/Brickset
-result or an actionable error/onboarding state before fading for 300ms. An
-8-second safety deadline releases the UI even if startup or the frame fails.
+result or an actionable error/onboarding state before fading for 300ms.
+Google Sheets authorization and Firebase sign-in use `beforeInteraction()` to
+wait for the animation and fade to finish before opening a Google popup. An
+authorization requirement counts as an actionable ready state, avoiding a
+dependency cycle between splash dismissal and token acquisition. Once the
+splash is gone, ordinary sign-in clicks remain synchronous up to popup launch.
+An 8-second safety deadline releases the UI even if startup or the frame fails.
 It never waits for all 2,188 photos or background prices. A saved Brickset
 snapshot counts as ready. Returning from another app does not replay it.
 Ordinary browser tabs load no splash frame. No dependency or service-worker
