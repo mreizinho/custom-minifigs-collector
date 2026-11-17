@@ -25,6 +25,9 @@ declares cover in HTML so it is available before JavaScript; the early script
 removes it outside installed Android apps. Runtime light/dark switching remains.
 This trials BrickGEST's matching startup declarations; it does not establish
 that dynamic navigation-bar changes work on physical Android hardware.
+The manifest response requires HTTP revalidation on each request rather than
+allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
+update schedule or guarantee an installed-package update.
 
 Icons are rasterized from the existing vector head mark with no third-party
 image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
