@@ -45,9 +45,31 @@ test('onboarding is an actionable ready state; no pageshow/visibility replay han
 });
 test('production build ships the isolated supplied animation and splash resources',()=>{
   const root=new URL('../dist/',import.meta.url),html=fs.readFileSync(new URL('index.html',root),'utf8');
-  for(const file of ['pwa-splash.js','pwa-splash.css','assets/splash/lego-splash.html'])assert.ok(fs.statSync(new URL(file,root)).size>0);
+  for(const file of ['pwa-splash.js','pwa-splash.css','assets/splash/lego-splash.html','assets/splash/head1.svg','assets/splash/head2.svg','assets/splash/head3.svg'])assert.ok(fs.statSync(new URL(file,root)).size>0);
   assert.match(html,/window\.collectorSplash\?\.mount\(\)/);
   const art=fs.readFileSync(new URL('assets/splash/lego-splash.html',root),'utf8');
   assert.ok(!art.includes('id="replay"'));assert.match(art,/prefers-reduced-motion:reduce/);
-  assert.match(art,/reduce\.matches\?250:2750/);
+  assert.match(art,/head-motion 3\.4s/);
+  assert.match(art,/show-eyes\{0%,30%\{opacity:0\}43%,100%\{opacity:1\}/);
+  assert.match(art,/show-two\{0%,30%\{opacity:0\}43%,63%\{opacity:1\}/);
+  assert.ok(!art.includes('<div class="controls">'));
+});
+function morph({reduced=false}={}) {
+  const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
+  const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const messages=[],microtasks=[];let end,changed;
+  const art={addEventListener:(name,fn)=>{assert.equal(name,'animationend');end=fn;}};
+  const reduce={matches:reduced,addEventListener:(name,fn)=>{assert.equal(name,'change');changed=fn;}};
+  vm.runInNewContext(script,{document:{querySelector:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
+  return{art,messages,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
+}
+test('morph reports completion once, only when its root head-motion animation finishes',()=>{
+  const p=morph();assert.equal(p.messages.length,0);
+  p.end({target:p.art,animationName:'show-eyes'});p.end({target:{},animationName:'head-motion'});assert.equal(p.messages.length,0);
+  p.end({target:p.art,animationName:'head-motion'});p.end({target:p.art,animationName:'head-motion'});
+  assert.equal(p.messages.length,1);assert.equal(p.messages[0].message.type,'collector-splash-animation-complete');assert.equal(p.messages[0].origin,'https://test.example');
+});
+test('morph reduced-motion completes without waiting for an animationend, including preference changes',()=>{
+  const initial=morph({reduced:true});initial.flush();assert.equal(initial.messages.length,1);
+  const later=morph();later.change({matches:true});assert.equal(later.messages.length,1);
 });

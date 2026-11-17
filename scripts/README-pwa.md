@@ -36,10 +36,12 @@ image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
 
 Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
 isolated iframe. Its SVG and style block are verbatim from the supplied
-`lego-splash-reference-colors.zip`; only the demo UI/controller were replaced. The
-white background and 2.4-second artwork animation are intentionally unchanged.
-The frame signals completion at the supplied 2.75-second mark (250ms with
-reduced motion). `pwa-splash.js` then waits for the initial demo/sheet/Brickset
+`lego-head-morph-synced.zip`; only the demo controls/hint/controller were replaced.
+The original head1/head2/head3 SVG files are retained alongside the integrated
+HTML. The white background, synchronized expressions, and 3.4-second morph
+animation are unchanged. The frame signals completion on the supplied
+head-motion animationend (immediately with reduced motion). `pwa-splash.js`
+then waits for the initial demo/sheet/Brickset
 result or an actionable error/onboarding state before fading for 300ms. An
 8-second safety deadline releases the UI even if startup or the frame fails.
 It never waits for all 2,188 photos or background prices. A saved Brickset

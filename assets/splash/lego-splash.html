@@ -1,82 +1,115 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff"><title>LEGO splash</title>
-<style>
-:root{color-scheme:light;--bg:#ffffff}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg)}
-.splash{position:fixed;inset:0;display:grid;place-items:center;background:#ffffff;z-index:9999;transition:opacity .3s ease,visibility .3s ease}
-.splash.done{opacity:0;visibility:hidden;pointer-events:none}
-.logo{width:min(65vw,260px);height:auto;overflow:visible;transform-origin:50% 50%;animation:logo-in 2.4s cubic-bezier(.2,.7,.2,1) both}
-.head{transform-box:fill-box;transform-origin:center;animation:head-move 2.4s ease-in-out both}
-.color{fill:#fff;animation:paint 2.4s ease-out both}.stud-color{animation:stud-paint 2.4s ease-out both}.base-color{animation:base-paint 2.4s ease-out both}.shine{opacity:0;animation:shine 2.4s ease-out both}.face{opacity:0;animation:face-in 2.4s ease-out both}
-.left-eye,.right-eye{transform-box:fill-box;transform-origin:center}.left-eye{animation:left-blink 2.4s both}.right-eye{animation:right-blink 2.4s both}.normal-mouth{animation:normal-smile 2.4s both}.wink-eye,.tongue-face{opacity:0;animation:tongue-out 2.4s both}.shade{opacity:0;animation:shine 2.4s both}.brow{opacity:0;animation:face-in 2.4s both}
-@keyframes paint{0%,22%{fill:#fff}57%,100%{fill:#fec818}}
-@keyframes stud-paint{0%,22%{fill:#fff}57%,100%{fill:#fec818}}
-@keyframes base-paint{0%,22%{fill:#fff}57%,100%{fill:#fec818}}
-@keyframes shine{0%,35%{opacity:0}70%,100%{opacity:1}}
-@keyframes face-in{0%,43%{opacity:0}60%,100%{opacity:1}}
-@keyframes logo-in{0%{opacity:0;transform:scale(.78)}17%{opacity:1;transform:scale(1)}58%{transform:scale(1.08)}73%{transform:scale(.96)}88%,100%{transform:scale(1)}}
-@keyframes head-move{0%,24%{transform:rotate(0deg)}48%{transform:rotate(-12deg)}67%{transform:rotate(-7deg)}83%,100%{transform:rotate(-10deg)}}
-@keyframes left-blink{0%,55%,95%,100%{opacity:1;transform:scaleY(1)}61%,85%{opacity:0;transform:scaleY(.15)}}
-@keyframes right-blink{0%,48%,100%{transform:scaleY(1)}51%{transform:scaleY(.1)}}
-@keyframes normal-smile{0%,53%,92%,100%{opacity:1}59%,87%{opacity:0}}
-@keyframes tongue-out{0%,53%,92%,100%{opacity:0}60%,86%{opacity:1}}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>LEGO Head · Morph Splash</title><style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,sans-serif}*{box-sizing:border-box}body{margin:0;min-height:100svh;background:#fff;display:grid;place-items:center;color:#333}.shell{width:min(94vw,650px);text-align:center}.art-frame{width:100%;aspect-ratio:841.9/595.3;display:grid;place-items:center}.lego-art{width:100%;height:100%;overflow:visible;transform-origin:50% 54%;animation:head-motion 3.4s cubic-bezier(.25,.75,.25,1) both}.stage-main{opacity:0;animation:show-main 3.4s ease both}.stage-two{opacity:0;animation:show-two 3.4s ease both}.stage-eyes{opacity:0;animation:show-eyes 3.4s ease both}.stage-three{opacity:0;animation:show-three 3.4s ease both}.controls{display:flex;justify-content:center;gap:14px;align-items:center;margin-top:0.5rem}button{background:#212121;color:white;border:0;border-radius:999px;padding:12px 22px;font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #efb81e;outline-offset:3px}.hint{font-size:.9rem;color:#777;margin-top:1rem}
+@keyframes show-main{0%,20%{opacity:0}36%,100%{opacity:1}}@keyframes show-two{0%,30%{opacity:0}43%,63%{opacity:1}72%,100%{opacity:0}}@keyframes show-eyes{0%,30%{opacity:0}43%,100%{opacity:1}}@keyframes show-three{0%,64%{opacity:0}78%,100%{opacity:1}}@keyframes head-motion{0%,25%{transform:translateY(0) rotate(0deg) scale(1)}39%{transform:translateY(-10px) rotate(-3deg) scale(1.025)}49%{transform:translateY(1px) rotate(2deg) scale(.995)}60%{transform:translateY(-3px) rotate(0deg) scale(1.008)}70%{transform:translateY(0) rotate(0deg) scale(1)}79%{transform:translateY(-9px) rotate(4deg) scale(1.03)}88%{transform:translateY(2px) rotate(-2deg) scale(.99)}100%{transform:translateY(0) rotate(0deg) scale(1)}}
+@media(prefers-reduced-motion:reduce){.lego-art,.stage-main,.stage-two,.stage-three,.stage-eyes{animation:none!important}.stage-main,.stage-three,.stage-eyes{opacity:1}.stage-two{opacity:0}}
+</style></head><body><main class="shell"><div class="art-frame" id="stage"><svg xmlns="http://www.w3.org/2000/svg" xmlns:affinity="https://www.affinity.studio/" id="Layer_1" version="1.1" viewBox="0 0 841.9 595.3" class="lego-art" role="img" aria-label="Animated LEGO-style face" preserveAspectRatio="xMidYMid meet">
+  <!-- Generator: Adobe Illustrator 31.0.0, SVG Export Plug-In . SVG Version: 2.1.5 Build 84)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke: #000;
+        stroke-linejoin: round;
+        stroke-width: 9.8px;
+      }
 
-@media(prefers-reduced-motion:reduce){.logo,.head,.color,.shine,.face,.left-eye,.right-eye,.normal-mouth,.wink-eye,.tongue-face,.shade,.brow{animation:none!important}.color{fill:#fec818}.stud-color{fill:#fec818}.base-color{fill:#fec818}.shine,.face,.brow,.shade{opacity:1}.wink-eye,.tongue-face{opacity:0}.splash{transition:none}}
-.demo{min-height:100dvh;display:grid;place-items:center;padding:2rem;font:500 1rem system-ui,sans-serif;color:#191919;text-align:center}.demo button{border:2px solid #111;border-radius:12px;background:#ffd804;padding:.8rem 1.2rem;font:inherit;cursor:pointer}
-</style>
-</head>
-<body>
-<div class="splash" id="splash" role="status" aria-label="Loading application">
-<svg class="logo" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
- <defs>
-  <clipPath id="body-clip"><path d="M75.934 84.288c6.301 0 11.43-5.128 11.43-11.431v-40.21c0-6.301-5.129-11.429-11.43-11.429H24.066c-6.303 0-11.43 5.128-11.43 11.429v40.21c0 6.303 5.127 11.431 11.43 11.431h51.868z"/></clipPath>
-  <clipPath id="stud-clip"><path d="M67.807 8.535c0-1.279-1.037-2.318-2.316-2.318H34.509c-1.279 0-2.318 1.04-2.318 2.318v9.725h35.616V8.535z"/></clipPath>
- </defs>
- <g class="head">
-  <!-- Original source geometry, adapted into separate animatable layers -->
-  <path class="color stud-color" d="M67.807 8.535c0-1.279-1.037-2.318-2.316-2.318H34.509c-1.279 0-2.318 1.04-2.318 2.318v9.725h35.616V8.535z"/>
-  <path class="color" d="M75.934 84.288c6.301 0 11.43-5.128 11.43-11.431v-40.21c0-6.301-5.129-11.429-11.43-11.429H24.066c-6.303 0-11.43 5.128-11.43 11.429v40.21c0 6.303 5.127 11.431 11.43 11.431h51.868z"/>
-  <rect class="color base-color" x="26.566" y="87.244" width="46.866" height="5.883"/>
-  <!-- Reference palette and fixed-position facets; no moving color overlays. -->
-  <g clip-path="url(#stud-clip)" class="shine">
-   <path fill="#ffdb73" d="M35 4H40V20H35Z"/>
-   <path fill="#fec818" d="M40 4H70V20H40Z"/>
-  </g>
-  <g clip-path="url(#body-clip)" class="shine">
-   <!-- Right-side shadow is a single continuous amber facet. -->
-   <path fill="#efb81e" d="M70 22Q81 24 84 33L84 75Q83 81 76 83L45 84Q69 79 73 66Q76 57 76 37Q76 29 70 22Z"/>
-   <!-- Tall pale left reflection, tucked behind the bright center. -->
-   <path fill="#ffdb73" d="M23 22Q17 26 15 34L15 72Q15 82 29 84L32 84Q24 78 23 69L23 29Q23 24 26 22Z"/>
-   <path fill="#fff5bf" d="M20 27Q23 23 26 27Q28 31 24 34Q21 36 19 33Q18 30 20 27Z"/>
-   <path fill="#fff5bf" d="M18 64Q20 61 21 67L22 73Q23 77 29 81Q34 84 30 84Q17 81 17 73L17 67Q17 65 18 64Z"/>
-   <!-- Subtle upper-right light rim and bottom-right glint. -->
-   <path fill="#ffdb73" d="M73 23Q85 25 86 37L86 72Q86 81 78 83L67 85Q65 85 70 83Q84 80 84 72L84 37Q84 29 73 23Z"/>
-   <path fill="#fff5bf" d="M68 83Q77 82 82 78Q78 84 68 84Z"/>
-  </g>
-  <path d="M76.393 96.084v-8.852c7.721-.242 13.928-6.596 13.928-14.375v-40.21c0-7.932-6.455-14.387-14.387-14.387h-5.17V8.535c0-2.909-2.367-5.275-5.273-5.275H34.509c-2.909 0-5.275 2.366-5.275 5.275v9.725h-5.168c-7.933 0-14.387 6.455-14.387 14.387v40.21c0 7.779 6.208 14.133 13.929 14.375v8.852h52.785zM73.432 93.127H26.566v-5.883h46.866v5.883zM32.191 8.535c0-1.279 1.039-2.318 2.318-2.318H65.49c1.279 0 2.316 1.04 2.316 2.318v9.725H32.191V8.535zM12.636 72.857v-40.21c0-6.301 5.127-11.429 11.43-11.429h51.868c6.301 0 11.43 5.128 11.43 11.429v40.21c0 6.303-5.129 11.431-11.43 11.431H24.066c-6.303 0-11.43-5.128-11.43-11.431z" fill="#3c3c3b"/>
-  <g class="face" fill="#3c3c3b">
-   <g class="left-eye"><circle cx="37.744" cy="48.038" r="4.153"/><circle cx="36.5" cy="46.8" r="1.5" fill="#fff"/></g>
-   <g class="right-eye"><circle cx="62.256" cy="48.038" r="4.153"/><circle cx="61" cy="46.8" r="1.5" fill="#fff"/></g>
-   <path class="normal-mouth" d="M36.82 62.893c-.673.675-.67 1.769.005 2.439 3.646 3.633 8.436 5.449 13.226 5.449s9.581-1.816 13.223-5.449c.676-.671.68-1.765.008-2.439-.674-.675-1.766-.676-2.441-.005-5.949 5.928-15.629 5.928-21.581 0-.676-.671-1.767-.67-2.44.005z"/>
-   <g class="wink-eye"><path d="M31 47q5-8 11-3q-7-1-11 5Z"/></g>
-   <g class="tongue-face">
-    <path d="M34 62Q49 67 66 57Q66 70 52 73Q40 75 34 62Z" fill="#3c3c3b"/>
-    <path d="M47 69Q51 68 55 65L58 77Q57 83 51 83Q46 83 45 78Z" fill="#ef665b" stroke="#3c3c3b" stroke-width="1.6"/>
-    <path d="M51 69L53 77" stroke="#9b3536" stroke-width="1.4" fill="none"/>
-    <path d="M47 78q4 4 9 0" stroke="#ffb6a3" stroke-width="1.2" fill="none"/>
-   </g>
-   <path class="brow" d="M31 40q4-6 10-5M57 35q5-6 12-2" fill="none" stroke="#3c3c3b" stroke-width="2.4" stroke-linecap="round"/>
-  </g>
- </g>
-</svg>
-</div>
+      .st1 {
+        fill: #fff;
+      }
 
-<script>
-const reduce=matchMedia('(prefers-reduced-motion: reduce)');
-function complete(){parent.postMessage({type:'collector-splash-animation-complete'},location.origin)}
-let finish=setTimeout(complete,reduce.matches?250:2750);
-reduce.addEventListener('change',event=>{if(event.matches){clearTimeout(finish);complete()}});
-</script>
-</body></html>
+      .st1, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10 {
+        fill-rule: evenodd;
+      }
+
+      .st2 {
+        fill: #fff5bf;
+      }
+
+      .st3 {
+        fill: #b22e26;
+      }
+
+      .st4 {
+        fill: #efb81e;
+      }
+
+      .st5 {
+        fill: #ffdb73;
+      }
+
+      .st6, .st11 {
+        fill: #c09d18;
+      }
+
+      .st12 {
+        display: none;
+      }
+
+      .st7 {
+        fill: #212121;
+      }
+
+      .st9 {
+        fill: #000100;
+      }
+
+      .st10 {
+        fill: #fec818;
+      }
+    </style>
+  </defs>
+  <g id="outline-art">
+    <g id="Head" class="stage-main">
+      <g>
+        <path class="st10" d="M312,145.8c71-12.4,142-24.1,212.2-36.5,0-15,0-29.9-.9-44.8,1.7-11.7,9.4-29.2-10-34.2-77.8-10.8-151.2-3-188.4,7.8-16,5-18,18.1-16.3,41.3C310.3,101,311.2,123.4,312,145.8Z"/>
+        <path class="st5" d="M359.5,101l-24.5.8-.9-52.3,27.9-6.7L359.5,101H359.5ZM330.7,51.1l-5.9.9,1.7,49h5.9L330.7,51.1Z"/>
+        <path class="st10" d="M268,468.8c102.3,11.6,203.8,22.4,306.1,34v30.7c0,13.3-10.2,23.3-40.6,26.6-104,10-189.4,8.3-252.8-6.6-11-3.4-16.9-9.2-15.2-20Q266.8,499.9,268,468.8Z"/>
+        <path class="st4" d="M276.5,510.4v7.5c-.9,4.2,2.5,6.6,7.6,7.5,43.1,6.6,87.1,13.3,260.4,3.3,14.3-1.7,19.4-5,18.6-9.1,0-5-.9-10-.9-15C464.2,525.4,370.3,519.6,276.5,510.4Z"/>
+        <path class="st10" d="M621.4,136.7c-91.3-54-261.2-42.4-362.7-21.6-28.7,7.5-74.4,29.1-74.4,75.6v139.4c.9,34.1,1.7,68.9,2.6,103,.8,33.2,10.1,62.3,49,76.4,107.4,24.9,230.9,7.7,361.8,2.5,31.3-4.2,49.9-22.5,50.8-60.7,2.5-44,5-88.8,6.7-132.8-.8-41.5-1.7-82.2-2.5-123.7C650.1,166.6,640,146.6,621.4,136.7Z"/>
+        <path class="st5" d="M285.8,520.3c9.3,4.1,17.7,6.2,27,10.3-.8,14.3-.8,18.4.9,34.9-9.3-6.2-18.6-8.3-27.9-14.4C285.8,538.8,286.6,534.7,285.8,520.3Z"/>
+        <path class="st5" d="M643.4,189.8c-2.6-39.9-23.2-53.3-43.5-59.1-112.4-34.9,5.9,34.2,10.1,46.7-.8,97.1-2.5,194.2-3.4,291.4,0,9.1-16.9,12.4-28.7,18.2-5.9,2.5-98.9,27.4-45.7,21.6,11-.8,63.4-10.8,74.4-13.2,14.4-5.9,34.4-21.1,36.1-34.4C646.1,370.5,645.9,274.4,643.4,189.8Z"/>
+        <path class="st4" d="M562.3,152.5q-3.8-5-7.6-10c-8.5-10.8-8.5-15.8,4.2-11.6,40.6,10.8,60,31.5,59.2,61.4q1.3,122.1,2.5,244.1c-1.7,16.6,1.7,34.9-25.3,47.3-22.9,13.3-54.1,19.1-91.3,19.1-40.6.9-80.3.9-120.9,1.7,32.9-7.5,65.9-15,99.7-22.4,108.2-22.4,82-153.6,85.4-196C566.5,227.2,577.5,165.7,562.3,152.5Z"/>
+        <path class="st5" d="M280.7,120.1l-34.6,9.9c-11.9,5-46.5,17.5-47.4,52.3v234.2s.9,67.2,36.4,79.7c16.9,5.8,44.8,10.8,62.5,13.3,9.3-5-31.3-14.1-38.9-74.8-5-36.5-2.5-176-2.5-215.8C256.2,157.4,255.4,132.5,280.7,120.1Z"/>
+        <path class="st2" d="M235.6,439.4c-1.7-11.6-2.5-23.2-4.2-34-7.6-14.9-14.4-24.9-16.9-.8,0,12.4.8,24,.8,36.5.9,10,5.1,20.8,21.1,34.9,13.6,7.4,27.9,13.3,43.2,16.6,15.2,1.6,15.2-.9,5.9-6.7-12.7-8.3-25.4-16.6-38.9-24.9C240.7,454.4,236.4,447.7,235.6,439.4Z"/>
+        <path class="st2" d="M257,142.5c-8.4-4.2-20.2.8-26.2,11.6-5.9,10.8-3.3,23.3,5.1,27.4s20.3-.8,26.2-11.6C268,158.3,265.5,146.6,257,142.5Z"/>
+      </g>
+      <path class="st8 stage-eyes" d="M314.6,280.6c0-18.9,14.3-34.3,32-34.3s32.1,15.4,32.1,34.3-14.4,34.4-32.1,34.4S314.6,299.6,314.6,280.6Z"/>
+      <path class="st8 stage-eyes" d="M447,280.6c0-18.9,14.3-34.3,32-34.3s32,15.4,32,34.3-14.3,34.4-32,34.4S447,299.6,447,280.6Z"/>
+      <g class="stage-three">
+        <g>
+          <path class="st7" d="M284.7,349.3s20.8-25.2,34.2-25.8c0,0-1.1,10.2,0,17.2,1,7,38.4,17.2,93.9,17.2s100.9-24.2,111-30.1c10.2-5.9,21.4,11.3,21.4,17.2s-6.4,7.5-12.8,4.3c-6.4-3.2-12.3-4.8-12.8,8.6-.6,13.4-11.8,91.1-81.2,103-69.4,11.7-103.5-17.2-115.3-47.3-11.7-30-8.5-60-8.5-60C314.6,353.6,277.8,360.5,284.7,349.3Z"/>
+          <path class="st1" d="M331.7,366.5s0,19.8,4.3,25.7c4.2,5.9,60.3,14.5,89.6,12.9,29.4-1.6,63.5-4.9,68.4-12.9,4.8-8.1,11.2-31.7,8.5-34.3-2.7-2.7-22.4,12.8-89.7,12.8S330.1,357.9,331.7,366.5Z"/>
+          <path class="st3" d="M357.3,433c0-13.5,23.9-19.4,53.4-19.4s53.4,10.8,53.4,19.4-23.9,19.3-53.4,19.3S357.3,446.4,357.3,433Z"/>
+        </g>
+        <path class="st6" d="M263.4,280.6c0-4.7,4.7-8.5,10.6-8.5s10.7,3.8,10.7,8.5-4.8,8.6-10.7,8.6S263.4,285.4,263.4,280.6Z"/>
+        <path class="st6" d="M549.5,280.6c0-4.7,4.7-8.5,10.6-8.5s10.7,3.8,10.7,8.5-4.8,8.6-10.7,8.6S549.5,285.4,549.5,280.6Z"/>
+        <path class="st9" d="M374.4,190.5s-29.9-1-59.8,12.9c-29.9,13.9-30.4,8.6-25.6,0,4.8-8.6,11.7-20.4,38.4-25.7,26.7-5.4,56.1-9.7,59.8-4.3,3.7,5.3.5,17.7-4.3,17.1C378.1,190,374.4,190.5,374.4,190.5Z"/>
+        <path class="st7" d="M468.3,173.4c-13.3-.6-22.4,0-29.9,4.3-7.4,4.3-2.6,12.8,12.9,17.1,15.4,4.3,38.9-2.1,55.5,4.3,16.5,6.5,24,15,29.8,17.2,5.9,2.1-8.5-20.9-25.6-30.1C494,177.1,481.7,173.9,468.3,173.4Z"/>
+      </g>
+      <g id="Generative_Object" class="stage-two">
+        <path d="M356.1,411.7c-2-.8-3.8-2-4.5-3.9s.4-4.1,2.5-4.6,2.4-.3,3.7-.2c9.3.7,18.3,1.3,27.7,1.2,21.2-.2,49.7-2.1,69.5-8.6,13-4.3,24.2-11.4,29.5-24.2l-10.5-1.9c-1.3-.2-2.4-1.1-2.6-2.1s.2-2.6,1.4-3.3c3.3-2,7-2.8,11-2.8,8.4,0,16.5,3.2,21.7,9.6,3.3,3.9,6.2,11.1,3.5,13.2s-8.8-5.9-13.9-8.4c-4.1,14.7-15.9,24.6-29.3,30.3-7.1,2.9-14.1,4.9-21.6,6.4-21.7,4.4-48.5,6.2-70.4,3.5C367.7,415.2,361.9,414,356.1,411.7Z"/>
+        <path d="M313.1,217.7c-9.9,2.7-20,7.4-26,15.9s-4.7,3.9-6.7,2.4-1.1-4.8-.4-6.9c7.9-24.8,37.2-32.4,60.9-34.1,12.9-1,25.4,0,38.1,1.9,3.9.5,7.3,1.9,9.1,5.4s1.6,7.6-.6,10.9-6.7,4.7-10.9,3.9C355.9,212.9,333.6,212.2,313.1,217.7Z"/>
+        <path d="M548.7,234.5c-2.5-.6-3.6-2.6-4.6-4.7-4.6-9.6-15.8-16.1-25.5-20-17.8-7.2-38.4-9.4-57.5-8.2-5.7.4-10.7-3.4-11.3-9.1s3.8-11.2,10-11.2c11.6-.2,22.8.4,34.3,2.5,10.9,2,21.4,5.1,31.3,10.2,12.6,6.6,23.8,16.4,26.7,30.8S552.6,235.6,548.7,234.5Z"/>
+        <path class="st11" d="M396.2,441.9c-3.7-1.1-9.2-3.2-8.8-5.8s3.9-2,7-1.8c16.4,1.2,32.4-.9,47.8-6.3,1.7-.6,3.7-1.1,5.2-.2s.4,2.6-.3,3.4c-1.9,2.4-4.2,4.1-6.9,5.7-6.2,3.6-12.9,5.7-20.1,6.5C412,444.4,404.1,444.1,396.2,441.9Z"/>
+      </g>
+    </g>
+    <path class="st1 stage-eyes" d="M336,267.8c0-7.1,4.7-12.9,10.6-12.9s10.7,5.8,10.7,12.9-4.8,12.8-10.7,12.8S336,274.9,336,267.8Z"/>
+    <path class="st1 stage-eyes" d="M468.3,267.8c0-7.1,4.8-12.9,10.7-12.9s10.7,5.8,10.7,12.9-4.8,12.8-10.7,12.8S468.3,274.9,468.3,267.8Z"/>
+    <path class="st0" d="M577.7,571.5v-52.6c45.9-1.5,82.8-39.3,82.8-85.5v-239.2c0-47.2-38.4-85.6-85.5-85.6h-30.8v-57.8c0-17.3-14.1-31.4-31.4-31.4h-184.2c-17.3,0-31.4,14.1-31.4,31.4v57.8h-30.7c-47.2,0-85.6,38.4-85.6,85.6v239.2c0,46.2,36.9,84,82.8,85.5v52.6H577.7ZM560.1,553.9h-278.8v-35h278.8V553.9ZM314.8,50.8c0-7.6,6.2-13.8,13.8-13.8h184.2c7.6,0,13.8,6.2,13.8,13.8v57.8h-211.8v-57.8h0ZM198.5,433.4v-239.2c0-37.5,30.5-68,68-68h308.5c37.4,0,67.9,30.5,67.9,68v239.2c0,37.4-30.5,67.9-67.9,67.9h-308.5c-37.5,0-68-30.5-68-67.9H198.5Z"/>
+  </g>
+</svg></div></main><script>
+(() => {
+  const art = document.querySelector('#stage svg');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  let completed = false;
+  function complete() {
+    if (completed) return;
+    completed = true;
+    parent.postMessage({type:'collector-splash-animation-complete'}, location.origin);
+  }
+  art.addEventListener('animationend', event => {
+    if (event.target === art && event.animationName === 'head-motion') complete();
+  });
+  if (reduce.matches) queueMicrotask(complete);
+  reduce.addEventListener('change', event => { if (event.matches) complete(); });
+})();
+</script></body></html>
