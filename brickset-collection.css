@@ -13,5 +13,11 @@
 .brickset-collection-active .wish{display:none}
 .brickset-collection-active [data-stat-filter="owned"]{cursor:default;opacity:1}
 .brickset-collection-active .filters label[hidden]{display:none}
+.brickset-pagination{display:flex;align-items:center;justify-content:center;gap:16px;grid-column:1/-1;margin:0 0 16px;color:var(--muted);font-size:14px}
+.brickset-pagination[hidden]{display:none}
+.brickset-pagination-bottom{margin:20px 0 0}
+.brickset-pagination button{border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 14px;font:inherit}
+.brickset-pagination button:hover:not(:disabled){background:var(--ink);color:var(--paper)}
+.brickset-pagination button:disabled{opacity:.4;cursor:default}
 @media(min-width:601px){.brickset-refresh .material-symbols-rounded{font-size:19px}}
 @media(max-width:600px){.brickset-sync-bar{font-size:12px}.brickset-refresh{top:10px;right:10px}}

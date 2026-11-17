@@ -11,21 +11,27 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, coll
   const storage = new Map(), elements = new Map();
   if (cached) storage.set(`collector-brickset-cache-v1-${owner}`, JSON.stringify(cached));
   if (cachedPrices) storage.set(`collector-brickset-prices-v1-${owner}`, JSON.stringify(cachedPrices));
-  const element = () => ({ hidden: false, disabled: false, textContent: '', innerHTML: '',
-    classList: { toggle() {}, remove() {}, add() {} }, style:{removeProperty(){}},before() {}, after() {}, append() {}, setAttribute() {}, replaceChildren() {}, querySelectorAll: () => [] });
+  const element = () => {
+    const children=new Map();
+    return { hidden: false, disabled: false, textContent: '', innerHTML: '',
+      classList: { toggle() {}, remove() {}, add() {} }, style:{removeProperty(){}},before() {}, after() {}, append() {}, setAttribute() {}, replaceChildren() {}, scrollIntoView() {}, querySelectorAll: () => [],
+      querySelector(selector){if(!children.has(selector))children.set(selector,element());return children.get(selector);}
+    };
+  };
   const totalCard=element();
   totalCard.closest=()=>totalCard;
   const ownedButton=element(),valueButton=element();
   ownedButton.closest=valueButton.closest=()=>totalCard;
   const status = element(), refresh = element(), bar = element();
+  const pagers=[],rendered=[];
   bar.querySelector = selector => selector === 'button' ? refresh : status;
   const $ = selector => { if (!elements.has(selector)) elements.set(selector, element());const result=elements.get(selector);result.closest=()=>selector==='#ownedStat'?ownedButton:selector==='#ownedValue'?valueButton:totalCard;return result; };
   const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener() {}, matchMedia:()=>({matches:false}) },
-    document: { createElement: tag => tag === 'div' ? bar : element(), body: element(), querySelectorAll: () => [], querySelector: () => null }, $,
+    document: { createElement: tag => {if(tag==='div')return bar;const created=element();if(tag==='nav')pagers.push(created);return created;}, body: element(), querySelectorAll: () => [], querySelector: () => null }, $,
     fetch: (url, options) => url.endsWith('/prices') ? (priceFetcher ? priceFetcher(url, options) : Promise.resolve(Response.json({prices:[],errors:[{error:'No test prices'}]}))) : fetcher(url, options),
     localStorage: { getItem: k => storage.get(k) || null, setItem: (k,v) => storage.set(k,v) },
     activeCollection: 'Brickset', COLLECTIONS: [...collections], figures: [], authenticatedLoadRevision: 0,
-    canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() { context.updateStats(); }, openDetail() {},
+    canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() { rendered.push([...context.filtered()].map(row=>row.id));context.updateStats(); }, openDetail() {},
     collectionMenuElement: { querySelectorAll: () => [] }, rebuildCollectionChoices() {},
     toggleOwned() {}, toggleWished() {}, openRenameCollection() {}, deleteCollection() {}, selectCollection() {},
     queueMicrotask() {}, AbortSignal, AbortController, setTimeout, clearTimeout, updateStats() {}, loadExchangeRates() {}, money: n => String(n),formatFigureCount:n=>Number(n).toLocaleString('de-DE')
@@ -33,7 +39,7 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, coll
   context.isBricksetCollection = (name = context.activeCollection) => name === 'Brickset' && uid === owner;
   context.filtered = () => context.figures;
   vm.createContext(context); vm.runInContext(code, context);
-  return { context, status, refresh, storage, elements };
+  return { context, status, refresh, storage, elements, pagers, rendered };
 }
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {
   let request;
@@ -121,4 +127,22 @@ test('late prices cannot overwrite figures after switching collection',async()=>
   context.selectCollection('Star Wars');context.activeCollection='Star Wars';context.figures=[{value:123}];
   finish(Response.json({prices:[{code:'sw0971',averageNewPrice:99,currency:'EUR'}],errors:[]}));
   await new Promise(resolve=>setTimeout(resolve,0));assert.equal(context.figures[0].value,123);
+});
+test('large collections render only one page while search and details retain every figure',async()=>{
+  const large={...snapshot,figures:Array.from({length:2188},(_,i)=>({...snapshot.figures[0],code:`fig${String(i+1).padStart(4,'0')}`}))};
+  const {context,pagers,rendered,elements}=client(async()=>Response.json(large),{cached:large});
+  await context.window.collectorLoadBrickset();
+  assert.equal(context.figures.length,2188);
+  assert.equal(context.filtered().length,2188);
+  assert.equal(rendered.length,1,'unchanged fresh data must not rebuild the cached catalogue');
+  assert.equal(rendered[0].length,96);
+  assert.equal(pagers[0].querySelector('span').textContent,'1–96 of 2.188');
+  assert.equal(elements.get('#resultCount').textContent,'BRICKSET: Showing 2.188 of 2.188 minifigs');
+  pagers[0].querySelector('[data-page="next"]').onclick();
+  assert.equal(rendered.at(-1)[0],'Brickset::fig0097');
+  assert.equal(pagers[0].querySelector('span').textContent,'97–192 of 2.188');
+  context.filtered=()=>context.figures.filter(row=>row.character==='fig2188');context.render();
+  assert.deepEqual(rendered.at(-1),['Brickset::fig2188']);
+  assert.equal(pagers[0].hidden,true);
+  assert.equal(elements.get('#resultCount').textContent,'BRICKSET: Showing 1 of 2.188 minifigs');
 });

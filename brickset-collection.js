@@ -7,6 +7,23 @@
   try { prices = JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}; } catch {}
   let priceRevision = 0, priceController = null;
   let snapshot = null, requestRevision = 0;
+  const PAGE_SIZE = 96;
+  let page = 0, resultKey = '', snapshotKey = '';
+  let figuresByCode = new Map();
+  const visiblePrices = new Map();
+  const pagers = [document.createElement('nav'), document.createElement('nav')];
+  for (const pager of pagers) {
+    pager.className = 'brickset-pagination'; pager.hidden = true;
+    pager.setAttribute('aria-label', 'Brickset collection pages');
+    pager.innerHTML = '<button type="button" data-page="previous">Previous</button><span aria-live="polite"></span><button type="button" data-page="next">Next</button>';
+    for (const direction of ['previous', 'next']) pager.querySelector(`[data-page="${direction}"]`).onclick = () => {
+      page += direction === 'next' ? 1 : -1;
+      render();
+      if (pager === pagers[1]) pagers[0].scrollIntoView({ block: 'center' });
+    };
+  }
+  pagers[1].classList.add('brickset-pagination-bottom');
+  $('#catalogue').before(pagers[0]); $('#catalogue').after(pagers[1]);
   const bar = document.createElement('div');
   bar.className = 'brickset-sync-bar';
   bar.hidden = true;
@@ -60,6 +77,10 @@
   function showSnapshot(data) {
     snapshot = data;
     refresh.title = `Refresh Brickset\nSynced ${lastSync(data)}`;
+    const key = JSON.stringify(data.figures);
+    // A fresh timestamp alone does not require rebuilding the catalogue.
+    if (key === snapshotKey && figures.length === data.figures.length && (!figures.length || figures[0].source === 'brickset')) return;
+    snapshotKey = key;
     figures = data.figures.map(row => ({
       id: `Brickset::${row.code}`, source: 'brickset', name: row.name, character: row.code,
       brand: 'LEGO', origin: 'Brickset', value: validPrice(prices[row.code]) ? unitPrice(prices[row.code]) : 0, currencyCode: 'EUR', currency: '€',
@@ -69,6 +90,7 @@
       altImage: '', notes: '', ownedQuantity: row.ownedTotal, ownedInSets: row.ownedInSets,
       ownedLoose: row.ownedLoose, raw: { '#': row.code, Name: row.name, Character: row.code, Owned: 'Owned' }
     }));
+    figuresByCode = new Map(figures.map(figure => [figure.character, figure]));
     renderFilters(); render(); loadExchangeRates();
   }
   function unitPrice(price) { return price?.averagePrice ?? price?.averageNewPrice; }
@@ -80,13 +102,13 @@
   }
   function stopPriceRefresh() { ++priceRevision; priceController?.abort(); priceController = null; }
   function applyPrices(updatedCodes) {
-    const updated = new Set(updatedCodes);
-    for (const figure of figures) {
-      if (!updated.has(figure.character)) continue;
+    for (const code of updatedCodes) {
+      const figure = figuresByCode.get(code);
+      if (!figure) continue;
       const price = prices[figure.character]; figure.priceAvailable = validPrice(price);
       figure.value = figure.priceAvailable ? unitPrice(price) : 0;
       figure.priceCondition = price?.priceCondition || 'new';
-      const card = document.querySelector(`#catalogue [data-brickset-code="${figure.character}"] .price`);
+      const card = visiblePrices.get(code);
       if (card) { card.textContent = money(figure.value, figure.currency);card.title = `Average ${figure.priceCondition}-condition sales price, last six months`; }
     }
     const currentCode = $('#detail .detail-character')?.textContent?.trim();
@@ -194,16 +216,37 @@
 
   const previousRender = render;
   render = () => {
-    previousRender();
     const active = isBricksetCollection();
+    let matches = [], visible = [];
+    visiblePrices.clear();
+    if (active) {
+      matches = filtered();
+      const key = matches.map(figure => figure.id).join('\n');
+      if (key !== resultKey) { resultKey = key; page = 0; }
+      page = Math.max(0, Math.min(page, Math.ceil(matches.length / PAGE_SIZE) - 1));
+      visible = matches.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+      // Existing card decorators use filtered() to map cards to figures. Keep
+      // them on the same page while retaining the full data for stats/details.
+      const fullFiltered = filtered;
+      filtered = () => visible;
+      try { previousRender(); } finally { filtered = fullFiltered; }
+      $('#resultCount').textContent = `BRICKSET: Showing ${formatFigureCount(matches.length)} of ${formatFigureCount(figures.length)} minifigs`;
+    } else previousRender();
     document.body.classList.toggle('brickset-collection-active', active); bar.hidden = !active;
+    for (const pager of pagers) {
+      pager.hidden = !active || matches.length <= PAGE_SIZE;
+      if (!active) continue;
+      pager.querySelector('[data-page="previous"]').disabled = page === 0;
+      pager.querySelector('[data-page="next"]').disabled = (page + 1) * PAGE_SIZE >= matches.length;
+      pager.querySelector('span').textContent = matches.length ? `${formatFigureCount(page * PAGE_SIZE + 1)}–${formatFigureCount(Math.min((page + 1) * PAGE_SIZE, matches.length))} of ${formatFigureCount(matches.length)}` : '';
+    }
     if (!active) return;
     alignRefreshWithHeading();
-    const visible = filtered();
     document.querySelectorAll('#catalogue .card').forEach((card,index) => {
       const figure=visible[index];if(!figure)return;
       card.dataset.bricksetCode=figure.character;
       const price=card.querySelector('.price');
+      if (price) visiblePrices.set(figure.character, price);
       if(price&&figure.priceAvailable)price.title=`Average ${figure.priceCondition}-condition sales price, last six months`;
     });
     document.querySelectorAll('#catalogue .own, #catalogue .wish').forEach(button => {
@@ -247,6 +290,9 @@
   deleteCollection = (name, options) => { if (isBricksetCollection(name)) return; return previousDelete(name, options); };
   const previousSelect = selectCollection;
   selectCollection = name => {
+    if (name !== activeCollection) { page = 0; resultKey = ''; }
+    for (const pager of pagers) pager.hidden = true;
+    visiblePrices.clear();
     ++requestRevision;
     stopPriceRefresh();
     document.body.classList.toggle('brickset-collection-active', isBricksetCollection(name));
@@ -257,6 +303,8 @@
     if (canReadBricksetCollection()) rebuildCollectionChoices();
     else {
       ++requestRevision; stopPriceRefresh(); snapshot = null; prices = {}; bar.hidden = true;
+      figuresByCode.clear(); visiblePrices.clear();
+      for (const pager of pagers) pager.hidden = true;
       document.body.classList.remove('brickset-collection-active');
       rebuildCollectionChoices();
       if (activeCollection === 'Brickset') selectCollection(COLLECTIONS[0] || GUEST_COLLECTIONS[0]);

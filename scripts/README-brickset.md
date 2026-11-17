@@ -1,6 +1,10 @@
 # Brickset collection
 
 The owner's collection menu includes `Brickset`, an external read-only source.
+Cards are rendered in pages of 96 to keep menus and filtering responsive for
+large collections. Search, sorting, stats, prices, and detail navigation retain
+the full collection. An unchanged refresh updates sync information without
+rebuilding the card list, and background prices update visible cards directly.
 Its menu entry requires the owner's active Firebase sign-in. The refresh icon is
 in the Total Minifigs card; sync information follows the catalogue count summary.
 It reads every owned minifigure, uses the first category component as a theme
