@@ -7,6 +7,8 @@ const outputDirectory = path.join(projectRoot, 'dist');
 const productionFiles = [
   'index.html',
   'app.js',
+  'brickset-collection.js',
+  'brickset-collection.css',
   'demo-catalogue.js',
   'assets/demo',
   'firebase-sync.js',

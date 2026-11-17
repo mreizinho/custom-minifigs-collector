@@ -1,0 +1,10 @@
+.brickset-sync-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 20px;color:var(--muted);font-size:14px}
+.brickset-sync-bar[hidden]{display:none}
+.brickset-sync-bar>span{min-width:0}
+.brickset-sync-bar button{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;border:1px solid var(--line,#ccc);padding:10px 14px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.brickset-sync-bar button:hover{background:var(--ink,#242622);color:var(--paper,#f5f5f2)}
+.brickset-sync-bar button:disabled{opacity:.6;cursor:default}
+.brickset-collection-active #addFigure,.brickset-collection-active .add-photo-overlay{display:none!important}
+.brickset-collection-active .own:disabled,.brickset-collection-active #detailOwn:disabled{opacity:1;cursor:default}
+.brickset-collection-active .wish{display:none}
+@media(max-width:600px){.brickset-sync-bar{align-items:flex-start;font-size:12px;gap:10px}.brickset-sync-bar button{padding:8px 10px}}

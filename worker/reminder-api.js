@@ -1,4 +1,5 @@
 import { lookup } from './bricklink.js';
+import { bricksetResponse } from './brickset.js';
 const APP_ID = 'd9dcde89-f32c-46c1-89f8-61d98a8267f1';
 const FIREBASE_PROJECT_ID = 'custom-figures-collector';
 const ALLOWED_ORIGINS = new Set([
@@ -146,6 +147,11 @@ export default {
 
     try {
       const user = await authenticatedUser(request);
+      if (url.pathname === '/brickset') {
+        const response = await bricksetResponse(request, env, user, origin, json);
+        response.headers.set('Cache-Control', 'private, no-store');
+        return response;
+      }
       if (url.pathname === '/bricklink') {
         if (!env.BRICKLINK_ALLOWED_UID || user.localId !== env.BRICKLINK_ALLOWED_UID) return json(origin, { error: 'BrickLink lookup is not enabled for this account.' }, 403);
         const { code } = await request.json();

@@ -5,6 +5,8 @@ const SECRET_DEMO_MODE = new URLSearchParams(location.search).has('realDB');
 const hasPersistedFirebaseUser = !!localStorage.getItem('minifig-firebase-user-id');
 const restoredFirebaseSheetId = sessionStorage.getItem('collector-restored-spreadsheet-id') || '';
 const GUEST_COLLECTIONS = ['Star Wars'];
+function canReadBricksetCollection(){return !SECRET_DEMO_MODE&&(window.collectorFirebaseAuthenticatedUser||window.collectorFirebaseUser||localStorage.getItem('minifig-firebase-user-id'))==='rh8WrITlLTXrsDj5mbJHzA1D4Bk2'}
+function isBricksetCollection(name=activeCollection){return name==='Brickset'&&canReadBricksetCollection()}
 let SHEET_ID = SECRET_DEMO_MODE ? SECRET_DEMO_SHEET_ID : restoredFirebaseSheetId || (hasPersistedFirebaseUser ? localStorage.getItem('minifig-spreadsheet-id') || DEFAULT_SHEET_ID : DEFAULT_SHEET_ID);
 const isDemoMode = () => !SECRET_DEMO_MODE && SHEET_ID === DEFAULT_SHEET_ID;
 // Google Sheets does not allow cross-origin fetches. JSONP lets this static
@@ -517,7 +519,7 @@ const detectedCollections=$('#detectedCollections'),collectionManagerStatus=$('#
 function updateCollectionManager(){detectedCollections.replaceChildren(...COLLECTIONS.map(name=>{const item=document.createElement('span');item.textContent=name;item.className=name===activeCollection?'active':'';return item}));newCollectionButton.disabled=SECRET_DEMO_MODE;newCollectionButton.title=SECRET_DEMO_MODE?'The demo is read-only.':''}
 rebuildCollectionChoices=()=>{$('#collectionMenu').innerHTML=orderedCollectionMenuNames().map(name=>`<button type="button" draggable="${window.matchMedia('(min-width: 601px) and (pointer: fine)').matches}" data-collection="${escapeHtml(name)}"><span class="collection-edit-slot"><span class="material-symbols-rounded collection-current-check" aria-hidden="true">check</span><span class="material-symbols-rounded collection-rename" data-rename-collection="${escapeHtml(name)}" role="button" tabindex="0" aria-label="Rename ${escapeHtml(name)}" title="Rename collection">edit</span></span><span class="collection-name">${escapeHtml(name)}</span><span class="material-symbols-rounded collection-delete" data-delete-collection="${escapeHtml(name)}" role="button" tabindex="0" aria-label="Delete ${escapeHtml(name)}" title="Delete collection">close</span><span class="material-symbols-rounded collection-swipe-feedback collection-swipe-trash" aria-hidden="true">delete</span><span class="material-symbols-rounded collection-swipe-feedback collection-swipe-edit" aria-hidden="true">edit</span></button>`).join('')+'<button type="button" class="collection-menu-new" data-new-collection><span class="material-symbols-rounded" aria-hidden="true">add</span><span class="collection-name">New Collection</span></button>';updateCollectionMenu();updateCollectionManager()};
 async function spreadsheetCollectionSheets(){const response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties(sheetId,title,index,hidden,sheetType,gridProperties(columnCount,rowCount))`),sheets=(await response.json()).sheets||[];return sheets.filter(sheet=>{const properties=sheet.properties||{};return properties.sheetType==='GRID'&&!properties.hidden&&!INTERNAL_COLLECTION_SHEETS.has(properties.title)&&!properties.title.startsWith('_')}).sort((a,b)=>a.properties.index-b.properties.index)}
-async function discoverSpreadsheetCollections({switchIfNeeded=true}={}){const sheets=await spreadsheetCollectionSheets(),names=sheets.map(sheet=>sheet.properties.title);if(!names.length)throw Error('This spreadsheet has no visible collection sheets.');COLLECTIONS=names;localStorage.setItem('minifig-collections',JSON.stringify(names));collectionSettingsInput.value=names.join('\n');const needsSwitch=!names.includes(activeCollection);if(needsSwitch){activeCollection=names[0];localStorage.setItem('minifig-collection',activeCollection)}rebuildCollectionChoices();if(needsSwitch&&switchIfNeeded){figures=[];$('#catalogue').replaceChildren();load()}return sheets}
+async function discoverSpreadsheetCollections({switchIfNeeded=true}={}){const sheets=await spreadsheetCollectionSheets(),names=sheets.map(sheet=>sheet.properties.title);if(canReadBricksetCollection()&&!names.includes('Brickset'))names.push('Brickset');if(!names.length)throw Error('This spreadsheet has no visible collection sheets.');COLLECTIONS=names;localStorage.setItem('minifig-collections',JSON.stringify(names));collectionSettingsInput.value=names.join('\n');const needsSwitch=!names.includes(activeCollection);if(needsSwitch){activeCollection=names[0];localStorage.setItem('minifig-collection',activeCollection)}rebuildCollectionChoices();if(needsSwitch&&switchIfNeeded){figures=[];$('#catalogue').replaceChildren();load()}return sheets}
 const newCollectionDialog=$('#newCollectionDialog'),newCollectionForm=$('#newCollectionForm'),newCollectionName=$('#newCollectionName'),newCollectionStatus=$('#newCollectionStatus'),createNewCollection=$('#createNewCollection');let newCollectionTemplateSheet=null;
 function closeNewCollection(){if(!createNewCollection.disabled)newCollectionDialog.close()}
 async function cloneCollectionSheet(templateSheetId,name,columnCount){const base=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,copyResponse=await sheetsRequest(`${base}/sheets/${templateSheetId}:copyTo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({destinationSpreadsheetId:SHEET_ID})}),createdSheet=await copyResponse.json();if(createdSheet?.sheetId==null)throw Error('Google Sheets did not return the copied sheet ID.');await sheetsRequest(`${base}:batchUpdate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[{updateSheetProperties:{properties:{sheetId:createdSheet.sheetId,title:name},fields:'title'}}]})});const escapedName=name.replace(/'/g,"''"),lastColumn=sheetColumn(columnCount-1);await sheetsRequest(`${base}/values/${encodeURIComponent(`'${escapedName}'!A2:${lastColumn}`)}:clear`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});return createdSheet}
@@ -815,6 +817,7 @@ rememberPhotoRefresh=fileId=>{
   privatePhotoRequests.delete(fileId);
 };
 load=async()=>{
+  if(isBricksetCollection())return window.collectorLoadBrickset?.();
   if(!usesAuthenticatedCatalogue())return publicCatalogueLoad();
   const revision=++authenticatedLoadRevision;
   updateDemoBadge();
@@ -946,7 +949,7 @@ function mapRowsForCollection(rows,collection){const previousCollection=activeCo
 async function loadAllCollectionPreorders(){
   if(!usesAuthenticatedCatalogue()||!window.collectorFirebaseUser)return figures.filter(isPreordered).map(figure=>({...figure,sourceCollection:activeCollection,sheetCollection:figure.sheetCollection||activeCollection}));
   await restoreSheetsAccess();
-  const groups=await Promise.all(COLLECTIONS.map(async collection=>{
+  const groups=await Promise.all(COLLECTIONS.filter(collection=>!isBricksetCollection(collection)).map(async collection=>{
     const escaped=collection.replace(/'/g,"''"),range=encodeURIComponent(`'${escaped}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS`),records=rowsFromSheetValues((await response.json()).values||[]),mapped=mapRowsForCollection(records.map(record=>record.raw),collection);
     mapped.forEach((figure,index)=>figure.sheetRow=records[index].sheetRow);
     return mapped.filter(isPreordered)
@@ -1101,7 +1104,7 @@ function resetMobileCollectionSwipe(){const swipe=mobileCollectionSwipe;mobileCo
 collectionMenuElement.addEventListener('touchstart',event=>{
   if(!window.matchMedia('(max-width:600px)').matches)return;
   resetMobileCollectionSwipe();if(event.touches.length!==1)return;
-  const row=event.target.closest('[data-collection]');if(!row)return;
+  const row=event.target.closest('[data-collection]');if(!row||isBricksetCollection(row.dataset.collection))return;
   const touch=event.touches[0];window.getSelection()?.removeAllRanges();
   mobileCollectionSwipe={touchId:touch.identifier,row,name:row.dataset.collection,x:touch.clientX,y:touch.clientY,dx:0,dy:0,locked:false,spreadsheetId:SHEET_ID,user:window.collectorFirebaseUser};
 },{passive:true});

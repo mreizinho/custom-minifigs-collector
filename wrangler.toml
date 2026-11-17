@@ -6,3 +6,4 @@ workers_dev = true
 
 [vars]
 BRICKLINK_ALLOWED_UID = "rh8WrITlLTXrsDj5mbJHzA1D4Bk2"
+BRICKSET_ALLOWED_UID = "rh8WrITlLTXrsDj5mbJHzA1D4Bk2"
