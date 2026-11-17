@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Custom Minifigs Collector",
-  "short_name": "CM Collector",
+  "name": "Collector",
+  "short_name": "Collector",
   "description": "Manage your minifigure collections, photos, tags and wishlist.",
   "lang": "en-GB",
   "start_url": "/",

@@ -11,7 +11,8 @@ test('production build contains an installable standalone manifest and correctly
   assert.match(html,/src="\/pwa-theme\.js/);
   assert.ok((await fs.stat(path.join(dist,'pwa-theme.js'))).size>0);
   const manifest=JSON.parse(await fs.readFile(path.join(dist,'manifest.webmanifest'),'utf8'));
-  assert.equal(manifest.name,'Custom Minifigs Collector');
+  assert.equal(manifest.name,'Collector');
+  assert.equal(manifest.short_name,'Collector');
   assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'/');assert.equal(manifest.id,'/');
   assert.notEqual(manifest.prefer_related_applications,true);
   assert.ok(manifest.icons.some(icon=>icon.purpose.includes('maskable')));
