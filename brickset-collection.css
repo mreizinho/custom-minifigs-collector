@@ -12,5 +12,6 @@
 .brickset-collection-active .own:disabled,.brickset-collection-active #detailOwn:disabled{opacity:1;cursor:default}
 .brickset-collection-active .wish{display:none}
 .brickset-collection-active [data-stat-filter="owned"]{cursor:default;opacity:1}
+.brickset-collection-active .filters label[hidden]{display:none}
 @media(min-width:601px){.brickset-refresh .material-symbols-rounded{font-size:19px}}
 @media(max-width:600px){.brickset-sync-bar{font-size:12px}.brickset-refresh{top:10px;right:10px}}
