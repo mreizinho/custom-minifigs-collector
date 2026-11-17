@@ -6,11 +6,15 @@ tag, and splits Brickset notes on commas, semicolons, pipes, or newlines into
 additional tags. Stable IDs are `Brickset::<BL reference>`; quantities are
 shown in details. Images load directly from BrickLink. Brickset does not provide
 minifigure prices, so `/brickset/prices` loads the BrickLink six-month average
-new-condition sold price in EUR. Batches contain at most eight owned references,
+new-condition sold price in EUR, falling back to used-condition sales when no new
+sales price is available. Used fallback valuations are identified in figure details.
+Batches contain at most eight owned references,
 with two upstream requests at a time and 24-hour server/device caching. Card and
 detail prices are per figure; the owned total includes duplicate copies. Missing
 prices remain unavailable, and incomplete totals are labelled as partial estimates.
 Refreshing resumes missing or stale prices without discarding successful results.
+Legacy cached no-sales results are retried with the used fallback. Figure counts
+use dot-separated thousands consistently across statistics and collection summaries.
 
 The Worker POST `/brickset` route validates the Firebase ID token and restricts
 access to `BRICKSET_ALLOWED_UID`. It uses only Brickset read methods, caches

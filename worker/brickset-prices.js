@@ -19,7 +19,11 @@ export async function bricksetPricesResponse(request,env,user,origin,json,{cache
       const code=codes[cursor++],key=new Request(`${base}/brickset-price-cache/v1/${encodeURIComponent(user.localId)}/${code}`);
       try{
         const previous=await cache.match(key);
-        if(previous){prices.push(await previous.json());continue;}
+        if(previous){
+          const saved=await previous.json();
+          // Retain successful new prices; retry old no-sales entries with the used fallback.
+          if(saved.priceStatus!=='no_sales'||saved.fallbackChecked){prices.push(saved);continue;}
+        }
         const price=await lookupMinifigurePrice(code,credentials,fetcher);
         await cache.put(key,new Response(JSON.stringify(price),{headers:{'Cache-Control':'max-age=86400'}}));
         prices.push(price);
@@ -27,5 +31,5 @@ export async function bricksetPricesResponse(request,env,user,origin,json,{cache
     }
   }
   await Promise.all([run(),run()]);
-  return json(origin,{prices,errors,rateLimited,priceBasis:'Average new-condition sales over the last six months, EUR'});
+  return json(origin,{prices,errors,rateLimited,priceBasis:'Average sales over the last six months, EUR: new preferred, used when no new sales'});
 }

@@ -28,19 +28,21 @@
     snapshot = data;
     figures = data.figures.map(row => ({
       id: `Brickset::${row.code}`, source: 'brickset', name: row.name, character: row.code,
-      brand: 'LEGO', origin: 'Brickset', value: validPrice(prices[row.code]) ? prices[row.code].averageNewPrice : 0, currencyCode: 'EUR', currency: '€',
+      brand: 'LEGO', origin: 'Brickset', value: validPrice(prices[row.code]) ? unitPrice(prices[row.code]) : 0, currencyCode: 'EUR', currency: '€',
       priceAvailable: validPrice(prices[row.code]),
+      priceCondition: prices[row.code]?.priceCondition || 'new',
       condition: '', collection: 'owned', hidden: false, tags: row.tags || [], image: row.photoUrl,
       altImage: '', notes: '', ownedQuantity: row.ownedTotal, ownedInSets: row.ownedInSets,
       ownedLoose: row.ownedLoose, raw: { '#': row.code, Name: row.name, Character: row.code, Owned: 'Owned' }
     }));
     renderFilters(); render(); loadExchangeRates();
   }
-  function validPrice(price) { return price?.currency === 'EUR' && typeof price.averageNewPrice === 'number' && Number.isFinite(price.averageNewPrice) && price.averageNewPrice >= 0; }
-  function freshPrice(price) { const age = Date.now() - Date.parse(price?.retrievedAt); return age >= 0 && age < 86400000 && (validPrice(price) || ['no_sales','not_found'].includes(price?.priceStatus)); }
+  function unitPrice(price) { return price?.averagePrice ?? price?.averageNewPrice; }
+  function validPrice(price) { const value=unitPrice(price);return price?.currency === 'EUR' && typeof value === 'number' && Number.isFinite(value) && value >= 0; }
+  function freshPrice(price) { const age = Date.now() - Date.parse(price?.retrievedAt); return age >= 0 && age < 86400000 && (validPrice(price) || price?.priceStatus==='not_found' || price?.priceStatus==='no_sales'&&price.fallbackChecked===true); }
   function priceSummary() {
     const priced = figures.filter(figure => figure.priceAvailable).length;
-    return `${priced.toLocaleString()} / ${figures.length.toLocaleString()} figures valued · BL average new price, last 6 months · Total includes all owned copies`;
+    return `${formatFigureCount(priced)} / ${formatFigureCount(figures.length)} figures valued · BL average price, last 6 months (new, used fallback) · Total includes all owned copies`;
   }
   function stopPriceRefresh() { ++priceRevision; priceController?.abort(); priceController = null; }
   function applyPrices(updatedCodes) {
@@ -48,14 +50,15 @@
     for (const figure of figures) {
       if (!updated.has(figure.character)) continue;
       const price = prices[figure.character]; figure.priceAvailable = validPrice(price);
-      figure.value = figure.priceAvailable ? price.averageNewPrice : 0;
+      figure.value = figure.priceAvailable ? unitPrice(price) : 0;
+      figure.priceCondition = price?.priceCondition || 'new';
       const card = document.querySelector(`#catalogue [data-brickset-code="${figure.character}"] .price`);
-      if (card) card.textContent = money(figure.value, figure.currency);
+      if (card) { card.textContent = money(figure.value, figure.currency);card.title = `Average ${figure.priceCondition}-condition sales price, last six months`; }
     }
     const currentCode = $('#detail .detail-character')?.textContent?.trim();
     const current = figures.find(figure => figure.character === currentCode);
     const detailValue = $('#detailInfo p:last-child span');
-    if (current && detailValue) detailValue.textContent = money(current.value, current.currency);
+    if (current && detailValue) detailValue.textContent = money(current.value, current.currency)+(current.priceAvailable&&current.priceCondition==='used'?' (used)':'');
     updateStats();
   }
   async function refreshPrices() {
@@ -128,7 +131,7 @@
       }
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
-      status.textContent = `Synced ${lastSync(data)} · ${data.figures.length.toLocaleString()} minifigures · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
+      status.textContent = `Synced ${lastSync(data)} · ${formatFigureCount(data.figures.length)} minifigures · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
       void refreshPrices();
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
@@ -149,7 +152,7 @@
     if (!isBricksetCollection()) return;
     const label = $('#ownedValue');
     if (figures.some(figure => !figure.priceAvailable)) label.textContent = label.textContent.replace(' estimated', ' partial estimate');
-    label.title = 'BrickLink average new-condition sales price over the last six months × owned quantity. Figures without an available price are excluded.';
+    label.title = 'BrickLink average sales price over the last six months × owned quantity. New preferred; used when no new sales are available. Figures without an available price are excluded.';
   };
 
   const previousRender = render;
@@ -159,7 +162,12 @@
     document.body.classList.toggle('brickset-collection-active', active); bar.hidden = !active;
     if (!active) return;
     const visible = filtered();
-    document.querySelectorAll('#catalogue .card').forEach((card,index) => { if (visible[index]) card.dataset.bricksetCode = visible[index].character; });
+    document.querySelectorAll('#catalogue .card').forEach((card,index) => {
+      const figure=visible[index];if(!figure)return;
+      card.dataset.bricksetCode=figure.character;
+      const price=card.querySelector('.price');
+      if(price&&figure.priceAvailable)price.title=`Average ${figure.priceCondition}-condition sales price, last six months`;
+    });
     document.querySelectorAll('#catalogue .own, #catalogue .wish').forEach(button => {
       button.disabled = true; button.title = 'Ownership managed in Brickset';
       button.setAttribute('aria-label', button.classList.contains('own') ? 'Owned in Brickset' : 'Wishlist managed in Brickset');
@@ -177,8 +185,10 @@
     $('#detail').querySelectorAll('.detail-edit-button,#detailAddPhoto,#detailWish,.detail-photo-navigation').forEach(control => control.remove());
     const own = $('#detailOwn'); if (own) { own.disabled = true; own.title = 'Ownership managed in Brickset'; }
     const quantity = document.createElement('p'); quantity.className = 'detail-meta';
-    quantity.textContent = `Owned: ${figure.ownedQuantity} · In sets: ${figure.ownedInSets} · Loose: ${figure.ownedLoose}`;
+    quantity.textContent = `Owned: ${formatFigureCount(figure.ownedQuantity)} · In sets: ${formatFigureCount(figure.ownedInSets)} · Loose: ${formatFigureCount(figure.ownedLoose)}`;
     $('#detail .detail-character').after(quantity);
+    const value = $('#detailInfo p:last-child span');
+    if(value&&figure.priceAvailable&&figure.priceCondition==='used')value.textContent=money(figure.value,figure.currency)+' (used)';
   };
   const previousRebuild = rebuildCollectionChoices;
   rebuildCollectionChoices = () => {

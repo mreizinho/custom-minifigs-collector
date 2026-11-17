@@ -31,14 +31,22 @@ export async function lookupMinifigurePrice(code,credentials,fetcher=fetch){
   code=String(code).trim().toLowerCase();
   if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(code))throw Error('Invalid minifigure reference.');
   for(const key of ['consumerKey','consumerSecret','token','tokenSecret'])if(!credentials[key])throw Error('BrickLink prices are not configured.');
-  const url=`https://api.bricklink.com/api/store/v1/items/MINIFIG/${encode(code)}/price?guide_type=sold&new_or_used=N&currency_code=EUR`;
+  async function guidePrice(condition){
+  const url=`https://api.bricklink.com/api/store/v1/items/MINIFIG/${encode(code)}/price?guide_type=sold&new_or_used=${condition}&currency_code=EUR`;
   const response=await fetcher(url,{headers:{Authorization:authorization(url,credentials)},signal:AbortSignal.timeout(12000)});
   let result;try{result=await response.json()}catch{throw Error('BrickLink prices are temporarily unavailable.');}
   const status=Number(result.meta?.code)||response.status;
-  if(status===404)return{code,averageNewPrice:null,currency:'EUR',priceStatus:'not_found',retrievedAt:new Date().toISOString()};
+  if(status===404)return{missing:true,price:null};
   if(!response.ok||status!==200){const error=Error(status===429?'BrickLink rate limit reached. Try refreshing later.':'BrickLink prices are temporarily unavailable.');error.rateLimited=status===429;throw error;}
   const guide=result.data;
   if(!guide||guide.currency_code!=='EUR')throw Error('BrickLink returned an invalid price guide.');
   const price=Number(guide.avg_price),hasPrice=Number(guide.total_quantity)>0&&guide.avg_price!=null&&String(guide.avg_price).trim()!==''&&Number.isFinite(price)&&price>=0;
-  return{code,averageNewPrice:hasPrice?price:null,currency:'EUR',priceStatus:hasPrice?'priced':'no_sales',retrievedAt:new Date().toISOString()};
+  return{missing:false,price:hasPrice?price:null};
+  }
+  const fresh=await guidePrice('N');
+  const used=!fresh.missing&&fresh.price===null?await guidePrice('U'):null;
+  const price=fresh.price??used?.price??null;
+  return{code,averagePrice:price,averageNewPrice:fresh.price,averageUsedPrice:used?.price??null,
+    priceCondition:fresh.price!==null?'new':price!==null?'used':null,fallbackChecked:true,
+    currency:'EUR',priceStatus:fresh.missing?'not_found':price!==null?'priced':'no_sales',retrievedAt:new Date().toISOString()};
 }
