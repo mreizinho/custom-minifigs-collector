@@ -4,6 +4,15 @@
   const themeColor = document.querySelector('meta[name="theme-color"]');
   const colorScheme = document.querySelector('meta[name="color-scheme"]');
   const fallback = { light: '#e6e7e4', dark: '#181917' };
+  // Let supported Android WebAPKs paint the page canvas behind system bars.
+  // Regular browser tabs and other platforms retain their current viewport.
+  const androidApp = /Android/i.test(window.navigator?.userAgent || '')
+    && window.matchMedia('(display-mode: standalone)').matches;
+  if (androidApp) {
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport && !/viewport-fit\s*=/.test(viewport.content)) viewport.content += ',viewport-fit=cover';
+    root.classList.add('pwa-edge-to-edge');
+  }
   let currentDark = null;
   function apply(dark, color) {
     currentDark = dark;
@@ -11,6 +20,7 @@
     if (colorScheme) colorScheme.content = dark ? 'dark' : 'light';
     root.style.colorScheme = dark ? 'dark' : 'light';
     root.style.backgroundColor = color;
+    root.style.setProperty('--pwa-chrome-bg', color);
   }
   function savedTheme() {
     try {

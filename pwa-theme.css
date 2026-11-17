@@ -1,0 +1,29 @@
+/* Only activated by pwa-theme.js in installed Android apps. Zero insets leave
+   the existing layout intact on Chrome builds without edge-to-edge support. */
+html.pwa-edge-to-edge body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html.pwa-edge-to-edge .topbar { top: env(safe-area-inset-top, 0px); }
+html.pwa-edge-to-edge::before,
+html.pwa-edge-to-edge::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2147483647;
+  background: var(--pwa-chrome-bg);
+  pointer-events: none;
+}
+html.pwa-edge-to-edge::before { top: 0; height: env(safe-area-inset-top, 0px); }
+html.pwa-edge-to-edge::after { bottom: 0; height: env(safe-area-inset-bottom, 0px); }
+@media (max-width: 600px) {
+  html.pwa-edge-to-edge body dialog[open] {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+  html.pwa-edge-to-edge body :is(.settings-dialog, .add-figure-dialog, .new-collection-dialog, .add-photo-dialog, .mobile-camera-dialog, .photo-manager-dialog)[open] {
+    top: env(safe-area-inset-top, 0px);
+    bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+}

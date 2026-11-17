@@ -8,6 +8,7 @@ const productionFiles = [
   'index.html',
   'manifest.webmanifest',
   'pwa-theme.js',
+  'pwa-theme.css',
   'icons',
   'app.js',
   'brickset-collection.js',
