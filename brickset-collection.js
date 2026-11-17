@@ -92,6 +92,7 @@
     }));
     figuresByCode = new Map(figures.map(figure => [figure.character, figure]));
     renderFilters(); render(); loadExchangeRates();
+    window.collectorSplash?.ready();
   }
   function unitPrice(price) { return price?.averagePrice ?? price?.averageNewPrice; }
   function validPrice(price) { const value=unitPrice(price);return price?.currency === 'EUR' && typeof value === 'number' && Number.isFinite(value) && value >= 0; }
@@ -198,7 +199,7 @@
         $('#empty').hidden = false; $('#empty h2').textContent = 'Could not load Brickset';
         $('#empty p').textContent = error.message; $('#resetEmpty').hidden = true;
       }
-    } finally { if (revision === requestRevision) refresh.disabled = false; }
+    } finally { if (revision === requestRevision) { refresh.disabled = false; window.collectorSplash?.ready(); } }
   }
   window.collectorLoadBrickset = loadBricksetCollection;
 

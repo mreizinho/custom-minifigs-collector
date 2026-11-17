@@ -32,7 +32,24 @@ update schedule or guarantee an installed-package update.
 Icons are rasterized from the existing vector head mark with no third-party
 image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
 
+## Supplied animated splash
+
+Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
+isolated iframe. Its SVG and style block are verbatim from the supplied
+`lego-splash-color-only.zip`; only the demo UI/controller were replaced. The
+white background and 2.4-second artwork animation are intentionally unchanged.
+The frame signals completion at the supplied 2.75-second mark (250ms with
+reduced motion). `pwa-splash.js` then waits for the initial demo/sheet/Brickset
+result or an actionable error/onboarding state before fading for 300ms. An
+8-second safety deadline releases the UI even if startup or the frame fails.
+It never waits for all 2,188 photos or background prices. A saved Brickset
+snapshot counts as ready. Returning from another app does not replay it.
+Ordinary browser tabs load no splash frame. No dependency or service-worker
+changes are needed. This page intro follows Android's native static splash.
+For explicit browser QA only, `/?splash=preview` enables the same startup intro
+without requiring PWA installation; normal browser visits remain unchanged.
+
 Validate production artifacts with:
 
     node scripts/build-static.mjs
-    node --test scripts/pwa-manifest.test.mjs scripts/demo-assets.test.mjs
+    node --test scripts/pwa-manifest.test.mjs scripts/pwa-theme.test.mjs scripts/pwa-splash.test.mjs scripts/demo-assets.test.mjs
