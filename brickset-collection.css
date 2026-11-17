@@ -2,11 +2,11 @@
 .brickset-sync-bar[hidden]{display:none}
 .brickset-sync-bar>span:first-child::before{content:' · '}
 .brickset-total-card{position:relative}
-.brickset-refresh{display:none;position:absolute;top:12px;right:12px;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--line,#ccc);background:transparent;color:var(--ink,#242622);cursor:pointer}
+.brickset-refresh{display:none;position:absolute;top:12px;right:12px;align-items:center;justify-content:center;width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--ink,#242622);cursor:pointer}
 .brickset-collection-active .brickset-refresh{display:inline-flex}
-.brickset-collection-active .brickset-total-card>span:first-child{display:block;padding-right:32px}
-.brickset-refresh .material-symbols-rounded{font-size:21px;color:inherit}
-.brickset-refresh:hover{background:var(--ink,#242622);color:var(--paper,#f5f5f2)}
+.brickset-collection-active .brickset-total-card>span:first-child{display:block;padding-right:24px}
+.brickset-refresh .material-symbols-rounded{font-size:17px;color:inherit}
+.brickset-refresh:hover{background:transparent;color:var(--accent,#ff5a35)}
 .brickset-refresh:disabled{opacity:.6;cursor:default}
 .brickset-collection-active #addFigure,.brickset-collection-active .add-photo-overlay{display:none!important}
 .brickset-collection-active .own:disabled,.brickset-collection-active #detailOwn:disabled{opacity:1;cursor:default}

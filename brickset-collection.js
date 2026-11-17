@@ -24,7 +24,7 @@
   function setPriceStatus(message) { priceNotice = message; updatePriceTooltip(); }
   function updatePriceTooltip() {
     if (!isBricksetCollection()) return;
-    const label = $('#ownedValue'), tooltip = priceNotice || priceSummary();
+    const label = $('#ownedValue'), tooltip = [priceNotice || priceSummary(), snapshot ? `Synced ${lastSync(snapshot)}` : ''].filter(Boolean).join('\n');
     label.title = tooltip;
     const button = label.closest('button');
     if (button) button.title = tooltip;
@@ -39,6 +39,7 @@
   }
   function showSnapshot(data) {
     snapshot = data;
+    refresh.title = `Refresh Brickset\nSynced ${lastSync(data)}`;
     figures = data.figures.map(row => ({
       id: `Brickset::${row.code}`, source: 'brickset', name: row.name, character: row.code,
       brand: 'LEGO', origin: 'Brickset', value: validPrice(prices[row.code]) ? unitPrice(prices[row.code]) : 0, currencyCode: 'EUR', currency: '€',
@@ -122,7 +123,7 @@
     bar.hidden = false; refresh.disabled = true;
     const cached = snapshot || readCache();
     if (cached) showSnapshot(cached);
-    status.textContent = cached ? `Last synced ${lastSync(cached)} · Checking Brickset…` : 'Loading owned minifigures from Brickset…';
+    status.textContent = cached ? 'Checking Brickset…' : 'Loading owned minifigures from Brickset…';
     try {
       if (window.collectorFirebaseUser !== OWNER || !window.collectorGetIdToken) throw Error('Sign in with your Google account to refresh Brickset.');
       const token = await window.collectorGetIdToken();
@@ -144,11 +145,11 @@
       }
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
-      status.textContent = `Synced ${lastSync(data)} · Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
+      status.textContent = `Ownership managed in Brickset${data.notesAvailable ? '' : ' · Notes could not be refreshed'}`;
       void refreshPrices();
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
-      status.textContent = cached ? `Showing saved collection from ${lastSync(cached)}. ${error.message}` : error.message;
+      status.textContent = cached ? `Showing saved collection. ${error.message}` : error.message;
       if (!cached) {
         figures = []; $('#catalogue').replaceChildren(); updateStats();
         $('#resultCount').textContent = 'Brickset collection unavailable';

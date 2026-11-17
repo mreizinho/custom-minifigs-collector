@@ -34,7 +34,7 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, coll
 }
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {
   let request;
-  const { context, status } = client(async (url, options) => { request = { url, options }; return Response.json(snapshot); });
+  const { context, status, refresh, elements } = client(async (url, options) => { request = { url, options }; return Response.json(snapshot); });
   await context.window.collectorLoadBrickset(true);
   assert.equal(context.figures.length, 1);
   assert.equal(context.figures[0].id, 'Brickset::sw0971');
@@ -44,6 +44,9 @@ test('renders the external collection with stable IDs, tags, and no sheet row; r
   assert.equal(request.options.headers.Authorization, 'Bearer firebase-test-token');
   assert.equal(JSON.parse(request.options.body).refresh, true);
   assert.match(status.textContent, /Ownership managed in Brickset/);
+  assert.ok(!status.textContent.includes('Synced'));
+  assert.match(refresh.title,/Refresh Brickset\nSynced /);
+  assert.match(elements.get('#ownedValue').title,/\nSynced /);
 });
 test('retains the last successful collection during a network outage', async () => {
   const { context, status, refresh } = client(async () => { throw Error('Network unavailable'); }, { cached: snapshot });
