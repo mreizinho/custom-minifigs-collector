@@ -8,6 +8,10 @@ Safari's Share → Add to Home Screen.
 The existing OneSignal service worker remains in place. Collection syncing and
 Google sign-in use the normal online website; this change adds no offline cache.
 
+`pwa-theme.js` updates page-level theme-color, color-scheme, and the root canvas
+from the site's saved/selected theme. Android/Chrome may apply additional rules
+to native navigation bars, so their final appearance remains platform-dependent.
+
 Icons are rasterized from the existing vector head mark with no third-party
 image service. To regenerate them, run `node scripts/build-app-icons.mjs`.
 

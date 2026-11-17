@@ -7,6 +7,7 @@ const outputDirectory = path.join(projectRoot, 'dist');
 const productionFiles = [
   'index.html',
   'manifest.webmanifest',
+  'pwa-theme.js',
   'icons',
   'app.js',
   'brickset-collection.js',
