@@ -20,9 +20,15 @@
   refresh.setAttribute('aria-label', 'Refresh Brickset');
   refresh.title = 'Refresh Brickset';
   totalCard.append(refresh);
-  const priceStatus = document.createElement('span');
-  priceStatus.className = 'brickset-price-status'; priceStatus.setAttribute('role', 'status');
-  bar.append(priceStatus);
+  let priceNotice = '';
+  function setPriceStatus(message) { priceNotice = message; updatePriceTooltip(); }
+  function updatePriceTooltip() {
+    if (!isBricksetCollection()) return;
+    const label = $('#ownedValue'), tooltip = priceNotice || priceSummary();
+    label.title = tooltip;
+    const button = label.closest('button');
+    if (button) button.title = tooltip;
+  }
   refresh.onclick = () => loadBricksetCollection(true);
 
   function readCache() {
@@ -72,7 +78,7 @@
     stopPriceRefresh();
     const revision = priceRevision;
     const pending = [...new Set([...filtered(), ...figures].map(figure => figure.character))].filter(code => !freshPrice(prices[code]));
-    priceStatus.textContent = pending.length ? `Updating prices… ${priceSummary()}` : priceSummary();
+    setPriceStatus(pending.length ? `Updating prices… ${priceSummary()}` : priceSummary());
     if (!pending.length) return;
     priceController = new AbortController();
     const signal = priceController.signal;
@@ -90,7 +96,7 @@
         for (const price of data.prices) if (pending.includes(price.code) && price.currency === 'EUR') prices[price.code] = price;
         try { localStorage.setItem(PRICE_KEY, JSON.stringify(prices)); } catch {}
         applyPrices(data.prices.map(price => price.code));
-        priceStatus.textContent = `Updating prices… ${priceSummary()}`;
+        setPriceStatus(`Updating prices… ${priceSummary()}`);
         if (data.rateLimited || !data.prices.length) throw Error(data.errors?.[0]?.error || 'BrickLink price refresh paused.');
         // One small batch at a time; no per-card fetches or image downloads.
         if (offset + 8 < pending.length) await new Promise(resolve => {
@@ -98,9 +104,9 @@
           signal.addEventListener('abort', () => { clearTimeout(timer); resolve(); }, { once: true });
         });
       }
-      if (revision === priceRevision) priceStatus.textContent = priceSummary() + (pending.some(code => !freshPrice(prices[code])) ? ' · Some prices unavailable; choose Refresh to retry' : ' · Prices updated');
+      if (revision === priceRevision) setPriceStatus(priceSummary() + (pending.some(code => !freshPrice(prices[code])) ? ' · Some prices unavailable; choose Refresh to retry' : ' · Prices updated'));
     } catch (error) {
-      if (revision === priceRevision && isBricksetCollection()) priceStatus.textContent = `${priceSummary()} · ${error.message} Choose Refresh to retry.`;
+      if (revision === priceRevision && isBricksetCollection()) setPriceStatus(`${priceSummary()} · ${error.message} Choose Refresh to retry.`);
     }
   }
   function lastSync(data) {
@@ -156,10 +162,12 @@
   const previousStats = updateStats;
   updateStats = () => {
     previousStats();
-    if (!isBricksetCollection()) return;
     const label = $('#ownedValue');
+    if (!isBricksetCollection()) {
+      label.removeAttribute('title'); updateOwnedValueCycleLabel(); return;
+    }
     if (figures.some(figure => !figure.priceAvailable)) label.textContent = label.textContent.replace(' estimated', ' partial estimate');
-    label.title = 'BrickLink average sales price over the last six months × owned quantity. New preferred; used when no new sales are available. Figures without an available price are excluded.';
+    updatePriceTooltip();
   };
 
   const previousRender = render;

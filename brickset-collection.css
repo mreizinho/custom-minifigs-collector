@@ -1,7 +1,6 @@
 .brickset-sync-bar{display:contents;color:var(--muted);font-size:14px}
 .brickset-sync-bar[hidden]{display:none}
 .brickset-sync-bar>span:first-child::before{content:' · '}
-.brickset-price-status{display:block;margin-top:4px;font-size:12px}
 .brickset-total-card{position:relative}
 .brickset-refresh{display:none;position:absolute;top:12px;right:12px;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--line,#ccc);background:transparent;color:var(--ink,#242622);cursor:pointer}
 .brickset-collection-active .brickset-refresh{display:inline-flex}
