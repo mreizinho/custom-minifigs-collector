@@ -1,3 +1,4 @@
+html.pwa-splash-pending { overflow: hidden; scrollbar-gutter: auto; background: #fff !important; }
 html.pwa-splash-pending body > :not(#pwaSplash) { visibility: hidden; }
 #pwaSplash {
   position: fixed;
