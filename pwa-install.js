@@ -17,5 +17,15 @@
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateAppleIcon, {once:true});
     else updateAppleIcon();
+  } else {
+    const restoreDesktopFavicon = () => {
+      // Restore the original outline in desktop tabs without changing app icons.
+      for (const icon of document.querySelectorAll('link[rel="icon"]')) {
+        if (icon.type === 'image/svg+xml') icon.href = '/lego-head.svg?v=3#favicon-outline';
+        else icon.remove();
+      }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', restoreDesktopFavicon, {once:true});
+    else restoreDesktopFavicon();
   }
 })();

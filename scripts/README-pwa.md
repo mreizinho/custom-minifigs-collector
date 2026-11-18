@@ -42,7 +42,9 @@ The manifest response requires HTTP revalidation on each request rather than
 allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
-Desktop and browser favicon icons retain the splash2 family. Mobile uses the
+Desktop installed icons retain the splash2 family. Desktop browser tabs restore
+the original `lego-head.svg?v=3#favicon-outline` after the head is parsed;
+mobile tab favicons are unchanged. Mobile installed icons use the
 supplied f1.svg artwork, including its blank opening expression. Its ordinary
 icons use a 900-unit square viewport; the separate maskable icon uses an 800-unit
 square viewport and a fully opaque white background. Android supplies the outer

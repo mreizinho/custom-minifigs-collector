@@ -26,7 +26,7 @@ test('production build contains an installable standalone manifest and correctly
   const worker=await fs.readFile(path.join(dist,'OneSignalSDKWorker.js'),'utf8');
   assert.ok(worker.includes('OneSignalSDK.sw.js'));
 });
-test('tab, privacy page, and installation icons share the splash2 first frame',async()=>{
+test('initial HTML retains the mobile-compatible splash2 fallback and existing desktop installation icons',async()=>{
   const dist=path.join(root,'dist');
   for(const page of ['index.html','privacy.html']){
     const html=await fs.readFile(path.join(dist,page),'utf8');
