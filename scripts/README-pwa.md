@@ -68,7 +68,8 @@ The supplied measured-path fuse script is retained so spark and stroke share
 one progress value; only demo Replay controls/wiring are removed. A separate
 completion bridge preserves the startup and Google sign-in handoff.
 Desktop retains supplied responsive sizing. Mobile aligns the original viewport
-to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing and 85% artwork scale;
+to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing and 85% artwork scale,
+then enlarges the mobile animation by 10% for the native-icon handoff (278.28405px stage width);
 native Chrome/Android placement remains device-controlled and needs phone QA.
 Reduced motion shows frame6 immediately. The root bounce animationend signals
 completion exactly once. pwa-splash.js

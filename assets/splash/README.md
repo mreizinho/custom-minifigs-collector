@@ -10,6 +10,7 @@ completion to the same-origin parent; reduced motion shows the final frame.
 f1.svg is the separately supplied mobile icon source. Editor metadata was
 removed; original paths/styles are preserved. Generated mobile icons scale the
 artwork to 85% around its center, leaving the opaque white adaptive background
-at full size. The mobile animation sizing matches this new framing. Desktop
+at full size. The mobile animation uses this framing with a further 10% size
+increase to improve the Android native-icon handoff. Desktop
 icons retain splash2.svg; previous frame1 assets remain for older installations.
 See scripts/README-pwa.md for generation and startup integration.
