@@ -1,0 +1,27 @@
+/* Native minimize/maximize/close/menu controls stay outside the draggable area. */
+#desktopWindowTitlebar[hidden] { display:none; }
+.desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
+.desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
+#desktopWindowTitlebar {
+  position:fixed;
+  top:env(titlebar-area-y,0px);
+  left:env(titlebar-area-x,0px);
+  width:env(titlebar-area-width,100%);
+  height:env(titlebar-area-height,32px);
+  z-index:100;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 8px;
+  overflow:hidden;
+  color:var(--ink);
+  background:var(--bg);
+  font:12px 'Segoe UI',Arial,sans-serif;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-app-region:drag;
+  app-region:drag;
+}
+#desktopWindowTitlebar img { width:16px; height:16px; flex:none; pointer-events:none; }
+#desktopWindowTitlebar span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.dark #desktopWindowTitlebar img { filter:invert(1); }

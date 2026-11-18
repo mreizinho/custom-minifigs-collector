@@ -47,10 +47,10 @@ Desktop large installed icons use the supplied Asset 2.png, stored unchanged as
 into 192px and 512px squares, preserving transparency, colors and proportions.
 The source is build-only and is not shipped in the static site. There are
 16x16 and 32x32 PNGs of the browser-tab outline offered separately in the desktop manifest.
-Chrome's app-window loader requests `kWebAppIconSmall` (32px) as its minimum;
-the 16px-only trial was too small and therefore selected a larger yellow icon.
-This is a Windows small-icon selection trial: Chrome/Windows decide which size
-to use for each surface and display scale. Mobile metadata and icons are unchanged.
+Edge diagnostics confirmed both outline sizes are downloaded, but the 512px
+yellow head is selected as the trusted app icon and supplies the generated OS
+icon sizes. The small-icon entries cannot force a different native titlebar icon.
+Mobile metadata and icons are unchanged.
 Desktop browser tabs restore
 the original `lego-head.svg?v=3#favicon-outline` after the head is parsed;
 mobile tab favicons are unchanged. Mobile installed icons use the
@@ -103,4 +103,18 @@ without requiring PWA installation; normal browser visits remain unchanged.
 Validate production artifacts with:
 
     node scripts/build-static.mjs
-    node --test scripts/pwa-install.test.mjs scripts/pwa-manifest.test.mjs scripts/pwa-theme.test.mjs scripts/pwa-splash.test.mjs scripts/demo-assets.test.mjs
+    node --test scripts/desktop-window.test.mjs scripts/pwa-install.test.mjs scripts/pwa-manifest.test.mjs scripts/pwa-theme.test.mjs scripts/pwa-splash.test.mjs scripts/demo-assets.test.mjs
+
+## Desktop window titlebar
+
+The desktop manifest opts into `window-controls-overlay`, with `standalone` as
+the fallback. Only the generated `/desktop/` HTML loads `desktop-window.js/css`
+and includes the custom titlebar. It displays the outline browser favicon and
+the app name in the browser-provided safe titlebar rectangle, leaving native
+menu/minimize/maximize/close controls to Edge/Chrome. The titlebar is draggable,
+tracks light/dark styling, and reserves its height above the normal app header.
+Geometry/visibility changes hide it and remove the spacing whenever overlay mode
+is disabled, including unsupported browsers and ordinary tabs. Mobile and root
+HTML do not load this integration. Windows still uses the yellow installed app
+icon for the taskbar. Existing installations must pick up the manifest change;
+the browser may also expose a titlebar toggle in its app controls.
