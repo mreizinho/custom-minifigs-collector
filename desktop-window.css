@@ -1,5 +1,10 @@
 /* Native minimize/maximize/close/menu controls stay outside the draggable area. */
 #desktopWindowTitlebar[hidden] { display:none; }
+/* This stylesheet is loaded only by /desktop/. Keep wheel/keyboard scrolling. */
+@media (display-mode:standalone), (display-mode:window-controls-overlay) {
+  html, html * { scrollbar-width:none !important; scrollbar-gutter:auto !important; }
+  html::-webkit-scrollbar, html *::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+}
 .desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
 @media (min-width:601px) {
@@ -20,7 +25,7 @@
   overflow:hidden;
   color:var(--ink);
   background:var(--bg);
-  font:400 20px/1 'Barlow Condensed',Arial,sans-serif;
+  font:400 19px/1 'Barlow Condensed',Arial,sans-serif;
   letter-spacing:.45px;
   text-transform:uppercase;
   user-select:none;

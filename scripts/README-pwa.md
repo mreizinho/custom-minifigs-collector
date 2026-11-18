@@ -117,6 +117,9 @@ tracks light/dark styling, and reserves its height above the normal app header.
 Desktop floating search/add buttons include this same titlebar height in their
 top offsets, preserving their normal spacing below the sticky header. Narrow
 windows keep the existing bottom-positioned controls.
+Installed desktop display modes hide page and inner scrollbars without disabling
+scrolling, and remove the reserved scrollbar gutter. Ordinary browser tabs keep
+their scrollbars; mobile does not load this stylesheet.
 Geometry/visibility changes hide it and remove the spacing whenever overlay mode
 is disabled, including unsupported browsers and ordinary tabs. Mobile and root
 HTML do not load this integration. Windows still uses the yellow installed app
