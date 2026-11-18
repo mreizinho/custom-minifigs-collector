@@ -22,21 +22,6 @@ test('ordinary tabs and unsupported browsers keep the normal layout',()=>{
 test('mobile does not activate or subscribe to the desktop titlebar',()=>{
   const p=launch({platform:'mobile',visible:true});assert.equal(p.titlebar.hidden,true);assert.equal(p.listening,false);assert.equal(p.classes.size,0);
 });
-test('installed desktop scrollbar reveals at the right edge and stays visible while dragging',()=>{
-  const classes=new Set(),events=new Map();
-  const root={clientWidth:1000,classList:{toggle:(name,active)=>active?classes.add(name):classes.delete(name)}};
-  const installed={matches:true,addEventListener:(name,fn)=>events.set(name,fn)};
-  vm.runInNewContext(source,{window:{collectorPwaPlatform:'desktop',matchMedia:()=>installed,addEventListener:(name,fn)=>events.set(name,fn)},navigator:{},document:{getElementById:()=>null,documentElement:root,addEventListener:(name,fn)=>events.set(name,fn)}});
-  const move=(clientX,buttons=0)=>events.get('pointermove')({clientX,buttons});
-  move(500);assert.equal(classes.size,0);
-  move(987);assert.ok(classes.has('desktop-scrollbar-edge'));
-  move(700,1);assert.ok(classes.has('desktop-scrollbar-edge'));
-  move(700);assert.equal(classes.size,0);
-  move(999);events.get('pointerleave')();assert.equal(classes.size,0);
-  move(999);events.get('blur')();assert.equal(classes.size,0);
-  move(999);installed.matches=false;events.get('change')();assert.equal(classes.size,0);
-  move(999);assert.equal(classes.size,0);
-});
 test('production injects custom titlebar only into the desktop entry and preserves mobile manifest',()=>{
   const root=new URL('../dist/',import.meta.url);
   const desktop=fs.readFileSync(new URL('desktop/index.html',root),'utf8');

@@ -117,11 +117,11 @@ tracks light/dark styling, and reserves its height above the normal app header.
 Desktop floating search/add buttons include this same titlebar height in their
 top offsets, preserving their normal spacing below the sticky header. Narrow
 windows keep the existing bottom-positioned controls.
-Installed desktop display modes use a thin, transparent page scrollbar that
-reveals its thumb when the pointer approaches within 14px of the right edge.
-The thumb stays visible during dragging, and hides when the pointer leaves the
-edge/window. A stable thin gutter avoids layout changes on reveal. Inner panels
-retain their existing scrollbar styles. Ordinary browser tabs keep their normal
+Installed desktop display modes use an always-visible 6px page scrollbar. Its
+vertical track starts below the sticky topbar (72px, or 60px in narrow windows)
+plus the custom titlebar's height when enabled. Standard scrollbar properties
+stay at auto so Edge's custom track margins apply. Document scrolling is retained;
+inner panels keep their existing styles. Ordinary browser tabs keep their normal
 scrollbars; mobile does not load this stylesheet.
 Geometry/visibility changes hide it and remove the spacing whenever overlay mode
 is disabled, including unsupported browsers and ordinary tabs. Mobile and root
