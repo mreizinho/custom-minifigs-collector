@@ -123,6 +123,8 @@ plus the custom titlebar's height when enabled. Standard scrollbar properties
 stay at auto so Edge's custom track margins apply. Document scrolling is retained;
 inner panels keep their existing styles. Ordinary browser tabs keep their normal
 scrollbars; mobile does not load this stylesheet.
+The root scrollbar background paints a continuation of the topbar's bottom
+divider and scroll shadow across its 6px gutter, including the dark theme line.
 Geometry/visibility changes hide it and remove the spacing whenever overlay mode
 is disabled, including unsupported browsers and ordinary tabs. Mobile and root
 HTML do not load this integration. Windows still uses the yellow installed app

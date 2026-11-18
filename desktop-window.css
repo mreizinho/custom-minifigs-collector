@@ -2,11 +2,20 @@
 #desktopWindowTitlebar[hidden] { display:none; }
 /* Keep the always-visible thin page track below the titlebar and sticky header. */
 @media (display-mode:standalone), (display-mode:window-controls-overlay) {
-  html { --desktop-topbar-height:72px; --desktop-titlebar-height:0px; scrollbar-width:auto; scrollbar-color:auto; scrollbar-gutter:stable; }
+  html { --desktop-topbar-height:72px; --desktop-titlebar-height:0px; --desktop-header-bottom:calc(var(--desktop-titlebar-height) + var(--desktop-topbar-height)); --desktop-gutter-line:var(--line); --desktop-gutter-shadow:transparent; scrollbar-width:auto; scrollbar-color:auto; scrollbar-gutter:stable; }
   html.desktop-window-overlay { --desktop-titlebar-height:env(titlebar-area-height,32px); }
+  /* Body theme variables do not inherit upwards into the root scrollbar. */
+  html:has(body.dark) { --desktop-gutter-line:#4c4e48; }
+  html:has(.topbar.is-scrolled) { --desktop-gutter-shadow:#00000018; }
   html::-webkit-scrollbar { width:6px; height:6px; background:transparent; }
+  /* The browser clips header content at its scrollport, so paint this last 6px. */
+  html::-webkit-scrollbar:vertical {
+    background-image:
+      linear-gradient(to bottom,transparent calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) var(--desktop-header-bottom),transparent var(--desktop-header-bottom)),
+      linear-gradient(to bottom,transparent var(--desktop-header-bottom),var(--desktop-gutter-shadow) var(--desktop-header-bottom),transparent calc(var(--desktop-header-bottom) + 14px));
+  }
   html::-webkit-scrollbar-track { background:transparent; }
-  html::-webkit-scrollbar-track:vertical { margin-top:calc(var(--desktop-titlebar-height) + var(--desktop-topbar-height)); }
+  html::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-bottom); }
   html::-webkit-scrollbar-thumb { background:#888; border-radius:999px; }
   html::-webkit-scrollbar-button { display:none; }
   html::-webkit-scrollbar-corner { background:transparent; }
