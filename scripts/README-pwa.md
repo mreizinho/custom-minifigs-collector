@@ -43,12 +43,12 @@ allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
 Desktop and browser favicon icons retain the splash2 family. Mobile uses the
-supplied frame1.svg artwork, including its blank opening expression. Its ordinary
+supplied f1.svg artwork, including its blank opening expression. Its ordinary
 icons use a 900-unit square viewport; the separate maskable icon uses an 800-unit
 square viewport and a fully opaque white background. Android supplies the outer
 adaptive shape. All non-white artwork fits within the central 40%-radius safe
-circle (maximum measured radius 198.74px on the 512px icon; safe radius 204.8px).
-The mobile Apple touch icon also uses frame1. The hidden, non-rendering external
+circle (artwork is scaled to 85% around the canvas center; safe radius 204.8px).
+The mobile Apple touch icon also uses f1. The hidden, non-rendering external
 image reference and editor metadata were removed from the source SVG; paths and
 styles are preserved. Existing icon assets remain available for old installs.
 
@@ -61,12 +61,14 @@ tools folder, then run the generator. No runtime/site dependency is added:
 ## Supplied animated splash
 
 Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
-isolated iframe. It uses 7 lego-six-frame-optimized.zip: the supplied six-frame
+isolated iframe. It uses 9 lego-fuse-top-right-synced.zip: the supplied six-frame
 sequence runs for 6.2 seconds, including bounces, pause, fuse, flashes and zoom.
 The inline SVG, reusable definitions, colors and animation CSS are unchanged.
-Only the demo Replay controls/script are replaced with the completion bridge.
+The supplied measured-path fuse script is retained so spark and stroke share
+one progress value; only demo Replay controls/wiring are removed. A separate
+completion bridge preserves the startup and Google sign-in handoff.
 Desktop retains supplied responsive sizing. Mobile aligns the original viewport
-to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing;
+to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing and 85% artwork scale;
 native Chrome/Android placement remains device-controlled and needs phone QA.
 Reduced motion shows frame6 immediately. The root bounce animationend signals
 completion exactly once. pwa-splash.js

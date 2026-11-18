@@ -1,12 +1,15 @@
 # Shared startup animation
 
-Source: supplied 7 lego-six-frame-optimized.zip, index.html (6.2 seconds).
-The SVG and original animation stylesheet are preserved verbatim. Demo controls
-and Replay script are removed. A completion bridge reports the root bounce end
-to the same-origin parent; reduced motion completes immediately with frame6.
-A separate mobile-only sizing rule aligns to the maskable launch icon framing.
+Source: supplied 9 lego-fuse-top-right-synced.zip, index.html (6.2 seconds).
+The SVG and original animation stylesheet are preserved verbatim, including
+the six embedded SVG frames. The supplied measured-path fuse script is retained:
+stroke and spark share progress from 4030ms to 4898ms. Only demo Replay controls
+and their event handler are removed. The completion bridge reports root bounce
+completion to the same-origin parent; reduced motion shows the final frame.
 
-frame1.svg is the new mobile icon source supplied separately. Hidden external
-image references and editor metadata were removed; paths/styles are unchanged.
-Desktop icons retain splash2.svg from the previous supplied archive.
-See scripts/README-pwa.md for icon generation and startup integration.
+f1.svg is the separately supplied mobile icon source. Editor metadata was
+removed; original paths/styles are preserved. Generated mobile icons scale the
+artwork to 85% around its center, leaving the opaque white adaptive background
+at full size. The mobile animation sizing matches this new framing. Desktop
+icons retain splash2.svg; previous frame1 assets remain for older installations.
+See scripts/README-pwa.md for generation and startup integration.

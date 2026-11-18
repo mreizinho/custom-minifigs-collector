@@ -60,20 +60,21 @@ test('mobile and desktop installations have distinct non-overlapping identities 
   assert.notEqual(apps[0].id,apps[1].id);
   assert.ok(!apps[0].scope.startsWith(apps[1].scope)&&!apps[1].scope.startsWith(apps[0].scope));
 });
-test('mobile uses frame1 with a separate full-bleed white maskable icon; desktop keeps splash2',async()=>{
+test('mobile uses f1 with a separate full-bleed white maskable icon; desktop keeps splash2',async()=>{
   const dist=path.join(root,'dist');
   const mobile=JSON.parse(await fs.readFile(path.join(dist,'manifest-mobile.webmanifest'),'utf8'));
   const desktop=JSON.parse(await fs.readFile(path.join(dist,'manifest-desktop.webmanifest'),'utf8'));
   assert.ok(desktop.icons.every(icon=>icon.src.includes('splash2')));
-  assert.ok(mobile.icons.every(icon=>icon.src.includes('frame1')));
+  assert.ok(mobile.icons.every(icon=>icon.src.includes('f1')));
   const mask=mobile.icons.find(icon=>icon.purpose==='maskable');
-  assert.equal(mask.src,'/icons/frame1-maskable-512.png');
+  assert.equal(mask.src,'/icons/f1-maskable-512.png');
   assert.ok(mobile.icons.some(icon=>icon.purpose==='any'));
-  const original=await fs.readFile(path.join(dist,'assets/splash/frame1.svg'),'utf8');
-  const icon=await fs.readFile(path.join(dist,'icons/frame1-maskable.svg'),'utf8');
+  const original=await fs.readFile(path.join(dist,'assets/splash/f1.svg'),'utf8');
+  const icon=await fs.readFile(path.join(dist,'icons/f1-maskable.svg'),'utf8');
   assert.deepEqual(icon.match(/<path\b[^>]*>/g),original.match(/<path\b[^>]*>/g));
-  assert.match(icon,/<rect x="100" y="460" width="800" height="800" fill="#ffffff"\/>/);
+  assert.match(icon,/<rect x="95" y="95" width="800" height="800" fill="#ffffff"\/>/);
   assert.ok(!icon.includes('<image'));
+  assert.match(icon,/transform="translate\(495 495\) scale\(0\.85\) translate\(-495 -495\)"/);
   const png=await fs.readFile(path.join(dist,mask.src));
   assert.equal(png.readUInt32BE(16),512);assert.equal(png.readUInt32BE(20),512);
 });

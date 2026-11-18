@@ -81,10 +81,12 @@ test('production build ships the isolated supplied animation and splash resource
   assert.match(art,/--duration:6\.2s/);
   assert.match(art,/@keyframes f6\{0%,80%\{opacity:0\}82%,100%\{opacity:1\}/);
   for(let frame=1;frame<=6;frame++)assert.ok(art.includes(`id="frame${frame}"`));
-  assert.ok(art.includes('<animateMotion dur="0.868s" begin="4.03s"'));
+  assert.ok(art.includes('const start=performance.now(), begin=4030, duration=868;'));
+  assert.ok(art.includes('path.getPointAtLength(distance)'));
+  assert.ok(!art.includes("getElementById('replay')"));
   assert.ok(!art.includes('<section class="controls">'));
   assert.ok(!art.includes('serviceWorker.register'));
-  assert.match(art,/viewBox="160 500 670 680"/);
+  assert.match(art,/viewBox="0 0 992.1 992.1"/);
 });
 function morph({reduced=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
@@ -104,4 +106,15 @@ test('morph reports completion once, only when its root bounce animation finishe
 test('morph reduced-motion completes without waiting for an animationend, including preference changes',()=>{
   const initial=morph({reduced:true});initial.flush();assert.equal(initial.messages.length,1);
   const later=morph();later.change({matches:true});assert.equal(later.messages.length,1);
+});
+test('supplied fuse and spark use the same measured progress and stop together',()=>{
+  const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
+  const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][1][1];
+  const path={style:{},getTotalLength:()=>1000,getPointAtLength:distance=>({x:distance,y:42})};
+  const spark={style:{},setAttribute(name,value){this[name]=value;}};
+  let tick;
+  vm.runInNewContext(script,{document:{getElementById:()=>({querySelector:selector=>selector==='#fuse'?path:spark})},cancelAnimationFrame(){},requestAnimationFrame:fn=>{tick=fn;return 1;},matchMedia:()=>({matches:false}),performance:{now:()=>0}});
+  tick(4464);assert.equal(path.style.strokeDashoffset,'500');assert.equal(spark.transform,'translate(500 42)');assert.equal(spark.style.opacity,'1');
+  tick(4898);assert.equal(path.style.strokeDashoffset,'0');assert.equal(spark.style.opacity,'0');
+  tick(5084);assert.equal(path.style.opacity,'0');
 });
