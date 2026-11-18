@@ -1,9 +1,13 @@
 /* Native minimize/maximize/close/menu controls stay outside the draggable area. */
 #desktopWindowTitlebar[hidden] { display:none; }
-/* This stylesheet is loaded only by /desktop/. Keep wheel/keyboard scrolling. */
+/* Reserve a thin, transparent page track so revealing it never shifts content. */
 @media (display-mode:standalone), (display-mode:window-controls-overlay) {
-  html, html * { scrollbar-width:none !important; scrollbar-gutter:auto !important; }
-  html::-webkit-scrollbar, html *::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+  html { scrollbar-width:thin; scrollbar-color:transparent transparent; scrollbar-gutter:stable; }
+  html.desktop-scrollbar-edge { scrollbar-color:#888 transparent; }
+  html::-webkit-scrollbar { width:6px; height:6px; background:transparent; }
+  html::-webkit-scrollbar-track { background:transparent; }
+  html::-webkit-scrollbar-thumb { background:transparent; border-radius:999px; }
+  html.desktop-scrollbar-edge::-webkit-scrollbar-thumb { background:#888; }
 }
 .desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
