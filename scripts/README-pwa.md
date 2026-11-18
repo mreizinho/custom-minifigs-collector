@@ -42,7 +42,11 @@ The manifest response requires HTTP revalidation on each request rather than
 allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
-Desktop installed icons retain the splash2 family. Desktop browser tabs restore
+Desktop installed icons retain the splash2 family at larger sizes, with a
+16x16 PNG of the browser-tab outline offered separately in the desktop manifest.
+This is a Windows small-icon selection trial: Chrome/Windows decide which size
+to use for each surface and display scale. Mobile metadata and icons are unchanged.
+Desktop browser tabs restore
 the original `lego-head.svg?v=3#favicon-outline` after the head is parsed;
 mobile tab favicons are unchanged. Mobile installed icons use the
 supplied f1.svg artwork, including its blank opening expression. Its ordinary
