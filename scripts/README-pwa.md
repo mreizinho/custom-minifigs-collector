@@ -57,9 +57,9 @@ supplied `assets/splash/frames/frame1.svg` artwork, including its blank opening 
 icons use a 900-unit square viewport; the separate maskable icon uses an 800-unit
 square viewport and a fully opaque white background. Android supplies the outer
 adaptive shape. All non-white artwork fits within the central 40%-radius safe
-circle (artwork is scaled to 85% around the canvas center; safe radius 204.8px).
+circle (artwork is scaled to 76.5% around the canvas center, or 90% of its previous size; safe radius 204.8px).
 The mobile Apple touch icon also uses frame1. Derived icons omit editor metadata;
-paths and styles are preserved. The `mobile-frame1` icon URLs distinguish this
+paths and styles are preserved. The `mobile-frame1-90` icon URLs distinguish this
 artwork revision from older installed icons. Existing assets remain available.
 
 To regenerate icons, install the pinned renderer into the ignored temporary

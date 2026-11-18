@@ -45,17 +45,17 @@ const mobileSource = (await fs.readFile(new URL('../assets/splash/frames/frame1.
 function mobileIcon(viewBox) {
   const [x,y,width,height] = viewBox.split(' ');
   return mobileSource.replace(/viewBox="[^"]+"/, `viewBox="${viewBox}"`)
-    .replace(/(<svg\b[^>]*>)/, `$1<title>Collector</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#ffffff"/><g transform="translate(495 495) scale(0.85) translate(-495 -495)">`)
+    .replace(/(<svg\b[^>]*>)/, `$1<title>Collector</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#ffffff"/><g transform="translate(495 495) scale(0.765) translate(-495 -495)">`)
     .replace('</svg>', '</g></svg>');
 }
 const mobile = mobileIcon('45 45 900 900');
 const maskable = mobileIcon('95 95 800 800');
-await fs.writeFile(new URL('mobile-frame1.svg', output), mobile);
-await fs.writeFile(new URL('mobile-frame1-maskable.svg', output), maskable);
+await fs.writeFile(new URL('mobile-frame1-90.svg', output), mobile);
+await fs.writeFile(new URL('mobile-frame1-90-maskable.svg', output), maskable);
 for (const size of [180, 192, 512]) {
   const png = new Resvg(mobile, {fitTo: {mode:'width', value:size}, font:{loadSystemFonts:false}}).render().asPng();
-  await fs.writeFile(new URL(`mobile-frame1-${size}.png`, output), png);
+  await fs.writeFile(new URL(`mobile-frame1-90-${size}.png`, output), png);
 }
-await fs.writeFile(new URL('mobile-frame1-maskable-512.png', output),
+await fs.writeFile(new URL('mobile-frame1-90-maskable-512.png', output),
   new Resvg(maskable, {fitTo:{mode:'width',value:512},font:{loadSystemFonts:false}}).render().asPng());
-console.log('Created mobile icons from the current frame1, preserving 85% artwork and white maskable canvas.');
+console.log('Created mobile icons from the current frame1, using 90% of the previous head size (76.5% source scale) and white maskable canvas.');

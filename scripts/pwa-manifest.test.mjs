@@ -77,16 +77,16 @@ test('mobile uses current frame1; desktop keeps supplied large artwork and small
     const smallPng=await fs.readFile(path.join(dist,smallDesktop.src));
     assert.equal(smallPng.readUInt32BE(16),size);assert.equal(smallPng.readUInt32BE(20),size);
   }
-  assert.ok(mobile.icons.every(icon=>icon.src.includes('mobile-frame1')));
+  assert.ok(mobile.icons.every(icon=>icon.src.includes('mobile-frame1-90')));
   const mask=mobile.icons.find(icon=>icon.purpose==='maskable');
-  assert.equal(mask.src,'/icons/mobile-frame1-maskable-512.png');
+  assert.equal(mask.src,'/icons/mobile-frame1-90-maskable-512.png');
   assert.ok(mobile.icons.some(icon=>icon.purpose==='any'));
   const original=await fs.readFile(path.join(dist,'assets/splash/frames/frame1.svg'),'utf8');
-  const icon=await fs.readFile(path.join(dist,'icons/mobile-frame1-maskable.svg'),'utf8');
+  const icon=await fs.readFile(path.join(dist,'icons/mobile-frame1-90-maskable.svg'),'utf8');
   assert.deepEqual(icon.match(/<path\b[^>]*>/g),original.match(/<path\b[^>]*>/g));
   assert.match(icon,/<rect x="95" y="95" width="800" height="800" fill="#ffffff"\/>/);
   assert.ok(!icon.includes('<image'));
-  assert.match(icon,/transform="translate\(495 495\) scale\(0\.85\) translate\(-495 -495\)"/);
+  assert.match(icon,/transform="translate\(495 495\) scale\(0\.765\) translate\(-495 -495\)"/);
   const png=await fs.readFile(path.join(dist,mask.src));
   assert.equal(png.readUInt32BE(16),512);assert.equal(png.readUInt32BE(20),512);
 });

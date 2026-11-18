@@ -13,7 +13,7 @@
     // This selector runs in the head before the icon link has been parsed.
     const updateAppleIcon = () => {
       const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
-      if (appleIcon) appleIcon.href = '/icons/mobile-frame1-180.png';
+      if (appleIcon) appleIcon.href = '/icons/mobile-frame1-90-180.png';
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateAppleIcon, {once:true});
     else updateAppleIcon();
