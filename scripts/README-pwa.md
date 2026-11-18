@@ -114,6 +114,9 @@ the app name in Barlow Condensed, with Collector using the selected accent color
 in the browser-provided safe titlebar rectangle, leaving native
 menu/minimize/maximize/close controls to Edge/Chrome. The titlebar is draggable,
 tracks light/dark styling, and reserves its height above the normal app header.
+Desktop floating search/add buttons include this same titlebar height in their
+top offsets, preserving their normal spacing below the sticky header. Narrow
+windows keep the existing bottom-positioned controls.
 Geometry/visibility changes hide it and remove the spacing whenever overlay mode
 is disabled, including unsupported browsers and ordinary tabs. Mobile and root
 HTML do not load this integration. Windows still uses the yellow installed app
