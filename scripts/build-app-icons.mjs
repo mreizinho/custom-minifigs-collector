@@ -18,13 +18,15 @@ for (const size of [32, 180, 192, 512]) {
 }
 console.log('Created matching favicon and installation icons from the splash2 opening frame.');
 
-// Windows trial: offer the browser-tab outline at 16px, keeping larger app art.
+// Chrome's app-window icon loader requests at least 32px, even for a 16px display.
 const head = await fs.readFile(new URL('../lego-head.svg', import.meta.url), 'utf8');
 const faviconArt = head.match(/<g id="favicon-art"[\s\S]*?<\/g>/)?.[0];
 if (!faviconArt) throw new Error('Original outline favicon artwork is missing.');
 const smallDesktopIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${faviconArt}</svg>`;
-await fs.writeFile(new URL('desktop-outline-16.png', output),
-  new Resvg(smallDesktopIcon, {fitTo:{mode:'width',value:16},font:{loadSystemFonts:false}}).render().asPng());
+for (const size of [16, 32]) {
+  await fs.writeFile(new URL(`desktop-outline-${size}.png`, output),
+    new Resvg(smallDesktopIcon, {fitTo:{mode:'width',value:size},font:{loadSystemFonts:false}}).render().asPng());
+}
 
 // Mobile has its own artwork. Android supplies the adaptive outline; never
 // bake rounded corners into this full-bleed, opaque white maskable canvas.

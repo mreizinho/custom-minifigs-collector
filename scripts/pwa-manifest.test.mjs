@@ -64,11 +64,13 @@ test('mobile uses f1 with a separate full-bleed white maskable icon; desktop kee
   const dist=path.join(root,'dist');
   const mobile=JSON.parse(await fs.readFile(path.join(dist,'manifest-mobile.webmanifest'),'utf8'));
   const desktop=JSON.parse(await fs.readFile(path.join(dist,'manifest-desktop.webmanifest'),'utf8'));
-  assert.ok(desktop.icons.filter(icon=>icon.sizes!=='16x16').every(icon=>icon.src.includes('splash2')));
-  const smallDesktop=desktop.icons.find(icon=>icon.sizes==='16x16');
-  assert.equal(smallDesktop.src,'/icons/desktop-outline-16.png');
-  const smallPng=await fs.readFile(path.join(dist,smallDesktop.src));
-  assert.equal(smallPng.readUInt32BE(16),16);assert.equal(smallPng.readUInt32BE(20),16);
+  assert.ok(desktop.icons.filter(icon=>parseInt(icon.sizes)>32).every(icon=>icon.src.includes('splash2')));
+  for(const size of [16,32]){
+    const smallDesktop=desktop.icons.find(icon=>icon.sizes===`${size}x${size}`);
+    assert.equal(smallDesktop.src,`/icons/desktop-outline-${size}.png`);
+    const smallPng=await fs.readFile(path.join(dist,smallDesktop.src));
+    assert.equal(smallPng.readUInt32BE(16),size);assert.equal(smallPng.readUInt32BE(20),size);
+  }
   assert.ok(mobile.icons.every(icon=>icon.src.includes('f1')));
   const mask=mobile.icons.find(icon=>icon.purpose==='maskable');
   assert.equal(mask.src,'/icons/f1-maskable-512.png');

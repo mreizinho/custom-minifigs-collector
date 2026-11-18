@@ -43,7 +43,9 @@ allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
 Desktop installed icons retain the splash2 family at larger sizes, with a
-16x16 PNG of the browser-tab outline offered separately in the desktop manifest.
+16x16 and 32x32 PNGs of the browser-tab outline offered separately in the desktop manifest.
+Chrome's app-window loader requests `kWebAppIconSmall` (32px) as its minimum;
+the 16px-only trial was too small and therefore selected a larger yellow icon.
 This is a Windows small-icon selection trial: Chrome/Windows decide which size
 to use for each surface and display scale. Mobile metadata and icons are unchanged.
 Desktop browser tabs restore
