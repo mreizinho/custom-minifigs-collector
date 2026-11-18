@@ -86,7 +86,13 @@ test('production build ships the isolated supplied animation and splash resource
   assert.ok(!art.includes('id="replay"'));assert.match(art,/prefers-reduced-motion:reduce/);
   assert.match(art,/--duration:6\.2s/);
   assert.match(art,/@keyframes f6\{0%,80%\{opacity:0\}82%,100%\{opacity:1\}/);
-  for(let frame=1;frame<=6;frame++)assert.ok(art.includes(`id="frame${frame}"`));
+  for(let frame=1;frame<=6;frame++){
+    const tag=art.match(new RegExp(`<image\\b[^>]*id="frame${frame}"[^>]*>`))[0];
+    const encoded=tag.match(/href="data:image\/svg\+xml;base64,([^"]+)"/)[1];
+    const original=fs.readFileSync(new URL(`assets/splash/frames/frame${frame}.svg`,root));
+    const normalizeLines=buffer=>buffer.toString('utf8').replace(/\r\n/g,'\n');
+    assert.equal(normalizeLines(Buffer.from(encoded,'base64')),normalizeLines(original));
+  }
   assert.ok(art.includes('const start=performance.now(), begin=4030, duration=868;'));
   assert.ok(art.includes('path.getPointAtLength(distance)'));
   assert.ok(!art.includes("getElementById('replay')"));

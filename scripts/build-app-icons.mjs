@@ -39,7 +39,9 @@ for (const size of [192, 512]) {
 
 // Mobile has its own artwork. Android supplies the adaptive outline; never
 // bake rounded corners into this full-bleed, opaque white maskable canvas.
-const mobileSource = await fs.readFile(new URL('../assets/splash/f1.svg', import.meta.url), 'utf8');
+const mobileSource = (await fs.readFile(new URL('../assets/splash/frames/frame1.svg', import.meta.url), 'utf8'))
+  .replace(/<\?xml[^>]*>\s*/, '')
+  .replace(/<metadata>[\s\S]*?<\/metadata>/, '');
 function mobileIcon(viewBox) {
   const [x,y,width,height] = viewBox.split(' ');
   return mobileSource.replace(/viewBox="[^"]+"/, `viewBox="${viewBox}"`)
@@ -48,12 +50,12 @@ function mobileIcon(viewBox) {
 }
 const mobile = mobileIcon('45 45 900 900');
 const maskable = mobileIcon('95 95 800 800');
-await fs.writeFile(new URL('f1.svg', output), mobile);
-await fs.writeFile(new URL('f1-maskable.svg', output), maskable);
+await fs.writeFile(new URL('mobile-frame1.svg', output), mobile);
+await fs.writeFile(new URL('mobile-frame1-maskable.svg', output), maskable);
 for (const size of [180, 192, 512]) {
   const png = new Resvg(mobile, {fitTo: {mode:'width', value:size}, font:{loadSystemFonts:false}}).render().asPng();
-  await fs.writeFile(new URL(`f1-${size}.png`, output), png);
+  await fs.writeFile(new URL(`mobile-frame1-${size}.png`, output), png);
 }
-await fs.writeFile(new URL('f1-maskable-512.png', output),
+await fs.writeFile(new URL('mobile-frame1-maskable-512.png', output),
   new Resvg(maskable, {fitTo:{mode:'width',value:512},font:{loadSystemFonts:false}}).render().asPng());
-console.log('Created mobile f1 icons with a separate white maskable canvas.');
+console.log('Created mobile icons from the current frame1, preserving 85% artwork and white maskable canvas.');

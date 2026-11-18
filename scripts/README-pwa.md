@@ -50,18 +50,17 @@ The source is build-only and is not shipped in the static site. There are
 Edge diagnostics confirmed both outline sizes are downloaded, but the 512px
 yellow head is selected as the trusted app icon and supplies the generated OS
 icon sizes. The small-icon entries cannot force a different native titlebar icon.
-Mobile metadata and icons are unchanged.
 Desktop browser tabs restore
 the original `lego-head.svg?v=3#favicon-outline` after the head is parsed;
 mobile tab favicons are unchanged. Mobile installed icons use the
-supplied f1.svg artwork, including its blank opening expression. Its ordinary
+supplied `assets/splash/frames/frame1.svg` artwork, including its blank opening expression. Its ordinary
 icons use a 900-unit square viewport; the separate maskable icon uses an 800-unit
 square viewport and a fully opaque white background. Android supplies the outer
 adaptive shape. All non-white artwork fits within the central 40%-radius safe
 circle (artwork is scaled to 85% around the canvas center; safe radius 204.8px).
-The mobile Apple touch icon also uses f1. The hidden, non-rendering external
-image reference and editor metadata were removed from the source SVG; paths and
-styles are preserved. Existing icon assets remain available for old installs.
+The mobile Apple touch icon also uses frame1. Derived icons omit editor metadata;
+paths and styles are preserved. The `mobile-frame1` icon URLs distinguish this
+artwork revision from older installed icons. Existing assets remain available.
 
 To regenerate icons, install the pinned renderer into the ignored temporary
 tools folder, then run the generator. No runtime/site dependency is added:
@@ -75,7 +74,11 @@ Installed standalone/fullscreen PWAs, including desktop window-controls-overlay
 mode, show `assets/splash/lego-splash.html` in an
 isolated iframe. It uses 9 lego-fuse-top-right-synced.zip: the supplied six-frame
 sequence runs for 6.2 seconds, including bounces, pause, fuse, flashes and zoom.
-The inline SVG, reusable definitions, colors and animation CSS are unchanged.
+The current six separately supplied SVGs in `assets/splash/frames/` replace only
+the embedded image payloads; surrounding SVG geometry, animation CSS, scripts
+and display sizes remain unchanged. Source SVGs are stored exactly as supplied.
+To re-embed them, run `node scripts/build-splash-frames.mjs`, followed by the
+icon generator and static build.
 The supplied measured-path fuse script is retained so spark and stroke share
 one progress value; only demo Replay controls/wiring are removed. A separate
 completion bridge preserves the startup and Google sign-in handoff.
