@@ -1,6 +1,7 @@
 // One splash per document launch; returning from another app never replays it.
 (() => {
   const installed = window.matchMedia('(display-mode: standalone)').matches
+    || window.matchMedia('(display-mode: window-controls-overlay)').matches
     || window.matchMedia('(display-mode: fullscreen)').matches
     || window.navigator.standalone === true
     || new URLSearchParams(location.search).get('splash') === 'preview';

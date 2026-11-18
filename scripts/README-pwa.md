@@ -71,7 +71,8 @@ tools folder, then run the generator. No runtime/site dependency is added:
 
 ## Supplied animated splash
 
-Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
+Installed standalone/fullscreen PWAs, including desktop window-controls-overlay
+mode, show `assets/splash/lego-splash.html` in an
 isolated iframe. It uses 9 lego-fuse-top-right-synced.zip: the supplied six-frame
 sequence runs for 6.2 seconds, including bounces, pause, fuse, flashes and zoom.
 The inline SVG, reusable definitions, colors and animation CSS are unchanged.
