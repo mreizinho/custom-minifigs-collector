@@ -1,1 +1,12 @@
-Source: lego-splash-no-early-splash1.zip. Sequence splash2 → splash3 → splash1, 2.35 seconds. Original paths, palette, and supplied animation rules are retained; prototype controls, manifest link, and service-worker registration are removed. The SVG viewBox is normalized to the shared 900-unit icon canvas. splash2.svg is the same combined SVG frozen at its initial state. The parent controls app-readiness and popup timing. The inline head script selects a centered 288 CSS-pixel mobile canvas; Chrome controls the native launch screen, so exact physical-device overlap requires verification.
+# Shared startup animation
+
+Source: supplied 7 lego-six-frame-optimized.zip, index.html (6.2 seconds).
+The SVG and original animation stylesheet are preserved verbatim. Demo controls
+and Replay script are removed. A completion bridge reports the root bounce end
+to the same-origin parent; reduced motion completes immediately with frame6.
+A separate mobile-only sizing rule aligns to the maskable launch icon framing.
+
+frame1.svg is the new mobile icon source supplied separately. Hidden external
+image references and editor metadata were removed; paths/styles are unchanged.
+Desktop icons retain splash2.svg from the previous supplied archive.
+See scripts/README-pwa.md for icon generation and startup integration.

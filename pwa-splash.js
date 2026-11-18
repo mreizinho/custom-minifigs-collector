@@ -40,7 +40,7 @@
   }
   window.addEventListener('message', animationComplete);
   // A network/authentication failure must never lock users out of the UI.
-  const deadline = setTimeout(finish, 8000);
+  const deadline = setTimeout(finish, 12000);
   window.collectorSplash = {
     ready() { appReady = true; maybeFinish(); },
     beforeInteraction() {

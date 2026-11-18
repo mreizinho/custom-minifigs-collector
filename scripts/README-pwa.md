@@ -1,7 +1,7 @@
 # Home-screen installation
 
 `manifest-mobile.webmanifest` and `manifest-desktop.webmanifest` provide two
-separate installations, both named Collector and using the splash2 icon:
+separate installations, both named Collector, with platform-specific icons:
 
 - `/mobile/`: identity, start URL, and scope `/mobile/`.
 - `/desktop/`: identity, start URL, and scope `/desktop/`.
@@ -42,13 +42,15 @@ The manifest response requires HTTP revalidation on each request rather than
 allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
-The browser favicon, Apple touch icon, and installed PWA icons all derive from
-`assets/splash/splash2.svg`, extracted from the latest ZIP's initial frame.
-`icons/splash2.svg` preserves its paths/styles with the shared 900-unit square
-framing and white background; matching PNGs cover 32, 180, 192,
-and 512 pixels. The same framing leaves room for Android icon masks. Old icon
-files remain available for older installations, but current metadata references
-only the new splash2 family. Theme changes no longer substitute another favicon.
+Desktop and browser favicon icons retain the splash2 family. Mobile uses the
+supplied frame1.svg artwork, including its blank opening expression. Its ordinary
+icons use a 900-unit square viewport; the separate maskable icon uses an 800-unit
+square viewport and a fully opaque white background. Android supplies the outer
+adaptive shape. All non-white artwork fits within the central 40%-radius safe
+circle (maximum measured radius 198.74px on the 512px icon; safe radius 204.8px).
+The mobile Apple touch icon also uses frame1. The hidden, non-rendering external
+image reference and editor metadata were removed from the source SVG; paths and
+styles are preserved. Existing icon assets remain available for old installs.
 
 To regenerate icons, install the pinned renderer into the ignored temporary
 tools folder, then run the generator. No runtime/site dependency is added:
@@ -59,18 +61,15 @@ tools folder, then run the generator. No runtime/site dependency is added:
 ## Supplied animated splash
 
 Installed standalone/fullscreen PWAs show `assets/splash/lego-splash.html` in an
-isolated iframe. It uses `lego-splash-no-early-splash1.zip`: splash2 → splash3 →
-splash1, 2.35 seconds, with the final outline explicitly hidden at startup. The
-prototype controls, manifest, and demo service-worker registration are removed;
-the original geometry, palette, and bounce/expression keyframes are retained.
-The SVG viewport is normalized to `50 410 900 900`, matching the icon framing.
-Mobile uses a centered 288 CSS-pixel square (Android's usual icon-only launch
-canvas) instead of vw scaling; desktop retains the supplied responsive sizing.
-The mobile manifest requests ordinary icons, avoiding a separate maskable icon
-background style. Native launch positioning/scaling is ultimately controlled by
-Chrome/Android and must be verified on the target phone; exact overlap is not a
-web API guarantee. The frame signals completion on the supplied
-head-bounce animationend (immediately with reduced motion). `pwa-splash.js`
+isolated iframe. It uses 7 lego-six-frame-optimized.zip: the supplied six-frame
+sequence runs for 6.2 seconds, including bounces, pause, fuse, flashes and zoom.
+The inline SVG, reusable definitions, colors and animation CSS are unchanged.
+Only the demo Replay controls/script are replaced with the completion bridge.
+Desktop retains supplied responsive sizing. Mobile aligns the original viewport
+to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing;
+native Chrome/Android placement remains device-controlled and needs phone QA.
+Reduced motion shows frame6 immediately. The root bounce animationend signals
+completion exactly once. pwa-splash.js
 then waits for the initial demo/sheet/Brickset
 result or an actionable error/onboarding state before fading for 300ms.
 Google Sheets authorization and Firebase sign-in use `beforeInteraction()` to
@@ -78,7 +77,7 @@ wait for the animation and fade to finish before opening a Google popup. An
 authorization requirement counts as an actionable ready state, avoiding a
 dependency cycle between splash dismissal and token acquisition. Once the
 splash is gone, ordinary sign-in clicks remain synchronous up to popup launch.
-An 8-second safety deadline releases the UI even if startup or the frame fails.
+A 12-second safety deadline releases the UI even if startup or the frame fails.
 It never waits for all 2,188 photos or background prices. A saved Brickset
 snapshot counts as ready. Returning from another app does not replay it.
 Ordinary browser tabs load no splash frame. No dependency or service-worker

@@ -9,4 +9,13 @@
   document.documentElement.dataset.pwaPlatform = platform;
   const manifest = document.querySelector('link[rel="manifest"]');
   if (manifest) manifest.href = `/manifest-${platform}.webmanifest`;
+  if (platform === 'mobile') {
+    // This selector runs in the head before the icon link has been parsed.
+    const updateAppleIcon = () => {
+      const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+      if (appleIcon) appleIcon.href = '/icons/frame1-180.png';
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateAppleIcon, {once:true});
+    else updateAppleIcon();
+  }
 })();

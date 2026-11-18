@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../pwa-install.js',import.meta.url),'utf8');
 function select(pathname,ua,touch=0){
   const manifest={},window={},root={dataset:{}};
-  vm.runInNewContext(source,{window,location:{pathname},navigator:{userAgent:ua,maxTouchPoints:touch},document:{documentElement:root,querySelector:()=>manifest}});
+  vm.runInNewContext(source,{window,location:{pathname},navigator:{userAgent:ua,maxTouchPoints:touch},document:{documentElement:root,querySelector:selector=>selector.includes('apple-touch')?{}:manifest}});
   return{platform:window.collectorPwaPlatform,manifest:manifest.href};
 }
 test('root selects installation metadata by device, not window width',()=>{

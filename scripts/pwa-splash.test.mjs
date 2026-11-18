@@ -33,7 +33,7 @@ test('waits for initialization when the animation finishes first',()=>{
   p.window.collectorSplash.ready();assert.equal(p.events.length,1);p.window.collectorSplash.ready();assert.equal(p.events.length,1);
 });
 test('startup/network failure cannot leave the application blocked',()=>{
-  const p=launch();p.window.collectorSplash.mount();p.listeners.get('DOMContentLoaded')();p.tick(8000);
+  const p=launch();p.window.collectorSplash.mount();p.listeners.get('DOMContentLoaded')();p.tick(12000);
   assert.equal(p.main.inert,false);assert.equal(p.classes.size,0);p.tick(320);assert.ok(p.layer.removed);
 });
 test('reduced motion dismisses without an animated fade',()=>{
@@ -52,7 +52,7 @@ test('interactive authorization waits for the animation and fade without waiting
 });
 test('a failed animation still releases queued authorization at the safety deadline',async()=>{
   const p=launch();p.window.collectorSplash.mount();const waiting=p.window.collectorSplash.beforeInteraction();
-  p.tick(8320);await waiting;assert.equal(p.layer.removed,true);
+  p.tick(12320);await waiting;assert.equal(p.layer.removed,true);
 });
 function sheetsAuthorization(p){
   const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
@@ -78,13 +78,13 @@ test('production build ships the isolated supplied animation and splash resource
   assert.match(html,/window\.collectorSplash\?\.mount\(\)/);
   const art=fs.readFileSync(new URL('assets/splash/lego-splash.html',root),'utf8');
   assert.ok(!art.includes('id="replay"'));assert.match(art,/prefers-reduced-motion:reduce/);
-  assert.match(art,/head-bounce 2\.35s/);
-  assert.match(art,/#final-outline\{opacity:0\}/);
-  assert.match(art,/@keyframes final\{0%,65%\{opacity:0\}79%,100%\{opacity:1\}/);
+  assert.match(art,/--duration:6\.2s/);
+  assert.match(art,/@keyframes f6\{0%,80%\{opacity:0\}82%,100%\{opacity:1\}/);
+  for(let frame=1;frame<=6;frame++)assert.ok(art.includes(`id="frame${frame}"`));
+  assert.ok(art.includes('<animateMotion dur="0.868s" begin="4.03s"'));
   assert.ok(!art.includes('<section class="controls">'));
   assert.ok(!art.includes('serviceWorker.register'));
-  const icon=fs.readFileSync(new URL('icons/splash2.svg',root),'utf8');
-  assert.equal(art.match(/viewBox="([^"]+)"/)[1],icon.match(/viewBox="([^"]+)"/)[1]);
+  assert.match(art,/viewBox="160 500 670 680"/);
 });
 function morph({reduced=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
@@ -92,13 +92,13 @@ function morph({reduced=false}={}) {
   const messages=[],microtasks=[];let end,changed;
   const art={addEventListener:(name,fn)=>{assert.equal(name,'animationend');end=fn;}};
   const reduce={matches:reduced,addEventListener:(name,fn)=>{assert.equal(name,'change');changed=fn;}};
-  vm.runInNewContext(script,{document:{getElementById:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
+  vm.runInNewContext(script,{document:{querySelector:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
   return{art,messages,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
 }
-test('morph reports completion once, only when its root head-bounce animation finishes',()=>{
+test('morph reports completion once, only when its root bounce animation finishes',()=>{
   const p=morph();assert.equal(p.messages.length,0);
-  p.end({target:p.art,animationName:'third'});p.end({target:{},animationName:'head-bounce'});assert.equal(p.messages.length,0);
-  p.end({target:p.art,animationName:'head-bounce'});p.end({target:p.art,animationName:'head-bounce'});
+  p.end({target:p.art,animationName:'third'});p.end({target:{},animationName:'bounce'});assert.equal(p.messages.length,0);
+  p.end({target:p.art,animationName:'bounce'});p.end({target:p.art,animationName:'bounce'});
   assert.equal(p.messages.length,1);assert.equal(p.messages[0].message.type,'collector-splash-animation-complete');assert.equal(p.messages[0].origin,'https://test.example');
 });
 test('morph reduced-motion completes without waiting for an animationend, including preference changes',()=>{
