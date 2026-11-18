@@ -68,7 +68,7 @@ for (const platform of ['mobile', 'desktop']) {
     .replace('/manifest-desktop.webmanifest', `/manifest-${platform}.webmanifest`);
   if (platform === 'desktop') {
     html = html.replace('</head>', '  <link rel="stylesheet" href="/desktop-window.css?v=20261118-01">\n  <script src="/desktop-window.js?v=20261118-01" defer></script>\n</head>')
-      .replace('<body>', '<body>\n  <div id="desktopWindowTitlebar" aria-label="Application title bar" hidden><img src="/lego-head.svg?v=3#favicon-outline" alt=""><span>Custom Minifigs Collector</span></div>');
+      .replace('<body>', '<body>\n  <div id="desktopWindowTitlebar" aria-label="Application title bar" hidden><img src="/lego-head.svg?v=3#outline" alt=""><span>Custom Minifigs Collector</span></div>');
   }
   await writeFile(path.join(directory, 'index.html'), html);
 }

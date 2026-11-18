@@ -26,6 +26,7 @@ test('production injects custom titlebar only into the desktop entry and preserv
   const root=new URL('../dist/',import.meta.url);
   const desktop=fs.readFileSync(new URL('desktop/index.html',root),'utf8');
   assert.ok(desktop.includes('id="desktopWindowTitlebar"'));assert.ok(desktop.includes('/desktop-window.css'));assert.ok(desktop.includes('/desktop-window.js'));
+  assert.ok(desktop.includes('<img src="/lego-head.svg?v=3#outline" alt="">'));
   for(const page of ['index.html','mobile/index.html']){
     const html=fs.readFileSync(new URL(page,root),'utf8');assert.ok(!html.includes('desktopWindowTitlebar'));assert.ok(!html.includes('desktop-window.js'));
   }

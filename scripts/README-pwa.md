@@ -109,7 +109,7 @@ Validate production artifacts with:
 
 The desktop manifest opts into `window-controls-overlay`, with `standalone` as
 the fallback. Only the generated `/desktop/` HTML loads `desktop-window.js/css`
-and includes the custom titlebar. It displays the outline browser favicon and
+and includes the custom titlebar. It displays the thin `lego-head.svg#outline` variant and
 the app name in the browser-provided safe titlebar rectangle, leaving native
 menu/minimize/maximize/close controls to Edge/Chrome. The titlebar is draggable,
 tracks light/dark styling, and reserves its height above the normal app header.
