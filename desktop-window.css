@@ -29,6 +29,6 @@
   app-region:drag;
 }
 #desktopWindowTitlebar img { width:16px; height:16px; flex:none; pointer-events:none; }
-#desktopWindowTitlebar .desktop-window-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#desktopWindowTitlebar .desktop-window-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transform:scaleX(.9); transform-origin:left center; }
 #desktopWindowTitlebar .desktop-window-accent { color:var(--accent); }
 body.dark #desktopWindowTitlebar img { filter:invert(1); }
