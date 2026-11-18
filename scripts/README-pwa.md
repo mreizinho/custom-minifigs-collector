@@ -108,7 +108,7 @@ without requiring PWA installation; normal browser visits remain unchanged.
 Validate production artifacts with:
 
     node scripts/build-static.mjs
-    node --test scripts/desktop-window.test.mjs scripts/pwa-install.test.mjs scripts/pwa-manifest.test.mjs scripts/pwa-theme.test.mjs scripts/pwa-splash.test.mjs scripts/demo-assets.test.mjs
+    node --test scripts/desktop-modal-chrome.test.mjs scripts/desktop-window.test.mjs scripts/pwa-install.test.mjs scripts/pwa-manifest.test.mjs scripts/pwa-theme.test.mjs scripts/pwa-splash.test.mjs scripts/demo-assets.test.mjs
 
 ## Desktop window titlebar
 
@@ -135,3 +135,13 @@ is disabled, including unsupported browsers and ordinary tabs. Mobile and root
 HTML do not load this integration. Windows still uses the yellow installed app
 icon for the taskbar. Existing installations must pick up the manifest change;
 the browser may also expose a titlebar toggle in its app controls.
+
+Only installed desktop entry points load `desktop-modal-chrome.js`. It blends
+the active modal dialogs' computed backdrop colors over the current body color
+and scrollbar colors, keeping the gutter consistent with the dimmed page. The
+same composite is sent through theme-color and the root canvas as a background
+hint for native window controls. It never overlays or disables those controls;
+Edge/Windows retains final control over their appearance. Nested modals compose,
+transparent backdrops are ignored, and closing restores the current theme.
+The mutation filter ignores unrelated catalogue changes to avoid style reads
+during normal collection updates. Mobile and ordinary browser tabs do not use it.

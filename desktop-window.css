@@ -7,7 +7,8 @@
   /* Body theme variables do not inherit upwards into the root scrollbar. */
   html:has(body.dark) { --desktop-gutter-line:#4c4e48; }
   html:has(.topbar.is-scrolled) { --desktop-gutter-shadow:#00000018; }
-  html::-webkit-scrollbar { width:6px; height:6px; background:transparent; }
+  html.desktop-modal-dimmed { --desktop-gutter-line:var(--desktop-modal-gutter-line); }
+  html::-webkit-scrollbar { width:6px; height:6px; background-color:var(--desktop-scrollbar-background,transparent); }
   /* The browser clips header content at its scrollport, so paint this last 6px. */
   html::-webkit-scrollbar:vertical {
     background-image:
@@ -16,7 +17,7 @@
   }
   html::-webkit-scrollbar-track { background:transparent; }
   html::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-bottom); }
-  html::-webkit-scrollbar-thumb { background:#888; border-radius:999px; }
+  html::-webkit-scrollbar-thumb { background:var(--desktop-scrollbar-thumb,#888); border-radius:999px; }
   html::-webkit-scrollbar-button { display:none; }
   html::-webkit-scrollbar-corner { background:transparent; }
   @media (max-width:600px) { html { --desktop-topbar-height:60px; } }
