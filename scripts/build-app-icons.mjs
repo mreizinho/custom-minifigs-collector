@@ -28,6 +28,15 @@ for (const size of [16, 32]) {
     new Resvg(smallDesktopIcon, {fitTo:{mode:'width',value:size},font:{loadSystemFonts:false}}).render().asPng());
 }
 
+// Desktop large icon: preserve the supplied PNG's colors and transparency,
+// fitting its full portrait artwork into a square without stretching/cropping.
+const desktopSource = await fs.readFile(new URL('../assets/icons/desktop-head-source.png', import.meta.url));
+const desktopIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><image href="data:image/png;base64,${desktopSource.toString('base64')}" width="512" height="512" preserveAspectRatio="xMidYMid meet"/></svg>`;
+for (const size of [192, 512]) {
+  await fs.writeFile(new URL(`desktop-head-${size}.png`, output),
+    new Resvg(desktopIcon, {fitTo:{mode:'width',value:size},font:{loadSystemFonts:false}}).render().asPng());
+}
+
 // Mobile has its own artwork. Android supplies the adaptive outline; never
 // bake rounded corners into this full-bleed, opaque white maskable canvas.
 const mobileSource = await fs.readFile(new URL('../assets/splash/f1.svg', import.meta.url), 'utf8');

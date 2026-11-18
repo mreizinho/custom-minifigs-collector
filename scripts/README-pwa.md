@@ -1,10 +1,10 @@
 # Home-screen installation
 
 `manifest-mobile.webmanifest` and `manifest-desktop.webmanifest` provide two
-separate installations, both named Collector, with platform-specific icons:
+separate installations with platform-specific names and icons:
 
-- `/mobile/`: identity, start URL, and scope `/mobile/`.
-- `/desktop/`: identity, start URL, and scope `/desktop/`.
+- `/mobile/`: Collector; identity, start URL, and scope `/mobile/`.
+- `/desktop/`: Custom Minifigs Collector; identity, start URL, and scope `/desktop/`.
 
 The build creates both entry pages from the same app HTML, using `<base href="/">`
 for shared assets. `pwa-install.js` selects a manifest by explicit route first,
@@ -42,7 +42,10 @@ The manifest response requires HTTP revalidation on each request rather than
 allowing an hour of cached metadata. This does not bypass Chrome's own WebAPK
 update schedule or guarantee an installed-package update.
 
-Desktop installed icons retain the splash2 family at larger sizes, with a
+Desktop large installed icons use the supplied Asset 2.png, stored unchanged as
+`assets/icons/desktop-head-source.png`. The generator fits its complete artwork
+into 192px and 512px squares, preserving transparency, colors and proportions.
+The source is build-only and is not shipped in the static site. There are
 16x16 and 32x32 PNGs of the browser-tab outline offered separately in the desktop manifest.
 Chrome's app-window loader requests `kWebAppIconSmall` (32px) as its minimum;
 the 16px-only trial was too small and therefore selected a larger yellow icon.

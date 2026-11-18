@@ -47,7 +47,8 @@ test('mobile and desktop installations have distinct non-overlapping identities 
   const dist=path.join(root,'dist'),apps=[];
   for(const platform of ['mobile','desktop']){
     const manifest=JSON.parse(await fs.readFile(path.join(dist,`manifest-${platform}.webmanifest`),'utf8'));
-    assert.equal(manifest.name,'Collector');assert.equal(manifest.short_name,'Collector');
+    const expectedName=platform==='desktop'?'Custom Minifigs Collector':'Collector';
+    assert.equal(manifest.name,expectedName);assert.equal(manifest.short_name,expectedName);
     assert.equal(manifest.id,`/${platform}/`);assert.equal(manifest.scope,`/${platform}/`);assert.equal(manifest.start_url,`/${platform}/`);
     assert.equal(manifest.background_color,'#ffffff');
     const html=await fs.readFile(path.join(dist,platform,'index.html'),'utf8');
@@ -60,11 +61,16 @@ test('mobile and desktop installations have distinct non-overlapping identities 
   assert.notEqual(apps[0].id,apps[1].id);
   assert.ok(!apps[0].scope.startsWith(apps[1].scope)&&!apps[1].scope.startsWith(apps[0].scope));
 });
-test('mobile uses f1 with a separate full-bleed white maskable icon; desktop keeps splash2',async()=>{
+test('mobile keeps f1; desktop uses supplied artwork for large icons and outline for small icons',async()=>{
   const dist=path.join(root,'dist');
   const mobile=JSON.parse(await fs.readFile(path.join(dist,'manifest-mobile.webmanifest'),'utf8'));
   const desktop=JSON.parse(await fs.readFile(path.join(dist,'manifest-desktop.webmanifest'),'utf8'));
-  assert.ok(desktop.icons.filter(icon=>parseInt(icon.sizes)>32).every(icon=>icon.src.includes('splash2')));
+  for(const size of [192,512]){
+    const large=desktop.icons.find(icon=>icon.sizes===`${size}x${size}`);
+    assert.equal(large.src,`/icons/desktop-head-${size}.png`);
+    const data=await fs.readFile(path.join(dist,large.src));
+    assert.equal(data.readUInt32BE(16),size);assert.equal(data.readUInt32BE(20),size);
+  }
   for(const size of [16,32]){
     const smallDesktop=desktop.icons.find(icon=>icon.sizes===`${size}x${size}`);
     assert.equal(smallDesktop.src,`/icons/desktop-outline-${size}.png`);
