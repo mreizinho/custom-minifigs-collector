@@ -84,7 +84,8 @@ one progress value; only demo Replay controls/wiring are removed. A separate
 completion bridge preserves the startup and Google sign-in handoff.
 Desktop retains supplied responsive sizing. Mobile aligns the original viewport
 to a 240 CSS-pixel maskable launch canvas using the icon's 800-unit framing and 85% artwork scale,
-then enlarges the mobile animation by 10% for the native-icon handoff (278.28405px stage width);
+with the prior 10% handoff enlargement, then scaled to 90% to match the smaller
+mobile icon (250.455645px stage width, i.e. 90% of the previous animation size);
 native Chrome/Android placement remains device-controlled and needs phone QA.
 Reduced motion shows frame6 immediately. The root bounce animationend signals
 completion exactly once. pwa-splash.js

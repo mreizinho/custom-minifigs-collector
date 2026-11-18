@@ -12,8 +12,8 @@ completion to the same-origin parent; reduced motion shows the final frame.
 frames/frame1.svg is also the current mobile icon source. Editor metadata is
 removed only in derived icons; original paths/styles are preserved. Generated mobile icons scale the
 artwork to 76.5% around its center (90% of the previous head size), leaving the opaque white adaptive background
-at full size. The mobile animation keeps its previous 85% framing with a further 10% size
-increase to improve the Android native-icon handoff. Desktop
+at full size. The mobile animation is 90% of its previous size (250.455645px stage),
+preserving the previous native-icon handoff proportions. Desktop
 icons retain the separately supplied Asset 2.png artwork. Previous icon assets
 remain available for older installations.
 See scripts/README-pwa.md for generation and startup integration.
