@@ -16,12 +16,15 @@
   overflow:hidden;
   color:var(--ink);
   background:var(--bg);
-  font:12px 'Segoe UI',Arial,sans-serif;
+  font:400 16px/1 'Barlow Condensed',Arial,sans-serif;
+  letter-spacing:.45px;
+  text-transform:uppercase;
   user-select:none;
   -webkit-user-select:none;
   -webkit-app-region:drag;
   app-region:drag;
 }
 #desktopWindowTitlebar img { width:16px; height:16px; flex:none; pointer-events:none; }
-#desktopWindowTitlebar span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#desktopWindowTitlebar .desktop-window-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#desktopWindowTitlebar .desktop-window-accent { color:var(--accent); }
 body.dark #desktopWindowTitlebar img { filter:invert(1); }
