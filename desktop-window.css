@@ -20,7 +20,7 @@
   overflow:hidden;
   color:var(--ink);
   background:var(--bg);
-  font:400 22px/1 'Barlow Condensed',Arial,sans-serif;
+  font:400 20px/1 'Barlow Condensed',Arial,sans-serif;
   letter-spacing:.45px;
   text-transform:uppercase;
   user-select:none;
