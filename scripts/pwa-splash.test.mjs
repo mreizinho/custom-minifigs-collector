@@ -157,7 +157,7 @@ test('mobile ending uses the local website logo font and retains the calibrated 
   assert.ok(html.includes('class="mobile-ending-bottom">Collector</span>'));
   assert.ok(html.includes("'Barlow Condensed',sans-serif"));assert.ok(html.includes('.mobile-ending{display:none}'));
   assert.ok(html.includes('width:260.47387px;max-height:none;transform:translate(0,calc(.2650725px + .7svh))'));
-  assert.ok(html.includes('<span class="desktop-ending-top">Custom Minifigs Collector</span>'));
+  assert.ok(html.includes('<span class="desktop-ending-top">Custom Minifigs</span>'));
   assert.ok(html.includes('<span class="desktop-ending-bottom">Collector</span>'));
   assert.ok(html.includes('.desktop-ending{display:none}'));
   assert.ok(html.includes('.desktop-launch .desktop-ending.is-visible .desktop-ending-top{opacity:1}'));
