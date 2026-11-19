@@ -94,12 +94,31 @@ test('uses cached unit prices immediately and retains them when the collection i
   assert.equal(context.figures[0].priceAvailable,true);
   assert.equal(called,false);
 });
-test('background prices update unit values and are cached separately from ownership data', async () => {
+test('switching to Brickset keeps stale prices and missing valuations until the refresh button is clicked', async () => {
+  let priceCalls=0;
+  const data={...snapshot,figures:[...snapshot.figures,{...snapshot.figures[0],code:'sw0001'}]};
+  const cachedPrices={sw0971:{averagePrice:12.34,currency:'EUR',retrievedAt:'2000-01-01T00:00:00Z'}};
+  const {context,refresh}=client(async()=>Response.json(data),{cachedPrices,priceFetcher:async(url,options)=>{
+    priceCalls++;
+    assert.deepEqual(JSON.parse(options.body).codes,['sw0971','sw0001']);
+    return Response.json({prices:['sw0971','sw0001'].map(code=>({code,averagePrice:9,currency:'EUR',retrievedAt:new Date().toISOString()}))});
+  }});
+  await context.window.collectorLoadBrickset();
+  context.selectCollection('Star Wars');context.activeCollection='Star Wars';
+  context.activeCollection='Brickset';await context.window.collectorLoadBrickset();
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(priceCalls,0);
+  assert.equal(context.figures[0].value,12.34);
+  assert.equal(context.figures[1].priceAvailable,false);
+  await refresh.onclick();await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(priceCalls,1);assert.equal(context.figures[0].value,9);assert.equal(context.figures[1].priceAvailable,true);
+});
+test('explicit refresh updates unit values and caches them separately from ownership data', async () => {
   const { context,storage } = client(async()=>Response.json(snapshot), {priceFetcher:async(url,options)=>{
     assert.deepEqual(JSON.parse(options.body).codes,['sw0971']);
     return Response.json({prices:[{code:'sw0971',averageNewPrice:8.75,currency:'EUR',priceStatus:'priced',retrievedAt:new Date().toISOString()}],errors:[]});
   }});
-  await context.window.collectorLoadBrickset();
+  await context.window.collectorLoadBrickset(true);
   await new Promise(resolve=>setTimeout(resolve,0));
   assert.equal(context.figures[0].value,8.75);
   assert.equal(context.figures[0].ownedQuantity,2);
@@ -107,7 +126,7 @@ test('background prices update unit values and are cached separately from owners
 });
 test('no recent sales is cached as unavailable and does not become a zero valuation', async()=>{
   const { context } = client(async()=>Response.json(snapshot), {priceFetcher:async()=>Response.json({prices:[{code:'sw0971',averageNewPrice:null,currency:'EUR',priceStatus:'no_sales',retrievedAt:new Date().toISOString()}],errors:[]})});
-  await context.window.collectorLoadBrickset();await new Promise(resolve=>setTimeout(resolve,0));
+  await context.window.collectorLoadBrickset(true);await new Promise(resolve=>setTimeout(resolve,0));
   assert.equal(context.figures[0].priceAvailable,false);
 });
 test('used fallback supplies a valuation and old no-sales caches are retried',async()=>{
@@ -117,13 +136,13 @@ test('used fallback supplies a valuation and old no-sales caches are retried',as
     calls++;
     return Response.json({prices:[{code:'sw0971',averagePrice:6.5,averageNewPrice:null,averageUsedPrice:6.5,priceCondition:'used',fallbackChecked:true,currency:'EUR',priceStatus:'priced',retrievedAt:new Date().toISOString()}],errors:[]});
   }});
-  await context.window.collectorLoadBrickset();await new Promise(resolve=>setTimeout(resolve,0));
+  await context.window.collectorLoadBrickset(true);await new Promise(resolve=>setTimeout(resolve,0));
   assert.equal(calls,1);assert.equal(context.figures[0].value,6.5);assert.equal(context.figures[0].priceCondition,'used');
 });
 test('late prices cannot overwrite figures after switching collection',async()=>{
   let finish,began;const started=new Promise(resolve=>began=resolve);
   const {context}=client(async()=>Response.json(snapshot),{priceFetcher:()=>new Promise(resolve=>{finish=resolve;began();})});
-  await context.window.collectorLoadBrickset();await started;
+  await context.window.collectorLoadBrickset(true);await started;
   context.selectCollection('Star Wars');context.activeCollection='Star Wars';context.figures=[{value:123}];
   finish(Response.json({prices:[{code:'sw0971',averageNewPrice:99,currency:'EUR'}],errors:[]}));
   await new Promise(resolve=>setTimeout(resolve,0));assert.equal(context.figures[0].value,123);

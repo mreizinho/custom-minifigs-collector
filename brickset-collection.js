@@ -189,7 +189,9 @@
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* Viewing still works if device storage is full. */ }
       showSnapshot(data);
       status.textContent = data.notesAvailable ? '' : 'Notes could not be refreshed';
-      void refreshPrices();
+      // Opening/switching collections must only display saved valuations.
+      if (force) void refreshPrices();
+      else setPriceStatus(priceSummary());
     } catch (error) {
       if (revision !== requestRevision || !isBricksetCollection()) return;
       status.textContent = cached ? `Showing saved collection. ${error.message}` : error.message;
