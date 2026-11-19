@@ -16,6 +16,7 @@ const productionFiles = [
   'pwa-splash.css',
   'desktop-window.js',
   'desktop-window.css',
+  'desktop-scrollbars.css',
   'desktop-modal-chrome.js',
   'assets/splash',
   'icons',
@@ -69,7 +70,7 @@ for (const platform of ['mobile', 'desktop']) {
   let html = appHtml.replace('<head>', '<head>\n  <base href="/">')
     .replace('/manifest-desktop.webmanifest', `/manifest-${platform}.webmanifest`);
   if (platform === 'desktop') {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="/desktop-window.css?v=20261118-12">\n  <script src="/desktop-window.js?v=20261118-03" defer></script>\n  <script src="/desktop-modal-chrome.js?v=20261119-01" defer></script>\n</head>')
+    html = html.replace('</head>', '  <link rel="stylesheet" href="/desktop-window.css?v=20261119-01">\n  <script src="/desktop-window.js?v=20261118-03" defer></script>\n</head>')
       .replace('<body>', '<body>\n  <div id="desktopWindowTitlebar" aria-label="Application title bar" hidden><img src="/lego-head.svg?v=3#outline" alt=""><span class="desktop-window-title">Custom Minifigs <span class="desktop-window-accent">Collector</span></span></div>');
   }
   await writeFile(path.join(directory, 'index.html'), html);

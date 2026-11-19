@@ -1,8 +1,9 @@
 // Match browser-painted desktop chrome to modal backdrops without dimming body twice.
 (() => {
-  if (window.collectorPwaPlatform !== 'desktop'
-    || !window.matchMedia('(display-mode:standalone), (display-mode:window-controls-overlay)').matches) return;
+  if (window.collectorPwaPlatform !== 'desktop') return;
+  const installed = window.matchMedia('(display-mode:standalone), (display-mode:window-controls-overlay)').matches;
   const root = document.documentElement;
+  root.classList.add('desktop-scrollbars');
   const theme = document.querySelector('meta[name="theme-color"]');
   let modalOrder = [];
   let dimmed = false;
@@ -36,7 +37,7 @@
       root.classList.toggle('desktop-modal-dimmed',dimmed);
     }
     // Edge chooses the native button rendering; theme-color supplies its backdrop.
-    if (theme && theme.content !== background) theme.content = background;
+    if (installed && theme && theme.content !== background) theme.content = background;
     if (root.style.backgroundColor !== background) root.style.backgroundColor = background;
   }
   const observer = new MutationObserver(records => {
