@@ -115,24 +115,46 @@ test('both flash transitions switch frames at full white opacity without a blank
     assert.ok(art.includes(`${peak}%{opacity:1}`));
   }
 });
-function morph({reduced=false}={}) {
+function morph({reduced=false,mobile=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
   const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
-  const messages=[],microtasks=[];let end,changed;
+  const messages=[],microtasks=[],endingClasses=new Set(),timers=new Map();let end,changed,now=0,id=0;
   const art={addEventListener:(name,fn)=>{assert.equal(name,'animationend');end=fn;}};
+  const ending={classList:{add:name=>endingClasses.add(name)}};
   const reduce={matches:reduced,addEventListener:(name,fn)=>{assert.equal(name,'change');changed=fn;}};
-  vm.runInNewContext(script,{document:{querySelector:()=>art},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn)});
-  return{art,messages,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
+  vm.runInNewContext(script,{document:{documentElement:{classList:{contains:()=>mobile}},querySelector:selector=>selector==='.head-motion'?art:ending},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn),setTimeout:(fn,delay)=>{timers.set(++id,{fn,at:now+delay});return id;},clearTimeout:key=>timers.delete(key)});
+  const tick=ms=>{now+=ms;for(const [key,timer]of timers)if(timer.at<=now){timers.delete(key);timer.fn();}};
+  return{art,messages,endingClasses,tick,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
 }
 test('morph reports completion once, only when its root bounce animation finishes',()=>{
   const p=morph();assert.equal(p.messages.length,0);
   p.end({target:p.art,animationName:'third'});p.end({target:{},animationName:'bounce'});assert.equal(p.messages.length,0);
   p.end({target:p.art,animationName:'bounce'});p.end({target:p.art,animationName:'bounce'});
-  assert.equal(p.messages.length,1);assert.equal(p.messages[0].message.type,'collector-splash-animation-complete');assert.equal(p.messages[0].origin,'https://test.example');
+  assert.equal(p.messages.length,1);assert.equal(p.messages[0].message.type,'collector-splash-animation-complete');assert.equal(p.messages[0].origin,'https://test.example');assert.equal(p.endingClasses.size,0);
 });
 test('morph reduced-motion completes without waiting for an animationend, including preference changes',()=>{
   const initial=morph({reduced:true});initial.flush();assert.equal(initial.messages.length,1);
   const later=morph();later.change({matches:true});assert.equal(later.messages.length,1);
+});
+test('mobile shows the logo words only after animation completion, then holds the ending once',()=>{
+  const p=morph({mobile:true});assert.equal(p.endingClasses.size,0);
+  p.end({target:p.art,animationName:'f6'});assert.equal(p.endingClasses.size,0);
+  p.end({target:p.art,animationName:'bounce'});assert.ok(p.endingClasses.has('is-visible'));assert.equal(p.messages.length,0);
+  p.tick(600);p.end({target:p.art,animationName:'bounce'});p.tick(599);assert.equal(p.messages.length,0);
+  p.tick(1);assert.equal(p.messages.length,1);p.tick(1200);assert.equal(p.messages.length,1);
+});
+test('mobile reduced motion skips the extra ending delay and cancels a pending hold',()=>{
+  const initial=morph({mobile:true,reduced:true});initial.flush();assert.equal(initial.messages.length,1);
+  const later=morph({mobile:true});later.end({target:later.art,animationName:'bounce'});later.change({matches:true});assert.equal(later.messages.length,1);later.tick(1200);assert.equal(later.messages.length,1);
+});
+test('mobile ending uses the local website logo font and retains the calibrated head geometry',()=>{
+  const root=new URL('../dist/assets/splash/',import.meta.url),html=fs.readFileSync(new URL('lego-splash.html',root),'utf8');
+  assert.ok(fs.statSync(new URL('barlow-condensed-latin-400.woff2',root)).size>1000);
+  assert.ok(fs.readFileSync(new URL('OFL-Barlow-Condensed.txt',root),'utf8').includes('SIL OPEN FONT LICENSE'));
+  assert.ok(html.includes('class="mobile-ending-top">Custom Minifigs</span>'));
+  assert.ok(html.includes('class="mobile-ending-bottom">Collector</span>'));
+  assert.ok(html.includes("'Barlow Condensed',sans-serif"));assert.ok(html.includes('.mobile-ending{display:none}'));
+  assert.ok(html.includes('width:260.47387px;max-height:none;transform:translate(0,calc(.2650725px + .7svh))'));
 });
 function fusePreview({width=992.1,height=width,reduced=false}={}){
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
