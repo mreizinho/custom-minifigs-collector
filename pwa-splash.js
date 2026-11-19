@@ -18,6 +18,8 @@
     finished = true;
     clearTimeout(deadline);
     window.removeEventListener('message', animationComplete);
+    window.removeEventListener('keydown', skipKey, true);
+    layer?.removeEventListener('click', skipAnimation);
     root.classList.remove('pwa-splash-pending');
     for (const [element, wasInert] of inertElements) element.inert = wasInert;
     function release() {
@@ -33,6 +35,17 @@
     document.dispatchEvent(new CustomEvent('pwa-splash-complete'));
   }
   function maybeFinish() { if (appReady && animationReady) finish(); }
+  function skipAnimation(event) {
+    if (finished || !layer || layer.hidden) return;
+    // Consume this event so it cannot also activate the newly revealed app.
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    animationReady = true;
+    maybeFinish();
+  }
+  function skipKey(event) {
+    if (event.key === 'Enter' && !event.repeat && !event.isComposing) skipAnimation(event);
+  }
   function animationComplete(event) {
     if (event.origin !== location.origin || event.source !== frame?.contentWindow
       || event.data?.type !== 'collector-splash-animation-complete') return;
@@ -40,6 +53,7 @@
     maybeFinish();
   }
   window.addEventListener('message', animationComplete);
+  window.addEventListener('keydown', skipKey, true);
   // A network/authentication failure must never lock users out of the UI.
   const deadline = setTimeout(finish, 12000);
   window.collectorSplash = {
@@ -56,6 +70,7 @@
       layer = document.getElementById('pwaSplash');
       if (!layer || finished) { layer?.remove(); return; }
       layer.hidden = false;
+      layer.addEventListener('click', skipAnimation);
       frame = layer.querySelector('iframe');
       const source = new URL(frame.dataset.src, location.origin);
       source.searchParams.set('platform', window.collectorPwaPlatform || (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent || '') ? 'mobile' : 'desktop'));
