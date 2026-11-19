@@ -85,7 +85,7 @@ test('production build ships the isolated supplied animation and splash resource
   const art=fs.readFileSync(new URL('assets/splash/lego-splash.html',root),'utf8');
   assert.ok(!art.includes('id="replay"'));assert.match(art,/prefers-reduced-motion:reduce/);
   assert.match(art,/--duration:6\.2s/);
-  assert.match(art,/@keyframes f6\{0%,80%\{opacity:0\}82%,100%\{opacity:1\}/);
+  assert.match(art,/@keyframes f6\{0%,81.19%\{opacity:0\}81.2%,100%\{opacity:1\}/);
   for(let frame=1;frame<=6;frame++){
     const tag=art.match(new RegExp(`<image\\b[^>]*id="frame${frame}"[^>]*>`))[0];
     const encoded=tag.match(/href="data:image\/svg\+xml;base64,([^"]+)"/)[1];
@@ -99,6 +99,17 @@ test('production build ships the isolated supplied animation and splash resource
   assert.ok(!art.includes('<section class="controls">'));
   assert.ok(!art.includes('serviceWorker.register'));
   assert.match(art,/viewBox="0 0 992.1 992.1"/);
+});
+test('both flash transitions switch frames at full white opacity without a blank gap',()=>{
+  const art=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
+  assert.ok(art.includes('animation-timing-function:steps(1,end)'));
+  for(const [from,to,before,peak] of [[2,3,'24.99','25'],[5,6,'81.19','81.2']]){
+    const outgoing=art.match(new RegExp(`@keyframes f${from}\\{[^@]+?(?=@)`))[0];
+    const incoming=art.match(new RegExp(`@keyframes f${to}\\{[^@]+?(?=@)`))[0];
+    assert.ok(outgoing.includes(`${before}%{opacity:1}${peak}%,100%{opacity:0}`));
+    assert.ok(incoming.includes(`0%,${before}%{opacity:0}${peak}%,`));
+    assert.ok(art.includes(`${peak}%{opacity:1}`));
+  }
 });
 function morph({reduced=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
