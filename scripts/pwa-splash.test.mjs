@@ -3,23 +3,23 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../pwa-splash.js',import.meta.url),'utf8');
-function launch({installed=true,reduced=false,mode='standalone'}={}) {
+function launch({installed=true,reduced=false,mode='standalone',userAgent=''}={}) {
   let now=0,id=0;
-  const timers=new Map(),listeners=new Map(),layerListeners=new Map(),events=[],classes=new Set();
+  const timers=new Map(),listeners=new Map(),layerListeners=new Map(),layerOptions=new Map(),events=[],classes=new Set();
   const layerClasses=new Set(),frame={dataset:{src:'/assets/splash/lego-splash.html'},contentWindow:{},addEventListener(){}};
-  const layer={hidden:true,tagName:'DIV',classList:{add:name=>layerClasses.add(name)},querySelector:()=>frame,setAttribute(){},addEventListener:(name,fn)=>layerListeners.set(name,fn),removeEventListener:name=>layerListeners.delete(name),remove(){this.removed=true;}};
+  const layer={hidden:true,tagName:'DIV',classList:{add:name=>layerClasses.add(name)},querySelector:()=>frame,setAttribute(){},addEventListener:(name,fn,options)=>{layerListeners.set(name,fn);layerOptions.set(name,options);},removeEventListener:name=>layerListeners.delete(name),remove(){this.removed=true;}};
   const main={tagName:'MAIN',inert:false},dialog={tagName:'DIALOG',inert:true};
   const document={documentElement:{classList:{add:name=>classes.add(name),remove:name=>classes.delete(name)}},body:{children:[layer,main,dialog]},getElementById:()=>layer,addEventListener:(name,fn)=>listeners.set(name,fn),dispatchEvent:event=>events.push(event.type)};
-  const window={navigator:{},matchMedia:query=>({matches:query.includes('reduced')?reduced:query.includes(`display-mode: ${mode}`)&&installed}),addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
+  const window={navigator:{userAgent},matchMedia:query=>({matches:query.includes('reduced')?reduced:query.includes(`display-mode: ${mode}`)&&installed}),addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
   const context={window,document,location:{origin:'https://test.example',search:''},URL,URLSearchParams,CustomEvent:class{constructor(type){this.type=type;}},setTimeout:(fn,ms)=>{timers.set(++id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id)};
   vm.runInNewContext(source,context);
   const tick=ms=>{const target=now+ms;while(true){const next=[...timers].sort((a,b)=>a[1].at-b[1].at).find(([,timer])=>timer.at<=target);if(!next)break;now=next[1].at;timers.delete(next[0]);next[1].fn();}now=target;};
   const message=(overrides={})=>listeners.get('message')?.({origin:context.location.origin,source:frame.contentWindow,data:{type:'collector-splash-animation-complete'},...overrides});
   const skip=(type='click',overrides={})=>{
-    const event={key:'Enter',repeat:false,isComposing:false,preventDefault(){this.prevented=true;},stopImmediatePropagation(){this.stopped=true;},...overrides};
-    (type==='click'?layerListeners:listeners).get(type)?.(event);return event;
+    const event={key:'Enter',repeat:false,isComposing:false,touches:[],changedTouches:[{}],preventDefault(){this.prevented=true;},stopImmediatePropagation(){this.stopped=true;},...overrides};
+    (type==='keydown'?listeners:layerListeners).get(type)?.(event);return event;
   };
-  return{window,layer,frame,classes,layerClasses,main,dialog,events,listeners,layerListeners,tick,message,skip};
+  return{window,layer,frame,classes,layerClasses,main,dialog,events,listeners,layerListeners,layerOptions,tick,message,skip};
 }
 test('normal browser visits do not load or show the animation',()=>{
   const p=launch({installed:false});assert.equal(p.window.collectorSplash,undefined);assert.equal(p.frame.src,undefined);assert.equal(p.classes.size,0);
@@ -56,6 +56,15 @@ test('skipping before initialization waits for ready and ignores unrelated or co
   for(const overrides of [{key:'Escape'},{repeat:true},{isComposing:true}])assert.equal(p.skip('keydown',overrides).prevented,undefined);
   const event=p.skip('keydown');assert.equal(event.prevented,true);assert.equal(p.events.length,0);assert.equal(p.main.inert,true);
   p.window.collectorSplash.ready();assert.equal(p.events.length,1);p.tick(320);assert.equal(p.layer.removed,true);
+});
+test('Android PWA touchscreen tap skips without a synthesized click and prevents click-through',()=>{
+  const p=launch({userAgent:'Mozilla/5.0 (Linux; Android 17) Chrome/157.0 Mobile'});
+  p.window.collectorSplash.mount();p.listeners.get('DOMContentLoaded')();p.window.collectorSplash.ready();
+  assert.equal(new URL(p.frame.src).searchParams.get('platform'),'mobile');assert.equal(p.layerOptions.get('touchend').passive,false);
+  assert.equal(p.skip('touchend',{changedTouches:[{},{}]}).prevented,undefined);
+  const event=p.skip('touchend');assert.equal(event.prevented,true);assert.equal(event.stopped,true);
+  assert.deepEqual(p.events,['pwa-splash-complete']);assert.equal(p.layerListeners.has('touchend'),false);
+  p.tick(320);assert.equal(p.layer.removed,true);
 });
 test('startup/network failure cannot leave the application blocked',()=>{
   const p=launch();p.window.collectorSplash.mount();p.listeners.get('DOMContentLoaded')();p.tick(12000);

@@ -20,6 +20,7 @@
     window.removeEventListener('message', animationComplete);
     window.removeEventListener('keydown', skipKey, true);
     layer?.removeEventListener('click', skipAnimation);
+    layer?.removeEventListener('touchend', skipTouch);
     root.classList.remove('pwa-splash-pending');
     for (const [element, wasInert] of inertElements) element.inert = wasInert;
     function release() {
@@ -46,6 +47,10 @@
   function skipKey(event) {
     if (event.key === 'Enter' && !event.repeat && !event.isComposing) skipAnimation(event);
   }
+  function skipTouch(event) {
+    // Cancel the compatibility click too, so a tap cannot reach the app underneath.
+    if (event.touches.length === 0 && event.changedTouches.length === 1) skipAnimation(event);
+  }
   function animationComplete(event) {
     if (event.origin !== location.origin || event.source !== frame?.contentWindow
       || event.data?.type !== 'collector-splash-animation-complete') return;
@@ -71,6 +76,7 @@
       if (!layer || finished) { layer?.remove(); return; }
       layer.hidden = false;
       layer.addEventListener('click', skipAnimation);
+      layer.addEventListener('touchend', skipTouch, { passive: false });
       frame = layer.querySelector('iframe');
       const source = new URL(frame.dataset.src, location.origin);
       source.searchParams.set('platform', window.collectorPwaPlatform || (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent || '') ? 'mobile' : 'desktop'));
