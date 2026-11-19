@@ -20,6 +20,7 @@ const productionFiles = [
   'assets/splash',
   'icons',
   'app.js',
+  'google-access.js',
   'brickset-collection.js',
   'brickset-collection.css',
   'demo-catalogue.js',

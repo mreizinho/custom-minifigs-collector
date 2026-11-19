@@ -7,3 +7,7 @@ workers_dev = true
 [vars]
 BRICKLINK_ALLOWED_UID = "rh8WrITlLTXrsDj5mbJHzA1D4Bk2"
 BRICKSET_ALLOWED_UID = "rh8WrITlLTXrsDj5mbJHzA1D4Bk2"
+
+[[kv_namespaces]]
+binding = "GOOGLE_CONNECTIONS"
+id = "3cb75a87bc624135a9bf649740a0fa32"

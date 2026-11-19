@@ -303,6 +303,7 @@ function installSettingsUi() {
     <p>Use your Google Account to backup, restore and sync your configuration across multiple devices. Choose Save to store this device’s configuration, or Load to restore a saved configuration.</p>
     <div class="google-settings-actions settings-account-actions">
       <button type="button" id="firebaseAuth"><span class="material-symbols-rounded">login</span>Sign in</button>
+      <button type="button" id="connectGoogleDrive" hidden>Connect Google Drive</button>
       <button type="button" id="firebaseUpload" data-firebase-required><span class="material-symbols-rounded">save</span>Save</button>
       <button type="button" id="firebaseDownload" data-firebase-required><span class="material-symbols-rounded">folder_open</span>Load</button>
     </div>
@@ -320,6 +321,19 @@ function installSettingsUi() {
     settingsFooter.innerHTML = '<button type="button" id="applySettings" disabled><span class="material-symbols-rounded">check</span>Apply</button>';
     document.querySelector('.settings-copy').append(settingsFooter);
   }
+  const driveButton = document.querySelector('#connectGoogleDrive');
+  window.addEventListener('collector-google-access-required', () => { driveButton.hidden = !auth.currentUser; });
+  window.addEventListener('collector-google-access-ready', () => { driveButton.hidden = true; });
+  window.addEventListener('collector-google-auth', event => {
+    if (!event.detail?.uid) { driveButton.hidden = true; return; }
+    // Offer the one-time connection even while an older browser token still works.
+    // This checks only the backend; it cannot open a Google window.
+    window.collectorGoogleAccess?.refresh().catch(() => {});
+  });
+  driveButton.onclick = async () => {
+    try { await window.collectorReconnectGoogleAccess(); status('Google Drive connected. Future launches will reconnect in the background.'); }
+    catch (error) { status(error.message, true); }
+  };
   document.querySelector('#firebaseAuth').addEventListener('click', async () => {
     if (authActionPending) return;
     authActionPending = true;

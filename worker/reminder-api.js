@@ -1,6 +1,7 @@
 import { lookup } from './bricklink.js';
 import { bricksetResponse } from './brickset.js';
 import { bricksetPricesResponse } from './brickset-prices.js';
+import { googleAccessResponse } from './google-access.js';
 const APP_ID = 'd9dcde89-f32c-46c1-89f8-61d98a8267f1';
 const FIREBASE_PROJECT_ID = 'custom-figures-collector';
 const ALLOWED_ORIGINS = new Set([
@@ -72,7 +73,7 @@ async function authenticatedUser(request) {
   if (!valid || claims.aud !== FIREBASE_PROJECT_ID || claims.iss !== `https://securetoken.google.com/${FIREBASE_PROJECT_ID}` || !claims.sub || claims.exp <= now || claims.iat > now) {
     throw new Error('Invalid or expired sign-in.');
   }
-  return { localId: claims.sub };
+  return { localId: claims.sub, googleId: claims.firebase?.identities?.['google.com']?.[0] || '' };
 }
 
 async function cancelNotification(messageId, env) {
@@ -148,6 +149,7 @@ export default {
 
     try {
       const user = await authenticatedUser(request);
+      if (url.pathname === '/google/access') return googleAccessResponse(request, env, user, origin, json);
       if (url.pathname === '/brickset/prices') {
         const response = await bricksetPricesResponse(request, env, user, origin, json);
         response.headers.set('Cache-Control', 'private, no-store');

@@ -469,10 +469,14 @@ const sheetsRequestWithoutSessionCleanup=sheetsRequest;
 let sheetsRenewalPromise=null;
 window.addEventListener('collector-google-auth',event=>{const uid=event.detail?.uid||'',previousUid=localStorage.getItem('minifig-google-user-id')||'';if(uid&&uid!==previousUid){localStorage.setItem('minifig-google-user-id',uid);queueMicrotask(applyDeviceTheme)}},{capture:true});
 rememberGoogleUser=async token=>{try{const response=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)return;const profile=await response.json(),stableUserId=window.collectorFirebaseUser||profile.sub;if(stableUserId)localStorage.setItem('minifig-google-user-id',stableUserId)}catch(error){console.warn('Could not identify the signed-in Google profile',error)}};
-function acquireSheetsToken(prompt=''){const splashFinished=window.collectorSplash?.beforeInteraction();if(splashFinished)return splashFinished.then(()=>acquireSheetsToken(prompt));return new Promise((resolve,reject)=>{if(!window.collectorFirebaseUser)return reject(Error('Sign in with Google in Settings first.'));if(!window.google?.accounts?.oauth2)return reject(Error('Google authorisation is still loading. Please try again.'));const client=google.accounts.oauth2.initTokenClient({client_id:APP_GOOGLE_CLIENT_ID,scope:`${GOOGLE_DRIVE_FILE_SCOPE} ${GOOGLE_IDENTITY_SCOPE}`,include_granted_scopes:true,callback:async response=>{if(response.error)return reject(Error(response.error_description||response.error));sheetsAccessToken=response.access_token;cacheSheetsAccessToken(sheetsAccessToken,response.expires_in);await rememberGoogleUser(sheetsAccessToken);resolve(sheetsAccessToken)},error_callback:error=>reject(Error(error.message||error.type||'Google authorisation failed'))});client.requestAccessToken({prompt})})}
+function acquireSheetsToken(prompt='',interactive=false){const splashFinished=interactive&&window.collectorSplash?.beforeInteraction();if(splashFinished)return splashFinished.then(()=>acquireSheetsToken(prompt,interactive));if(!window.collectorFirebaseUser)return Promise.reject(Error('Sign in with Google in Settings first.'));const request=interactive?window.collectorGoogleAccess.connect():window.collectorGoogleAccess.refresh({force:prompt==='refresh'});return request.then(async response=>{sheetsAccessToken=response.access_token;cacheSheetsAccessToken(sheetsAccessToken,response.expires_in);await rememberGoogleUser(sheetsAccessToken);return sheetsAccessToken})}
 requestSheetsAccess=()=>acquireSheetsToken('');
-async function renewSheetsAccess(){if(sheetsRenewalPromise)return sheetsRenewalPromise;sheetsRenewalPromise=acquireSheetsToken('none').catch(()=>acquireSheetsToken('')).finally(()=>{sheetsRenewalPromise=null});return sheetsRenewalPromise}
-sheetsRequest=async(url,options={})=>{try{return await sheetsRequestWithoutSessionCleanup(url,options)}catch(error){const insufficientScope=/insufficient authentication scopes|insufficient.*scope/i.test(error.message||'');if(sheetsAccessToken&&!insufficientScope)throw error;sheetsAccessToken='';clearCachedSheetsAccessToken();await renewSheetsAccess();return sheetsRequestWithoutSessionCleanup(url,options)}};
+async function renewSheetsAccess(){if(sheetsRenewalPromise)return sheetsRenewalPromise;sheetsRenewalPromise=acquireSheetsToken('refresh').finally(()=>{sheetsRenewalPromise=null});return sheetsRenewalPromise}
+sheetsRequest=async(url,options={})=>{try{return await sheetsRequestWithoutSessionCleanup(url,options)}catch(error){if(error.code?.startsWith('google_'))throw error;const insufficientScope=/insufficient authentication scopes|insufficient.*scope/i.test(error.message||'');if(sheetsAccessToken&&!insufficientScope)throw error;sheetsAccessToken='';clearCachedSheetsAccessToken();await renewSheetsAccess();return sheetsRequestWithoutSessionCleanup(url,options)}};
+
+// Restoring a private collection must never start an interactive OAuth flow.
+restoreSheetsAccess=async()=>{if(!window.collectorFirebaseUser)return false;const cached=cachedSheetsAccessToken();if(cached){sheetsAccessToken=cached;return true}await requestSheetsAccess();return true};
+window.collectorReconnectGoogleAccess=async()=>{await acquireSheetsToken('',true);updateGoogleAuthControl();load()};
 
 let activeDetailFigure=null;
 const openDetailWithDeleteTracking=openDetail;openDetail=figure=>{activeDetailFigure=figure;return openDetailWithDeleteTracking(figure)};
@@ -824,6 +828,7 @@ load=async()=>{
     await restoreSheetsAccess();
     const escapedCollection=activeCollection.replace(/'/g,"''"),range=encodeURIComponent(`'${escapedCollection}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?majorDimension=ROWS`),records=rowsFromSheetValues((await response.json()).values||[]);
     if(revision!==authenticatedLoadRevision)return;
+    if($('#reconnectGoogleAccess'))$('#reconnectGoogleAccess').hidden=true;
     figures=mapRows(records.map(record=>record.raw));
     figures.forEach((figure,index)=>{figure.sheetRow=records[index].sheetRow;figure.sheetCollection=activeCollection});
     renderFilters();
@@ -835,6 +840,9 @@ load=async()=>{
     $('#empty').hidden=false;
     $('#empty h2').textContent='Google access required';
     $('#empty p').textContent=error.message;
+    let reconnect=$('#reconnectGoogleAccess');
+    if(!reconnect){reconnect=document.createElement('button');reconnect.id='reconnectGoogleAccess';reconnect.type='button';reconnect.textContent='Connect Google Drive';$('#empty').append(reconnect);reconnect.onclick=async()=>{try{await window.collectorReconnectGoogleAccess()}catch(error){$('#empty p').textContent=error.message}};}
+    reconnect.hidden=error.code!=='google_reconnect_required';
     $('#resetEmpty').hidden=true;
     if(window.collectorFirebaseUser)console.error(error);
   }finally{

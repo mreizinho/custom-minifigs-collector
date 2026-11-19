@@ -65,18 +65,22 @@ function sheetsAuthorization(p){
   const acquire=app.split(/\r?\n/).find(line=>line.startsWith('function acquireSheetsToken('));
   let popupCount=0;
   p.window.collectorFirebaseUser='test-user';
-  p.window.google={accounts:{oauth2:{initTokenClient:options=>({requestAccessToken(){popupCount++;options.callback({access_token:'test-token',expires_in:3600});}})}}};
+  p.window.collectorGoogleAccess={connect(){popupCount++;return Promise.resolve({access_token:'test-token',expires_in:3600});},refresh(){return Promise.resolve({access_token:'test-token',expires_in:3600});}};
   const request=vm.runInNewContext(acquire+'\nacquireSheetsToken',{window:p.window,google:p.window.google,APP_GOOGLE_CLIENT_ID:'test-client',GOOGLE_DRIVE_FILE_SCOPE:'drive.file',GOOGLE_IDENTITY_SCOPE:'openid',cacheSheetsAccessToken(){},rememberGoogleUser:async()=>{},sheetsAccessToken:''});
   return{request,popupCount:()=>popupCount};
 }
 test('actual Sheets token entry point opens Google only after splash removal',async()=>{
-  const p=launch();p.window.collectorSplash.mount();const auth=sheetsAuthorization(p),result=auth.request();
+  const p=launch();p.window.collectorSplash.mount();const auth=sheetsAuthorization(p),result=auth.request('',true);
   assert.equal(auth.popupCount(),0);p.message();p.tick(319);await Promise.resolve();assert.equal(auth.popupCount(),0);
   p.tick(1);assert.equal(await result,'test-token');assert.equal(auth.popupCount(),1);assert.equal(p.layer.removed,true);
 });
 test('ordinary browser sign-in retains synchronous popup launch',async()=>{
-  const auth=sheetsAuthorization(launch({installed:false})),result=auth.request();
+  const auth=sheetsAuthorization(launch({installed:false})),result=auth.request('',true);
   assert.equal(auth.popupCount(),1);assert.equal(await result,'test-token');
+});
+test('startup gets a background token without opening Google or ending the splash early',async()=>{
+  const p=launch();p.window.collectorSplash.mount();const auth=sheetsAuthorization(p);
+  assert.equal(await auth.request(),'test-token');assert.equal(auth.popupCount(),0);assert.equal(p.events.length,0);
 });
 test('production build ships the isolated supplied animation and splash resources',()=>{
   const root=new URL('../dist/',import.meta.url),html=fs.readFileSync(new URL('index.html',root),'utf8');
