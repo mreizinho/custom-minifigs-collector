@@ -134,14 +134,30 @@ test('morph reduced-motion completes without waiting for an animationend, includ
   const initial=morph({reduced:true});initial.flush();assert.equal(initial.messages.length,1);
   const later=morph();later.change({matches:true});assert.equal(later.messages.length,1);
 });
-test('supplied fuse and spark use the same measured progress and stop together',()=>{
+function fusePreview({width=992.1,height=width,reduced=false}={}){
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
   const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][1][1];
-  const path={style:{},getTotalLength:()=>1000,getPointAtLength:distance=>({x:distance,y:42})};
+  const path={style:{},ownerSVGElement:{viewBox:{baseVal:{width:992.1,height:992.1}},getBoundingClientRect:()=>({width,height})},getAttribute:()=> 'original-path',getTotalLength:()=>1000,getPointAtLength:distance=>({x:distance,y:42})};
   const spark={style:{},setAttribute(name,value){this[name]=value;}};
+  const trail={style:{},setAttribute(name,value){this[name]=value;}},gradient={setAttribute(name,value){this[name]=value;}};
   let tick;
-  vm.runInNewContext(script,{document:{getElementById:()=>({querySelector:selector=>selector==='#fuse'?path:spark})},cancelAnimationFrame(){},requestAnimationFrame:fn=>{tick=fn;return 1;},matchMedia:()=>({matches:false}),performance:{now:()=>0}});
-  tick(4464);assert.equal(path.style.strokeDashoffset,'500');assert.equal(spark.transform,'translate(500 42)');assert.equal(spark.style.opacity,'1');
-  tick(4898);assert.equal(path.style.strokeDashoffset,'0');assert.equal(spark.style.opacity,'0');
-  tick(5084);assert.equal(path.style.opacity,'0');
+  vm.runInNewContext(script,{document:{getElementById:()=>({getBoundingClientRect:()=>({width}),querySelector:selector=>({'#fuse':path,'#spark':spark,'#fuseTrail':trail,'#fuseTrailGradient':gradient})[selector]})},cancelAnimationFrame(){},requestAnimationFrame:fn=>{tick=fn;return 1;},matchMedia:()=>({matches:reduced}),performance:{now:()=>0}});
+  return{path,spark,trail,gradient,tick:now=>tick?.(now)};
+}
+test('supplied fuse and spark use the same measured progress and stop together',()=>{
+  const p=fusePreview();p.tick(4464);assert.equal(p.path.style.strokeDashoffset,'500');assert.equal(p.spark.transform,'translate(500 42)');assert.equal(p.spark.style.opacity,'1');
+  p.tick(4898);assert.equal(p.path.style.strokeDashoffset,'0');assert.equal(p.spark.style.opacity,'0');assert.equal(p.trail.style.opacity,'0');
+  p.tick(5084);assert.equal(p.path.style.opacity,'0');
+});
+test('orange-to-black fuse trail follows the spark and stays 20 screen pixels at either stage size',()=>{
+  for(const [width,height] of [[260.47387,260.47387],[660,660],[660,492]]){
+    const p=fusePreview({width,height});p.tick(4464);
+    const length=Number(p.trail.style.strokeDasharray.split(' ')[0]);
+    assert.ok(Math.abs(length*Math.min(width,height)/992.1-20)<0.000001);
+    assert.equal(p.trail.d,'original-path');assert.equal(p.trail.style.opacity,'1');
+    assert.equal(p.gradient.x2,500);assert.equal(p.gradient.x1,500-length);
+    assert.equal(Number(p.trail.style.strokeDashoffset),-(500-length));
+  }
+  const p=fusePreview();p.tick(4031);assert.ok(Number(p.trail.style.strokeDasharray.split(' ')[0])<20,'the trail cannot extend before the start of the path');
+  const reduced=fusePreview({reduced:true});reduced.tick(4464);assert.equal(reduced.trail.style.opacity,'0');
 });
