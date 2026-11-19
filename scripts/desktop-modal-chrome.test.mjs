@@ -6,7 +6,7 @@ const source=fs.readFileSync(new URL('../desktop-modal-chrome.js',import.meta.ur
 function page({platform='desktop',installed=true}={}){
   const classes=new Set(),events=new Map(),observed=[];
   const root={style:{backgroundColor:'rgb(230, 231, 228)',setProperty(key,value){this[key]=value;}},classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
-  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)'},header={borderBottomColor:'rgb(209, 210, 207)'},theme={content:'#e6e7e4'};
+  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)'},theme={content:'#e6e7e4'};
   let open=[],changed,reads=0;
   vm.runInNewContext(source,{window:{collectorPwaPlatform:platform,matchMedia:()=>({matches:installed}),addEventListener:(name,fn)=>events.set(name,fn)},document:{documentElement:root,body,querySelector:selector=>selector.includes('theme-color')?theme:header,querySelectorAll:()=>open},getComputedStyle:node=>{reads++;return node;},MutationObserver:class{constructor(fn){changed=fn;}observe(...args){observed.push(args);}}});
   return{root,body,theme,classes,observed,events,reads:()=>reads,setOpen:dialogs=>{open=dialogs;changed([{type:'attributes',target:dialogs[0]||body}]);},notify:records=>changed(records)};
@@ -29,6 +29,22 @@ test('theme changes while a popup is open restore the current theme, not a stale
   const p=page();p.setOpen([dialog('rgba(0, 0, 0, 0.5)')]);
   p.body.backgroundColor='rgb(24, 25, 23)';p.notify([{type:'attributes',target:p.body}]);assert.equal(p.theme.content,'rgb(12, 13, 12)');
   p.setOpen([]);assert.equal(p.theme.content,'rgb(24, 25, 23)');assert.equal(p.root.style.backgroundColor,p.theme.content);
+});
+test('theme switches use the target color while the body is still transitioning',()=>{
+  const p=page();
+  p.body.themeBackground='#181917';
+  p.notify([{type:'attributes',target:p.body}]);
+  assert.equal(p.theme.content,'rgb(24, 25, 23)');
+  assert.equal(p.root.style['--desktop-scrollbar-background'],p.theme.content);
+  p.setOpen([dialog('rgba(0, 0, 0, 0.5)')]);
+  assert.equal(p.theme.content,'rgb(12, 13, 12)');
+  p.body.backgroundColor='rgb(24, 25, 23)';
+  p.body.themeBackground='#e6e7e4';
+  p.notify([{type:'attributes',target:p.body}]);
+  assert.equal(p.theme.content,'rgb(115, 116, 114)');
+  p.setOpen([]);
+  assert.equal(p.theme.content,'rgb(230, 231, 228)');
+  assert.equal(p.root.style['--desktop-scrollbar-background'],p.theme.content);
 });
 test('transparent dialogs do not dim chrome and catalogue mutations do not recompute styles',()=>{
   const p=page();p.setOpen([dialog('rgba(0, 0, 0, 0)')]);assert.equal(p.classes.size,0);

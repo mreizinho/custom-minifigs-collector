@@ -7,6 +7,8 @@
   let modalOrder = [];
   let dimmed = false;
   const rgb = color => {
+    const hex = color.trim().match(/^#([\da-f]{6})$/i);
+    if (hex) return [0,2,4].map(offset => parseInt(hex[1].slice(offset,offset+2),16)).concat(1);
     const values = color.match(/[\d.]+/g)?.map(Number);
     return values?.length >= 3 ? [...values.slice(0,3),values[3] ?? 1] : null;
   };
@@ -17,7 +19,9 @@
     modalOrder.push(...open.filter(dialog => !modalOrder.includes(dialog)));
     const backdrops = modalOrder.map(dialog => rgb(getComputedStyle(dialog,'::backdrop').backgroundColor)).filter(color => color && color[3] > 0);
     const bodyStyle = getComputedStyle(document.body);
-    const base = rgb(bodyStyle.backgroundColor);
+    // backgroundColor may still be the old theme during the body's CSS transition.
+    // The custom property already contains the selected theme's final color.
+    const base = rgb(bodyStyle.getPropertyValue('--bg').trim()) || rgb(bodyStyle.backgroundColor);
     if (!base) return;
     const blend = color => backdrops.reduce((under,over) =>
       under.map((channel,index) => channel*(1-over[3])+over[index]*over[3]),color.slice(0,3));
