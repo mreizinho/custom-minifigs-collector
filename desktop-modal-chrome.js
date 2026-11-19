@@ -6,6 +6,9 @@
   root.classList.add('desktop-scrollbars');
   const theme = document.querySelector('meta[name="theme-color"]');
   const header = document.querySelector('.topbar');
+  // A horizontally unbounded shadow: same Gaussian blur (10px / 2) and
+  // downward offset as .topbar's box-shadow, without fading at the right edge.
+  const shadowImage = `url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="24"><defs><filter id="s" x="-100" y="-1000" width="201" height="1100" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="5"/></filter></defs><rect x="-100" y="-1000" width="201" height="1004" fill="black" fill-opacity="0.0941176471" filter="url(#s)"/></svg>')}")`;
   let modalOrder = [];
   let dimmed = false;
   const rgb = color => {
@@ -30,7 +33,11 @@
     const background = format(blend(base));
     const line = (header && rgb(getComputedStyle(header).borderBottomColor)) || base;
     // Explicitly invalidate native scrollbar paint when the sticky header changes.
-    root.style.setProperty('--desktop-gutter-shadow',header?.classList.contains('is-scrolled') ? '#00000018' : 'transparent');
+    root.style.setProperty('--desktop-gutter-shadow-image',header?.classList.contains('is-scrolled') ? shadowImage : 'none');
+    if (header) {
+      const borderWidth = parseFloat(getComputedStyle(header).borderBottomWidth) || 1;
+      root.style.setProperty('--desktop-header-line-top',`${header.getBoundingClientRect().bottom - borderWidth}px`);
+    }
     root.style.setProperty('--desktop-scrollbar-background',background);
     root.style.setProperty('--desktop-scrollbar-thumb',format(blend([136,136,136])));
     root.style.setProperty('--desktop-modal-gutter-line',format(blend(line)));
@@ -53,5 +60,7 @@
   observer.observe(root,{attributes:true,attributeFilter:['class']});
   if (theme) observer.observe(theme,{attributes:true,attributeFilter:['content']});
   window.addEventListener('pageshow',sync);
+  window.addEventListener('resize',sync);
+  if (header && window.ResizeObserver) new window.ResizeObserver(sync).observe(header);
   sync();
 })();

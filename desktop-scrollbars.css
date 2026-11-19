@@ -1,20 +1,15 @@
 /* Keep the always-visible thin page track below the titlebar and sticky header. */
 @media (min-width:601px), (display-mode:standalone), (display-mode:window-controls-overlay) {
-  html.desktop-scrollbars { --desktop-topbar-height:72px; --desktop-titlebar-height:0px; --desktop-header-bottom:calc(var(--desktop-titlebar-height) + var(--desktop-topbar-height)); --desktop-gutter-line:var(--line); --desktop-gutter-shadow:transparent; scrollbar-width:auto; scrollbar-color:auto; scrollbar-gutter:stable; }
+  html.desktop-scrollbars { --desktop-topbar-height:72px; --desktop-titlebar-height:0px; --desktop-header-bottom:calc(var(--desktop-titlebar-height) + var(--desktop-topbar-height)); --desktop-header-line-top:calc(var(--desktop-header-bottom) - 1px); --desktop-gutter-line:var(--line); --desktop-gutter-shadow-image:none; scrollbar-width:auto; scrollbar-color:auto; scrollbar-gutter:stable; }
   html.desktop-scrollbars.desktop-window-overlay { --desktop-titlebar-height:env(titlebar-area-height,32px); }
   /* Body theme variables do not inherit upwards into the root scrollbar. */
   html.desktop-scrollbars:has(body.dark) { --desktop-gutter-line:#4c4e48; }
-  html.desktop-scrollbars:has(.topbar.is-scrolled) { --desktop-gutter-shadow:#00000018; }
   html.desktop-scrollbars.desktop-modal-dimmed { --desktop-gutter-line:var(--desktop-modal-gutter-line); }
   html.desktop-scrollbars::-webkit-scrollbar { width:6px; height:6px; background-color:var(--desktop-scrollbar-background,transparent); }
-  /* The browser clips header content at its scrollport, so paint this last 6px. */
-  html.desktop-scrollbars::-webkit-scrollbar:vertical {
-    background-image:
-      linear-gradient(to bottom,transparent calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) var(--desktop-header-bottom),transparent var(--desktop-header-bottom));
-  }
   html.desktop-scrollbars::-webkit-scrollbar-track { background:transparent; }
-  /* Paint on the visible track, whose origin is already below the header. */
-  html.desktop-scrollbars::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-bottom); background-image:linear-gradient(to bottom,var(--desktop-gutter-shadow),transparent 14px); }
+  /* A border snaps like the header's own 1px border at fractional display scales.
+     The shadow image extends that header's 4px offset / 10px blur to the edge. */
+  html.desktop-scrollbars::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-line-top); border-top:1px solid var(--desktop-gutter-line); background-image:var(--desktop-gutter-shadow-image); background-repeat:no-repeat; background-size:100% 24px; background-origin:padding-box; background-clip:padding-box; }
   html.desktop-scrollbars::-webkit-scrollbar-thumb { background:var(--desktop-scrollbar-thumb,#888); border-radius:999px; }
   html.desktop-scrollbars::-webkit-scrollbar-button { display:none; }
   html.desktop-scrollbars::-webkit-scrollbar-corner { background:transparent; }

@@ -6,7 +6,7 @@ const source=fs.readFileSync(new URL('../desktop-modal-chrome.js',import.meta.ur
 function page({platform='desktop',installed=true}={}){
   const classes=new Set(),events=new Map(),observed=[];
   const root={style:{backgroundColor:'rgb(230, 231, 228)',setProperty(key,value){this[key]=value;}},classList:{add:name=>classes.add(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
-  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)',scrolled:false,classList:{contains:()=>header.scrolled}},theme={content:'#e6e7e4'};
+  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)',borderBottomWidth:'1px',bottom:72,getBoundingClientRect(){return{bottom:this.bottom};},scrolled:false,classList:{contains:()=>header.scrolled}},theme={content:'#e6e7e4'};
   let open=[],changed,reads=0;
   vm.runInNewContext(source,{window:{collectorPwaPlatform:platform,matchMedia:()=>({matches:installed}),addEventListener:(name,fn)=>events.set(name,fn)},document:{documentElement:root,body,querySelector:selector=>selector.includes('theme-color')?theme:header,querySelectorAll:()=>open},getComputedStyle:node=>{reads++;return node;},MutationObserver:class{constructor(fn){changed=fn;}observe(...args){observed.push(args);}}});
   return{root,body,header,theme,classes,observed,events,reads:()=>reads,setOpen:dialogs=>{open=dialogs;changed([{type:'attributes',target:dialogs[0]||body}]);},notify:records=>changed(records)};
@@ -61,9 +61,16 @@ test('browser tabs share PWA scrollbar themes and dimming without changing brows
   p.setOpen([]);assert.equal(p.root.style['--desktop-scrollbar-background'],'rgb(24, 25, 23)');assert.equal(p.theme.content,'#e6e7e4');
 });
 test('scrolling invalidates the scrollbar shadow and returning to the top clears it',()=>{
-  const p=page({installed:false});assert.equal(p.root.style['--desktop-gutter-shadow'],'transparent');
-  p.header.scrolled=true;p.notify([{type:'attributes',target:p.header}]);assert.equal(p.root.style['--desktop-gutter-shadow'],'#00000018');
-  p.header.scrolled=false;p.notify([{type:'attributes',target:p.header}]);assert.equal(p.root.style['--desktop-gutter-shadow'],'transparent');
+  const p=page({installed:false});assert.equal(p.root.style['--desktop-gutter-shadow-image'],'none');
+  p.header.scrolled=true;p.notify([{type:'attributes',target:p.header}]);assert.match(p.root.style['--desktop-gutter-shadow-image'],/^url\("data:image\/svg\+xml,/);
+  p.header.scrolled=false;p.notify([{type:'attributes',target:p.header}]);assert.equal(p.root.style['--desktop-gutter-shadow-image'],'none');
+});
+test('gutter border follows the measured header border at fractional zoom and after resize',()=>{
+  const p=page();assert.equal(p.root.style['--desktop-header-line-top'],'71px');
+  p.header.borderBottomWidth='0.666667px';p.notify([{type:'attributes',target:p.header}]);
+  assert.ok(Math.abs(parseFloat(p.root.style['--desktop-header-line-top'])-71.333333)<0.000001);
+  p.header.bottom=104;p.events.get('resize')();
+  assert.ok(Math.abs(parseFloat(p.root.style['--desktop-header-line-top'])-103.333333)<0.000001);
 });
 test('production shares desktop scrollbar resources across entry points with mobile runtime gating',()=>{
   const dist=new URL('../dist/',import.meta.url);
@@ -74,5 +81,5 @@ test('production shares desktop scrollbar resources across entry points with mob
   }
   const css=fs.readFileSync(new URL('desktop-scrollbars.css',dist),'utf8');
   assert.match(css,/@media \(min-width:601px\), \(display-mode:standalone\)/);
-  assert.match(css,/html.desktop-scrollbars::-webkit-scrollbar-track:vertical \{ margin-top:var\(--desktop-header-bottom\)/);
+  assert.match(css,/html.desktop-scrollbars::-webkit-scrollbar-track:vertical \{ margin-top:var\(--desktop-header-line-top\); border-top:1px solid/);
 });
