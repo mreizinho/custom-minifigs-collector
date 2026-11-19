@@ -149,15 +149,16 @@ test('supplied fuse and spark use the same measured progress and stop together',
   p.tick(4898);assert.equal(p.path.style.strokeDashoffset,'0');assert.equal(p.spark.style.opacity,'0');assert.equal(p.trail.style.opacity,'0');
   p.tick(5084);assert.equal(p.path.style.opacity,'0');
 });
-test('orange-to-black fuse trail follows the spark and stays 20 screen pixels at either stage size',()=>{
+test('orange-to-black fuse trail follows the spark and grows up to 200 screen pixels at either stage size',()=>{
   for(const [width,height] of [[260.47387,260.47387],[660,660],[660,492]]){
-    const p=fusePreview({width,height});p.tick(4464);
+    const p=fusePreview({width,height});p.tick(4800);
     const length=Number(p.trail.style.strokeDasharray.split(' ')[0]);
-    assert.ok(Math.abs(length*Math.min(width,height)/992.1-20)<0.000001);
+    assert.ok(Math.abs(length*Math.min(width,height)/992.1-200)<0.000001);
     assert.equal(p.trail.d,'original-path');assert.equal(p.trail.style.opacity,'1');
-    assert.equal(p.gradient.x2,500);assert.equal(p.gradient.x1,500-length);
-    assert.equal(Number(p.trail.style.strokeDashoffset),-(500-length));
+    const distance=(4800-4030)/868*1000;
+    assert.equal(p.gradient.x2,distance);assert.equal(p.gradient.x1,distance-length);
+    assert.equal(Number(p.trail.style.strokeDashoffset),-(distance-length));
   }
-  const p=fusePreview();p.tick(4031);assert.ok(Number(p.trail.style.strokeDasharray.split(' ')[0])<20,'the trail cannot extend before the start of the path');
+  const p=fusePreview();p.tick(4031);assert.ok(Number(p.trail.style.strokeDasharray.split(' ')[0])<200,'the trail cannot extend before the start of the path');
   const reduced=fusePreview({reduced:true});reduced.tick(4464);assert.equal(reduced.trail.style.opacity,'0');
 });
