@@ -26,7 +26,7 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 .desktop-ending{display:none}
 .desktop-launch .desktop-ending{display:block;position:absolute;inset:0;pointer-events:none;text-align:center;white-space:nowrap;color:#252624;font:400 clamp(32px,10vmin,84px)/1.2 'Barlow Condensed',sans-serif;letter-spacing:.65px;text-transform:uppercase}
 .desktop-ending span{position:absolute;left:0;right:0}
-.desktop-ending-top{bottom:calc(50% + min(88vw,660px,82svh)*.2795 + 16px);font-size:clamp(20px,5vmin,42px);opacity:0;transition:opacity .25s ease}
+.desktop-ending-top{bottom:calc(50% + min(88vw,660px,82svh)*.2795 + 16px);font-size:calc(clamp(32px,10vmin,84px) / 1.55 + .5px);opacity:0;transition:opacity .25s ease}
 .desktop-ending-bottom{top:calc(50% + min(88vw,660px,82svh)*.277 + 16px);opacity:0;transform:scale(.6);transform-origin:center;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease}
 .desktop-launch .desktop-ending.is-visible .desktop-ending-top{opacity:1}
 .desktop-launch .desktop-ending.is-visible .desktop-ending-bottom{opacity:1;transform:scale(1)}
