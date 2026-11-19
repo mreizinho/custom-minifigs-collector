@@ -5,6 +5,7 @@
   const root = document.documentElement;
   root.classList.add('desktop-scrollbars');
   const theme = document.querySelector('meta[name="theme-color"]');
+  const header = document.querySelector('.topbar');
   let modalOrder = [];
   let dimmed = false;
   const rgb = color => {
@@ -27,8 +28,9 @@
     const blend = color => backdrops.reduce((under,over) =>
       under.map((channel,index) => channel*(1-over[3])+over[index]*over[3]),color.slice(0,3));
     const background = format(blend(base));
-    const header = document.querySelector('.topbar');
     const line = (header && rgb(getComputedStyle(header).borderBottomColor)) || base;
+    // Explicitly invalidate native scrollbar paint when the sticky header changes.
+    root.style.setProperty('--desktop-gutter-shadow',header?.classList.contains('is-scrolled') ? '#00000018' : 'transparent');
     root.style.setProperty('--desktop-scrollbar-background',background);
     root.style.setProperty('--desktop-scrollbar-thumb',format(blend([136,136,136])));
     root.style.setProperty('--desktop-modal-gutter-line',format(blend(line)));
@@ -42,7 +44,7 @@
   }
   const observer = new MutationObserver(records => {
     const relevant = records.some(record => {
-      if (record.type === 'attributes') return record.target === theme || record.target === root || record.target === document.body || record.target.tagName === 'DIALOG';
+      if (record.type === 'attributes') return record.target === theme || record.target === root || record.target === document.body || record.target === header || record.target.tagName === 'DIALOG';
       return [...record.removedNodes].some(node => node.nodeType === 1 && (node.tagName === 'DIALOG' || node.querySelector('dialog')));
     });
     if (relevant) sync();

@@ -6,10 +6,10 @@ const source=fs.readFileSync(new URL('../desktop-modal-chrome.js',import.meta.ur
 function page({platform='desktop',installed=true}={}){
   const classes=new Set(),events=new Map(),observed=[];
   const root={style:{backgroundColor:'rgb(230, 231, 228)',setProperty(key,value){this[key]=value;}},classList:{add:name=>classes.add(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
-  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)'},theme={content:'#e6e7e4'};
+  const body={tagName:'BODY',backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)',scrolled:false,classList:{contains:()=>header.scrolled}},theme={content:'#e6e7e4'};
   let open=[],changed,reads=0;
   vm.runInNewContext(source,{window:{collectorPwaPlatform:platform,matchMedia:()=>({matches:installed}),addEventListener:(name,fn)=>events.set(name,fn)},document:{documentElement:root,body,querySelector:selector=>selector.includes('theme-color')?theme:header,querySelectorAll:()=>open},getComputedStyle:node=>{reads++;return node;},MutationObserver:class{constructor(fn){changed=fn;}observe(...args){observed.push(args);}}});
-  return{root,body,theme,classes,observed,events,reads:()=>reads,setOpen:dialogs=>{open=dialogs;changed([{type:'attributes',target:dialogs[0]||body}]);},notify:records=>changed(records)};
+  return{root,body,header,theme,classes,observed,events,reads:()=>reads,setOpen:dialogs=>{open=dialogs;changed([{type:'attributes',target:dialogs[0]||body}]);},notify:records=>changed(records)};
 }
 const dialog=color=>({tagName:'DIALOG',backgroundColor:color});
 test('desktop modal blends actual backdrop into scrollbar and native theme hint, then restores',()=>{
@@ -59,6 +59,11 @@ test('browser tabs share PWA scrollbar themes and dimming without changing brows
   assert.equal(p.root.style['--desktop-scrollbar-background'],'rgb(24, 25, 23)');
   p.setOpen([dialog('rgba(0, 0, 0, 0.5)')]);assert.equal(p.root.style['--desktop-scrollbar-background'],'rgb(12, 13, 12)');
   p.setOpen([]);assert.equal(p.root.style['--desktop-scrollbar-background'],'rgb(24, 25, 23)');assert.equal(p.theme.content,'#e6e7e4');
+});
+test('scrolling invalidates the scrollbar shadow and returning to the top clears it',()=>{
+  const p=page({installed:false});assert.equal(p.root.style['--desktop-gutter-shadow'],'transparent');
+  p.header.scrolled=true;p.notify([{type:'attributes',target:p.header}]);assert.equal(p.root.style['--desktop-gutter-shadow'],'#00000018');
+  p.header.scrolled=false;p.notify([{type:'attributes',target:p.header}]);assert.equal(p.root.style['--desktop-gutter-shadow'],'transparent');
 });
 test('production shares desktop scrollbar resources across entry points with mobile runtime gating',()=>{
   const dist=new URL('../dist/',import.meta.url);

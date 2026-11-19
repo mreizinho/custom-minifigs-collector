@@ -10,11 +10,11 @@
   /* The browser clips header content at its scrollport, so paint this last 6px. */
   html.desktop-scrollbars::-webkit-scrollbar:vertical {
     background-image:
-      linear-gradient(to bottom,transparent calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) var(--desktop-header-bottom),transparent var(--desktop-header-bottom)),
-      linear-gradient(to bottom,transparent var(--desktop-header-bottom),var(--desktop-gutter-shadow) var(--desktop-header-bottom),transparent calc(var(--desktop-header-bottom) + 14px));
+      linear-gradient(to bottom,transparent calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) calc(var(--desktop-header-bottom) - 1px),var(--desktop-gutter-line) var(--desktop-header-bottom),transparent var(--desktop-header-bottom));
   }
   html.desktop-scrollbars::-webkit-scrollbar-track { background:transparent; }
-  html.desktop-scrollbars::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-bottom); }
+  /* Paint on the visible track, whose origin is already below the header. */
+  html.desktop-scrollbars::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-bottom); background-image:linear-gradient(to bottom,var(--desktop-gutter-shadow),transparent 14px); }
   html.desktop-scrollbars::-webkit-scrollbar-thumb { background:var(--desktop-scrollbar-thumb,#888); border-radius:999px; }
   html.desktop-scrollbars::-webkit-scrollbar-button { display:none; }
   html.desktop-scrollbars::-webkit-scrollbar-corner { background:transparent; }
