@@ -20,9 +20,9 @@ if (new URLSearchParams(location.search).get('platform') === 'mobile') document.
   const trail=stage.querySelector('#fuseTrail'), gradient=stage.querySelector('#fuseTrailGradient');
   trail.setAttribute('d',path.getAttribute('d'));
   const length=path.getTotalLength();
-  // Keep the trail about 200 CSS pixels long on both mobile and desktop.
+  // Keep the trail about 100 CSS pixels long on both mobile and desktop.
   const svgBox=path.ownerSVGElement.viewBox.baseVal, svgBounds=path.ownerSVGElement.getBoundingClientRect();
-  const trailLength=200/Math.max(.001,Math.min(svgBounds.width/svgBox.width,svgBounds.height/svgBox.height));
+  const trailLength=100/Math.max(.001,Math.min(svgBounds.width/svgBox.width,svgBounds.height/svgBox.height));
   trail.style.opacity='0';
   path.style.strokeDasharray=String(length);
   path.style.strokeDashoffset=String(length);
