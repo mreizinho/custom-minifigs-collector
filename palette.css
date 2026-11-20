@@ -421,6 +421,7 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
   align-items: center;
   max-width: 100%;
 }
+.detail-tags > span,
 .detail-custom-tag-label {
   position: relative;
   isolation: isolate;
@@ -432,6 +433,7 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
   padding: 7px 12px;
   font-size: 12px;
 }
+.detail-tags > span::before,
 .detail-custom-tag-label::before {
   content: '';
   position: absolute;
@@ -441,6 +443,7 @@ body .actions .wish.selected .material-symbols-rounded { color:inherit; }
   clip-path: polygon(0 0, calc(100% - 7.62px) 0, 100% 7.62px, 100% 100%, 0 100%);
   background: #fff;
 }
+.detail-tags > span { display: inline-block; }
 .detail-custom-tag button {
   position: absolute;
   top: -6px;
@@ -871,6 +874,7 @@ body.dark { color-scheme: dark; }
   color: var(--paper);
 }
 .dark .close { background: var(--bg); color: var(--ink); }
+.dark .detail-tags > span::before,
 .dark .detail-custom-tag-label::before,
 .dark .detail-custom-tag button,
 .dark .detail-tag-suggestions button::before { background: var(--bg); }
@@ -924,7 +928,6 @@ body.dark { color-scheme: dark; }
 .dark .filter-brand input[type='checkbox']:checked,
 .dark .filter-collection input[type='checkbox']:checked,
 .dark .filter-condition input[type='checkbox']:checked { background:var(--accent); }
-.dark .detail-tags span { color: #20211e; }
 .dark .tag-filters label { background: #8f918b; }
 .dark .tag-filters label::before { background: var(--bg); }
 .dark .tag-filters label:has(input:checked),
