@@ -37,7 +37,7 @@ test('theme switches use the target color while the body is still transitioning'
   p.notify([{type:'attributes',target:p.body}]);
   assert.equal(p.theme.content,'rgb(24, 25, 23)');
   assert.equal(p.root.style['--desktop-scrollbar-background'],p.theme.content);
-  assert.equal(p.root.style['--desktop-scrollbar-thumb'],'rgb(59, 60, 60)');
+  assert.equal(p.root.style['--desktop-scrollbar-thumb'],'rgb(96, 97, 97)');
   p.setOpen([dialog('rgba(0, 0, 0, 0.5)')]);
   assert.equal(p.theme.content,'rgb(12, 13, 12)');
   p.body.backgroundColor='rgb(24, 25, 23)';
