@@ -2,6 +2,15 @@
 #desktopWindowTitlebar[hidden] { display:none; }
 .desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
+.desktop-window-overlay #pwaSplash::before {
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  z-index:1;
+  height:calc(env(titlebar-area-y,0px) + env(titlebar-area-height,32px));
+  background:var(--desktop-scrollbar-background,var(--pwa-chrome-bg,#e6e7e4));
+  pointer-events:none;
+}
 .desktop-window-overlay .settings-dialog::backdrop { background:#0009; }
 .desktop-window-overlay .release-calendar-dialog {
   --calendar-titlebar-bottom: calc(env(titlebar-area-y,0px) + env(titlebar-area-height,32px));
