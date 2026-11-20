@@ -19,5 +19,6 @@
 .brickset-pagination button{border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 14px;font:inherit}
 .brickset-pagination button:hover:not(:disabled){background:var(--ink);color:var(--paper)}
 .brickset-pagination button:disabled{opacity:.4;cursor:default}
+@media(max-width:850px){.brickset-pagination{order:3}.brickset-pagination-bottom{order:4}}
 @media(min-width:601px){.brickset-refresh .material-symbols-rounded{font-size:19px}}
 @media(max-width:600px){.brickset-sync-bar{font-size:12px}.brickset-refresh{top:10px;right:10px}}
