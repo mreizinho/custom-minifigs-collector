@@ -3,8 +3,8 @@
 Source: supplied 9 lego-fuse-top-right-synced.zip, index.html (6.2 seconds).
 The original fuse animation is available under Settings → Display → Startup
 animation or with `?animation=fuse` on the splash URL. The default sequence
-fades from frame 1 to frame 3, then animates the eyes and smile from frame 2
-over the final outline before the title appears.
+animates the grin, wink, and laugh over the yellow head from frame 1. It
+then blinks and smiles over the final outline before the title appears.
 
 The six embedded image
 payloads now come from the separately supplied frame1.svg through frame6.svg,

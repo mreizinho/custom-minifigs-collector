@@ -151,11 +151,11 @@ test('both flash transitions switch frames at full white opacity without a blank
     assert.ok(art.includes(`${peak}%{opacity:1}`));
   }
 });
-test('the grinning frame stays opaque until the exact tick the winking frame appears',()=>{
+test('the face sequence animates one yellow expression over the blank head',()=>{
   const art=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
-  assert.match(art,/@keyframes face-frame3\s*\{[^@]*opacity: 1; animation-timing-function: steps\(1, end\);\s*\}\s*40%, 100% \{ opacity: 0; \}/);
-  assert.match(art,/@keyframes f4\{0%,39\.99%\{opacity:0\}40%,53\.49%\{opacity:1\}/);
-  assert.doesNotMatch(art,/\.face-splash\s+#frame4/);
+  assert.match(art,/\.face-splash #frame2, \.face-splash #frame3,\s*\.face-splash #frame4, \.face-splash #frame5 \{ display: none; \}/);
+  assert.equal([...art.matchAll(/<path id="yellow-mouth"/g)].length,1);
+  assert.match(art,/@keyframes yellow-mouth\s*\{[^@]*38%[^@]*44%[^@]*57\.5%/);
 });
 function morph({reduced=false,mobile=false,desktop=!mobile,face=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');

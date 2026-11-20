@@ -37,12 +37,8 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 @media(prefers-reduced-motion:reduce){.desktop-launch .desktop-ending span{transition:none;transform:none}}
 /* The face sequence shares the original artwork and ending with the fuse. */
 .face-splash #frame1 { animation-name: face-frame1; }
-.face-splash #frame2 { display: none; }
-.face-splash #frame3 {
-  animation-name: face-frame3;
-  animation-timing-function: ease-in;
-}
-.face-splash #frame5 { animation-name: face-frame5; }
+.face-splash #frame2, .face-splash #frame3,
+.face-splash #frame4, .face-splash #frame5 { display: none; }
 .face-splash #frame6 { animation-name: face-frame6; }
 .face-splash #flash { animation-name: final-flash; }
 .face-splash .head-motion {
@@ -66,19 +62,51 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 
 @keyframes face-frame1 {
   0% { opacity: 1; }
-  26%, 100% { opacity: 0; }
-}
-/* Fade in over the blank head. At 40%, the original stepped frame 4
-   switches on as frame 3 switches off, keeping the two mouths separate. */
-@keyframes face-frame3 {
-  0%, 23% { opacity: 0; }
-  26% { opacity: 1; animation-timing-function: steps(1, end); }
-  40%, 100% { opacity: 0; }
-}
-@keyframes face-frame5 {
-  0%, 53.49% { opacity: 0; }
-  53.5%, 66.99% { opacity: 1; }
   67%, 100% { opacity: 0; }
+}
+.yellow-expression { display: none; }
+.face-splash .yellow-expression {
+  display: inline;
+  animation: yellow-expression var(--duration) steps(1, end) both;
+}
+.yellow-expression-ink { animation: yellow-ink var(--duration) ease-in both; }
+.yellow-mouth { animation: yellow-mouth var(--duration) ease-in-out both; }
+.yellow-mouth-details { animation: yellow-mouth-details var(--duration) ease-in-out both; }
+.yellow-wink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: yellow-wink var(--duration) ease-in-out both;
+}
+.yellow-brow { animation: yellow-brow var(--duration) ease-in-out both; }
+
+@keyframes yellow-expression {
+  0% { opacity: 1; }
+  67%, 100% { opacity: 0; }
+}
+@keyframes yellow-ink {
+  0%, 23% { opacity: 0; }
+  26%, 100% { opacity: 1; }
+}
+@keyframes yellow-mouth {
+  0%, 38% { d: path("M436 603 C474 613 528 604 552 580 C551 604 480 637 436 603 Z"); }
+  44%, 51.5% { d: path("M392 575 C455 592 549 565 595 546 C591 671 439 712 392 575 Z"); }
+  57.5%, 100% { d: path("M393 553 C452 586 550 582 606 548 C601 715 401 717 393 553 Z"); }
+}
+@keyframes yellow-mouth-details {
+  0%, 39% { opacity: 0; }
+  43%, 100% { opacity: 1; }
+}
+@keyframes yellow-wink {
+  0%, 38%, 57.5%, 100% { transform: scaleY(1); }
+  43%, 52% { transform: scaleY(.14); }
+}
+@keyframes yellow-brow {
+  0%, 38% { d: path("M537 423 Q590 418 624 438"); }
+  44%, 51.5% { d: path("M533 449 Q583 456 616 430"); }
+  57.5%, 100% { d: path("M533 414 Q586 405 621 432"); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .face-splash .yellow-expression { display: none; }
 }
 @keyframes face-frame6 {
   0%, 66.99% { opacity: 0; }
@@ -116,6 +144,26 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
   <path class="splash-mouth" d="M456 594 Q495 598 534 594" fill="none" stroke="#010101" stroke-width="13" stroke-linecap="round"/>
   <circle class="splash-eye" cx="423.5" cy="487.5" r="25.9"/>
   <circle class="splash-eye" cx="567.2" cy="487.5" r="26"/>
+</g>
+<g class="yellow-expression" aria-hidden="true">
+  <g class="yellow-expression-ink" fill="#212121">
+    <path d="M371 435 Q405 411 443 422" fill="none" stroke="#212121" stroke-width="15" stroke-linecap="round"/>
+    <path class="yellow-brow" d="M537 423 Q590 418 624 438" fill="none" stroke="#212121" stroke-width="15" stroke-linecap="round"/>
+    <ellipse cx="429" cy="490" rx="32" ry="34"/>
+    <ellipse cx="429" cy="477" rx="10.5" ry="12.5" fill="#fff"/>
+    <g class="yellow-wink">
+      <ellipse cx="561" cy="490" rx="32" ry="34"/>
+      <ellipse cx="561" cy="477" rx="10.5" ry="12.5" fill="#fff"/>
+    </g>
+    <path id="yellow-mouth" class="yellow-mouth" d="M436 603 C474 613 528 604 552 580 C551 604 480 637 436 603 Z"/>
+    <clipPath id="yellow-mouth-clip">
+      <path class="yellow-mouth" d="M436 603 C474 613 528 604 552 580 C551 604 480 637 436 603 Z"/>
+    </clipPath>
+    <g class="yellow-mouth-details" clip-path="url(#yellow-mouth-clip)">
+      <path d="M391 553 Q495 623 606 548 L605 576 Q495 652 392 579 Z" fill="#fff"/>
+      <ellipse cx="508" cy="663" rx="72" ry="32" fill="#b22e26"/>
+    </g>
+  </g>
 </g>
 <g id="flash"><circle cx="495" cy="500" r="360"/></g></g></svg><div class="mobile-ending" aria-hidden="true"><span class="mobile-ending-top">Custom Minifigs</span><span class="mobile-ending-bottom">Collector</span></div><div class="desktop-ending" aria-hidden="true"><span class="desktop-ending-top">Custom Minifigs</span><span class="desktop-ending-bottom">Collector</span></div></div></main><script>
 (()=>{
