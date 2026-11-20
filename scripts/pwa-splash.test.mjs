@@ -182,19 +182,17 @@ test('mobile shows the logo words only after animation completion, then holds th
   p.tick(600);p.end({target:p.art,animationName:'bounce'});p.tick(599);assert.equal(p.messages.length,0);
   p.tick(1);assert.equal(p.messages.length,1);p.tick(1200);assert.equal(p.messages.length,1);
 });
-test('the face fades out and pauses before the title appears',()=>{
+test('the face fades out as the title appears, then the title holds',()=>{
   const p=morph({mobile:true,face:true});
   p.end({target:{},animationName:'look-around'});
   assert.equal(p.endingClasses.size,0);
   assert.equal(p.faceClasses.size,0);
   p.end({target:p.art,animationName:'face-bounce'});
   assert.ok(p.faceClasses.has('is-leaving'));
-  p.tick(549);
-  assert.equal(p.endingClasses.size,0);
-  p.tick(1);
   assert.ok(p.endingClasses.has('is-visible'));
+  p.tick(1499);
   assert.equal(p.messages.length,0);
-  p.tick(1200);
+  p.tick(1);
   assert.equal(p.messages.length,1);
 });
 test('mobile reduced motion skips the extra ending delay and cancels a pending hold',()=>{

@@ -50,7 +50,7 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 .face-splash #frame6 { animation-name: face-frame6; }
 .face-splash #flash { animation-name: final-flash; }
 .face-splash .head-motion {
-  --duration: 8s;
+  --duration: 8.7s;
   animation-name: face-bounce;
 }
 .splash-face { display: none; }
@@ -113,9 +113,10 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 }
 @keyframes look-around {
   0%, 84% { transform: translateX(0); }
-  87%, 89% { transform: translateX(calc(-1 * var(--gaze-distance, 26px))); }
-  93%, 96% { transform: translateX(var(--gaze-distance, 26px)); }
-  100% { transform: translateX(0); }
+  85.8%, 87.5% { transform: translateX(calc(-1 * var(--gaze-distance, 26px))); }
+  89.3%, 92% { transform: translateX(0); }
+  93.8%, 95.5% { transform: translateX(var(--gaze-distance, 26px)); }
+  97.3%, 100% { transform: translateX(0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .face-splash .splash-face, .splash-gaze, .splash-mouth, .splash-eye { animation: none; }
@@ -195,17 +196,12 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
     if ((!mobile && !desktop) || reduced.matches) { complete(); return; }
     if (endingStarted) return;
     endingStarted = true;
-    const showTitle = () => {
-      ending.classList.add('is-visible');
-      endingTimer = setTimeout(complete, 1200);
-    };
-    if (document.documentElement.classList.contains('face-splash')) {
+    const faceSplash = document.documentElement.classList.contains('face-splash');
+    if (faceSplash) {
       document.querySelector('.splash-face').classList.add('is-leaving');
-      // Allow 250 ms for the fade and hold the empty outline for 300 ms.
-      endingTimer = setTimeout(showTitle, 550);
-    } else {
-      showTitle();
     }
+    ending.classList.add('is-visible');
+    endingTimer = setTimeout(complete, faceSplash ? 1500 : 1200);
   };
   motion.addEventListener('animationend', event => {
     if (event.target === motion && ['bounce', 'face-bounce'].includes(event.animationName)) finishAnimation();
