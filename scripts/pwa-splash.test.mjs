@@ -151,6 +151,12 @@ test('both flash transitions switch frames at full white opacity without a blank
     assert.ok(art.includes(`${peak}%{opacity:1}`));
   }
 });
+test('the grinning frame stays opaque until the exact tick the winking frame appears',()=>{
+  const art=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
+  assert.match(art,/@keyframes face-frame3\s*\{[^@]*opacity: 1; animation-timing-function: steps\(1, end\);\s*\}\s*40%, 100% \{ opacity: 0; \}/);
+  assert.match(art,/@keyframes f4\{0%,39\.99%\{opacity:0\}40%,53\.49%\{opacity:1\}/);
+  assert.doesNotMatch(art,/\.face-splash\s+#frame4/);
+});
 function morph({reduced=false,mobile=false,desktop=!mobile,face=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
   const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];

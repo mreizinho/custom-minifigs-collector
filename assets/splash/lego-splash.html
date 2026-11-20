@@ -38,9 +38,8 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 /* The face sequence shares the original artwork and ending with the fuse. */
 .face-splash #frame1 { animation-name: face-frame1; }
 .face-splash #frame2 { display: none; }
-.face-splash #frame3 { animation-name: face-frame3; }
-.face-splash #frame4 {
-  animation-name: face-frame4;
+.face-splash #frame3 {
+  animation-name: face-frame3;
   animation-timing-function: ease-in;
 }
 .face-splash #frame5 { animation-name: face-frame5; }
@@ -72,16 +71,12 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
   0% { opacity: 1; }
   26%, 100% { opacity: 0; }
 }
-/* Switch both expressions on the same tick so their printed features cannot overlap. */
+/* Fade in over the blank head. At 40%, the original stepped frame 4
+   switches on as frame 3 switches off, keeping the two mouths separate. */
 @keyframes face-frame3 {
-  0% { opacity: 0; }
-  26% { opacity: 1; }
-  42.01%, 100% { opacity: 0; }
-}
-@keyframes face-frame4 {
-  0%, 39% { opacity: 0; }
-  42%, 53.49% { opacity: 1; }
-  53.5%, 100% { opacity: 0; }
+  0%, 23% { opacity: 0; }
+  26% { opacity: 1; animation-timing-function: steps(1, end); }
+  40%, 100% { opacity: 0; }
 }
 @keyframes face-frame5 {
   0%, 53.49% { opacity: 0; }
