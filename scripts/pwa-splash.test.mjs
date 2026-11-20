@@ -155,7 +155,13 @@ test('the face sequence animates one yellow expression over the blank head',()=>
   const art=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
   assert.match(art,/\.face-splash #frame2, \.face-splash #frame3,\s*\.face-splash #frame4, \.face-splash #frame5 \{ display: none; \}/);
   assert.equal([...art.matchAll(/<path id="yellow-mouth"/g)].length,1);
-  assert.match(art,/@keyframes yellow-mouth\s*\{[^@]*38%[^@]*44%[^@]*57\.5%/);
+  const shapes=fs.readFileSync(new URL('../dist/assets/splash/yellow-expressions.css',import.meta.url),'utf8');
+  assert.match(shapes,/@keyframes yellow-mouth\s*\{[^@]*38%[^@]*44%[^@]*57\.5%/);
+  for (const [frame, start] of [[3,'M438.2,620.2'],[4,'M468.9,675.6'],[5,'M366.8,556.7']]) {
+    const original=fs.readFileSync(new URL(`../assets/splash/frames/frame${frame}.svg`,import.meta.url),'utf8');
+    const mouth=[...original.matchAll(/d="([^"]+)"/g)].find(([,d])=>d.startsWith(start))[1];
+    assert.ok(shapes.includes(`d: path("${mouth}")`));
+  }
 });
 function morph({reduced=false,mobile=false,desktop=!mobile,face=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
