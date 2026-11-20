@@ -23,6 +23,7 @@ const productionFiles = [
   'app.js',
   'google-access.js',
   'brickset-collection.js',
+  'brickset-photo-recovery.js',
   'brickset-collection.css',
   'demo-catalogue.js',
   'assets/demo',
