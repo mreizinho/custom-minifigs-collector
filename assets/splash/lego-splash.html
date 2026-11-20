@@ -100,20 +100,20 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
   69%, 100% { opacity: 0; }
 }
 @keyframes face-appear {
-  0%, 70% { opacity: 0; }
-  74%, 100% { opacity: 1; }
+  0%, 74% { opacity: 0; }
+  77%, 100% { opacity: 1; }
 }
 @keyframes face-disappear {
   from { opacity: 1; }
   to { opacity: 0; }
 }
 @keyframes blink-twice {
-  0%, 76%, 78%, 80%, 82%, 100% { transform: scaleY(1); }
-  77%, 81% { transform: scaleY(.09); }
+  0%, 78%, 80%, 82%, 84%, 100% { transform: scaleY(1); }
+  79%, 83% { transform: scaleY(.09); }
 }
 @keyframes look-around {
-  0%, 83% { transform: translateX(0); }
-  86%, 89% { transform: translateX(calc(-1 * var(--gaze-distance, 26px))); }
+  0%, 84% { transform: translateX(0); }
+  87%, 89% { transform: translateX(calc(-1 * var(--gaze-distance, 26px))); }
   93%, 96% { transform: translateX(var(--gaze-distance, 26px)); }
   100% { transform: translateX(0); }
 }
@@ -195,11 +195,17 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
     if ((!mobile && !desktop) || reduced.matches) { complete(); return; }
     if (endingStarted) return;
     endingStarted = true;
+    const showTitle = () => {
+      ending.classList.add('is-visible');
+      endingTimer = setTimeout(complete, 1200);
+    };
     if (document.documentElement.classList.contains('face-splash')) {
       document.querySelector('.splash-face').classList.add('is-leaving');
+      // Allow 250 ms for the fade and hold the empty outline for 300 ms.
+      endingTimer = setTimeout(showTitle, 550);
+    } else {
+      showTitle();
     }
-    ending.classList.add('is-visible');
-    endingTimer = setTimeout(complete, 1200);
   };
   motion.addEventListener('animationend', event => {
     if (event.target === motion && ['bounce', 'face-bounce'].includes(event.animationName)) finishAnimation();
