@@ -58,6 +58,9 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
   display: inline;
   animation: face-appear var(--duration) ease both;
 }
+.face-splash .splash-face.is-leaving {
+  animation: face-disappear .25s ease both;
+}
 .splash-mouth { --gaze-distance: 13px; }
 .splash-gaze, .splash-mouth { animation: look-around var(--duration) ease-in-out both; }
 .splash-eye {
@@ -99,6 +102,10 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 @keyframes face-appear {
   0%, 70% { opacity: 0; }
   74%, 100% { opacity: 1; }
+}
+@keyframes face-disappear {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 @keyframes blink-twice {
   0%, 76%, 78%, 80%, 82%, 100% { transform: scaleY(1); }
@@ -188,6 +195,9 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
     if ((!mobile && !desktop) || reduced.matches) { complete(); return; }
     if (endingStarted) return;
     endingStarted = true;
+    if (document.documentElement.classList.contains('face-splash')) {
+      document.querySelector('.splash-face').classList.add('is-leaving');
+    }
     ending.classList.add('is-visible');
     endingTimer = setTimeout(complete, 1200);
   };
