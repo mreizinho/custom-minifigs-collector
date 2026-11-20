@@ -2,6 +2,13 @@
 #desktopWindowTitlebar[hidden] { display:none; }
 .desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
+.desktop-window-overlay .settings-dialog::backdrop { background:#0009; }
+.desktop-window-overlay .release-calendar-dialog {
+  --calendar-titlebar-bottom: calc(env(titlebar-area-y,0px) + env(titlebar-area-height,32px));
+  inset-block:var(--calendar-titlebar-bottom) 0;
+  margin-block:auto;
+  max-height:min(850px, max(0px, calc(100dvh - var(--calendar-titlebar-bottom) - 32px)));
+}
 @media (min-width:601px) {
   .desktop-window-overlay .quick-search.is-visible { top:calc(env(titlebar-area-height,32px) + 82px); }
   .desktop-window-overlay .add-figure.is-floating { top:calc(env(titlebar-area-height,32px) + 143px); }
