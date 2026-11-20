@@ -396,13 +396,39 @@ const renderDetailWithoutPhotoAction=openDetail;openDetail=figure=>{renderDetail
 
 async function updateFigureStatusInSheet(figure,status){if(!figure.sheetRow)throw Error('This minifig is missing its spreadsheet row reference.');const escapedCollection=activeCollection.replace(/'/g,"''"),headerRange=encodeURIComponent(`'${escapedCollection}'!1:1`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${headerRange}?majorDimension=ROWS`),headers=(await response.json()).values?.[0]||[],statusIndex=headerIndex(headers,['owned','collectionstatus','collection','availability']);if(statusIndex<0)throw Error(`The ${activeCollection} sheet needs an Owned, Collection Status, Collection, or Availability column.`);const cell=encodeURIComponent(`'${escapedCollection}'!${sheetColumn(statusIndex)}${figure.sheetRow}`);await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${cell}?valueInputOption=RAW`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({majorDimension:'ROWS',values:[[status]]})});figure.collection=status.toLowerCase();const rawStatusKey=Object.keys(figure.raw).find(key=>['owned','collectionstatus','collection','availability'].includes(normalizedHeader(key)));if(rawStatusKey)figure.raw[rawStatusKey]=status}
 
+async function renamePhotosForFigureId(rows,row,nextId,isCurrentCatalogue){
+  const headers=rows[0];
+  const photos=[
+    [headerIndex(headers,['imageurl','photourl','thumbnail','thumb','picture']),''],
+    [headerIndex(headers,['altphotourl','altimageurl','alternatephotourl']),'b']
+  ].map(([column,suffix])=>[drivePhotoId(rows[row-1][column]),suffix]).filter(([id])=>id);
+  let incomplete=false;
+  for(const [id,suffix] of photos){
+    const shared=photos.filter(([otherId])=>otherId===id).length>1||
+      rows.some((cells,index)=>index>0&&index!==row-1&&cells.some(value=>drivePhotoId(value)===id));
+    if(shared||!isCurrentCatalogue()){incomplete=true;continue}
+    try{
+      const fileUrl=`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}`;
+      const response=await sheetsRequest(`${fileUrl}?fields=name,mimeType,trashed&supportsAllDrives=true`);
+      const file=await response.json(),name=`${nextId}${suffix}.png`;
+      if(file.trashed||file.mimeType!=='image/png'||!/^-?\d+(?:b|-alt)?\.png$/i.test(file.name)||file.name===name)continue;
+      if(!isCurrentCatalogue()){incomplete=true;continue}
+      await sheetsRequest(`${fileUrl}?supportsAllDrives=true`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+    }catch(error){
+      incomplete=true;
+      console.warn('Could not rename the minifig photo.',error);
+    }
+  }
+  return incomplete;
+}
 async function updateFigureHiddenInSheet(figure,hidden){
   if(SECRET_DEMO_MODE)throw Error('This secret demo view is read-only.');
   if(!window.collectorFirebaseUser)throw Error('Sign in with Google before hiding figures in your spreadsheet.');
   await resolveFigureSheetRow(figure);
   await restoreSheetsAccess();
   const collection=activeCollection,spreadsheetId=SHEET_ID,googleUser=window.collectorFirebaseUser,escapedCollection=collection.replace(/'/g,"''"),range=encodeURIComponent(`'${escapedCollection}'!A:ZZ`),response=await sheetsRequest(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?majorDimension=ROWS`),rows=(await response.json()).values||[],headers=rows[0]||[],idIndex=headerIndex(headers,['id','number','setnumber','figureid']);
-  if(activeCollection!==collection||SHEET_ID!==spreadsheetId||window.collectorFirebaseUser!==googleUser)throw Error('The collection or Google account changed. Reload the collection and try again.');
+  const isCurrentCatalogue=()=>activeCollection===collection&&SHEET_ID===spreadsheetId&&window.collectorFirebaseUser===googleUser;
+  if(!isCurrentCatalogue())throw Error('The collection or Google account changed. Reload the collection and try again.');
   if(idIndex<0)throw Error(`The ${collection} sheet is missing an ID column.`);
   const matches=rows.flatMap((row,index)=>index>0&&comparableFigureId(row[idIndex])===comparableFigureId(figureNumber(figure))?[index+1]:[]);
   if(matches.length!==1)throw Error('The minifig ID is missing or duplicated. Reload the collection and try again.');
@@ -424,6 +450,7 @@ async function updateFigureHiddenInSheet(figure,hidden){
   const rawHiddenKey=Object.keys(figure.raw).find(key=>['hidden','hide'].includes(normalizedHeader(key)));
   if(rawHiddenKey)figure.raw[rawHiddenKey]=hidden?'TRUE':'';else figure.raw.Hidden=hidden?'TRUE':'';
   persist();persistCustomTags();
+  return renamePhotosForFigureId(rows,matches[0],nextId,isCurrentCatalogue);
 }
 
 async function toggleFigureHidden(figure,trigger){
@@ -431,7 +458,7 @@ async function toggleFigureHidden(figure,trigger){
   const hidden=!isHidden(figure);
   if(trigger)trigger.disabled=true;
   try{
-    await updateFigureHiddenInSheet(figure,hidden);
+    const photoRenameIncomplete=await updateFigureHiddenInSheet(figure,hidden);
     const photo=$('#detail .detail-photo-stage')||$('#detail .detail-image img'),reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(hidden){
       if(photo?.animate&&!reducedMotion){
@@ -462,6 +489,7 @@ async function toggleFigureHidden(figure,trigger){
       if(icon)icon.textContent=hidden?'visibility':'visibility_off';
     }
     $('#resultCount').textContent=hidden?`${figure.name} hidden. Search for “hide” to show hidden minifigs.`:`${figure.name} is visible in the catalogue again.`;
+    if(photoRenameIncomplete)$('#resultCount').textContent+=' Some Drive photo filenames could not be updated.';
     return true;
   }catch(error){
     const message=$('#detail .detail-edit-message');
