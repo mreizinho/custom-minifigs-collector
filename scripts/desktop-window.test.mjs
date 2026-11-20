@@ -3,26 +3,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../desktop-window.js',import.meta.url),'utf8');
-function launch({platform='desktop',supported=true,visible=false,installed=false,focused=false}={}){
-  const classes=new Set(),titlebar={hidden:true},windowEvents=new Map();let changed;
+function launch({platform='desktop',supported=true,visible=false}={}){
+  const classes=new Set(),titlebar={hidden:true};let changed;
   const overlay={visible,addEventListener:(name,fn)=>{assert.equal(name,'geometrychange');changed=fn;}};
-  vm.runInNewContext(source,{window:{collectorPwaPlatform:platform,matchMedia:()=>({matches:installed}),addEventListener:(name,fn)=>windowEvents.set(name,fn)},navigator:supported?{windowControlsOverlay:overlay}:{},document:{hasFocus:()=>focused,getElementById:()=>titlebar,documentElement:{classList:{toggle:(name,active)=>active?classes.add(name):classes.delete(name)}}}});
-  return{titlebar,classes,focus:value=>{focused=value;windowEvents.get(value?'focus':'blur')?.();},change:visible=>{overlay.visible=visible;changed?.();},listening:!!changed};
+  vm.runInNewContext(source,{window:{collectorPwaPlatform:platform},navigator:supported?{windowControlsOverlay:overlay}:{},document:{getElementById:()=>titlebar,documentElement:{classList:{toggle:(name,active)=>active?classes.add(name):classes.delete(name)}}}});
+  return{titlebar,classes,change:visible=>{overlay.visible=visible;changed?.();},listening:!!changed};
 }
 test('custom titlebar follows native overlay visibility, including maximize/fullscreen/toggle changes',()=>{
   const p=launch({visible:true});assert.equal(p.titlebar.hidden,false);assert.ok(p.classes.has('desktop-window-overlay'));
   p.change(false);assert.equal(p.titlebar.hidden,true);assert.equal(p.classes.size,0);
   p.change(true);assert.equal(p.titlebar.hidden,false);
-});
-test('the installed desktop outline follows window focus with or without the native overlay',()=>{
-  for (const supported of [true,false]) {
-    const p=launch({installed:true,focused:true,supported});
-    assert.ok(p.classes.has('desktop-window-active'));
-    p.focus(false);assert.equal(p.classes.has('desktop-window-active'),false);
-    p.focus(true);assert.ok(p.classes.has('desktop-window-active'));
-  }
-  const tab=launch({focused:true});tab.focus(true);
-  assert.equal(tab.classes.has('desktop-window-active'),false);
 });
 test('ordinary tabs and unsupported browsers keep the normal layout',()=>{
   for(const options of [{visible:false},{supported:false}]){

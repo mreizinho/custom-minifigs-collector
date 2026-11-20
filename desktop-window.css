@@ -1,14 +1,5 @@
 /* Native minimize/maximize/close/menu controls stay outside the draggable area. */
 #desktopWindowTitlebar[hidden] { display:none; }
-.desktop-window-active::before {
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:2147483647;
-  border:1px solid var(--accent);
-  border-radius:7px;
-  pointer-events:none;
-}
 .desktop-window-overlay body { padding-top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .topbar { top:env(titlebar-area-height,32px); }
 .desktop-window-overlay .settings-dialog::backdrop { background:#0009; }
