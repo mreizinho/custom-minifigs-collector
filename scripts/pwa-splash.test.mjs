@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../pwa-splash.js',import.meta.url),'utf8');
-function launch({installed=true,reduced=false,mode='standalone',userAgent=''}={}) {
+function launch({installed=true,reduced=false,mode='standalone',userAgent='',animation=null}={}) {
   let now=0,id=0;
   const timers=new Map(),listeners=new Map(),layerListeners=new Map(),layerOptions=new Map(),events=[],classes=new Set();
   const layerClasses=new Set(),frame={dataset:{src:'/assets/splash/lego-splash.html'},contentWindow:{},addEventListener(){}};
@@ -13,6 +13,7 @@ function launch({installed=true,reduced=false,mode='standalone',userAgent=''}={}
   const window={navigator:{userAgent},matchMedia:query=>({matches:query.includes('reduced')?reduced:query.includes(`display-mode: ${mode}`)&&installed}),addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
   const context={window,document,location:{origin:'https://test.example',search:''},URL,URLSearchParams,CustomEvent:class{constructor(type){this.type=type;}},setTimeout:(fn,ms)=>{timers.set(++id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id)};
   vm.runInNewContext(source,context);
+  context.localStorage={getItem:key=>key==='minifig-splash-animation'?animation:null};
   const tick=ms=>{const target=now+ms;while(true){const next=[...timers].sort((a,b)=>a[1].at-b[1].at).find(([,timer])=>timer.at<=target);if(!next)break;now=next[1].at;timers.delete(next[0]);next[1].fn();}now=target;};
   const message=(overrides={})=>listeners.get('message')?.({origin:context.location.origin,source:frame.contentWindow,data:{type:'collector-splash-animation-complete'},...overrides});
   const skip=(type='click',overrides={})=>{
@@ -23,6 +24,13 @@ function launch({installed=true,reduced=false,mode='standalone',userAgent=''}={}
 }
 test('normal browser visits do not load or show the animation',()=>{
   const p=launch({installed:false});assert.equal(p.window.collectorSplash,undefined);assert.equal(p.frame.src,undefined);assert.equal(p.classes.size,0);
+});
+test('startup defaults to the face sequence and honors the saved fuse choice',()=>{
+  for (const [animation, expected] of [[null,null],['face',null],['fuse','fuse']]) {
+    const p=launch({animation});
+    p.window.collectorSplash.mount();
+    assert.equal(new URL(p.frame.src).searchParams.get('animation'),expected);
+  }
 });
 test('desktop custom-titlebar mode starts the splash and waits for animation completion',async()=>{
   const p=launch({mode:'window-controls-overlay'});assert.ok(p.window.collectorSplash);
@@ -172,6 +180,16 @@ test('mobile shows the logo words only after animation completion, then holds th
   p.end({target:p.art,animationName:'bounce'});assert.ok(p.endingClasses.has('is-visible'));assert.equal(p.messages.length,0);
   p.tick(600);p.end({target:p.art,animationName:'bounce'});p.tick(599);assert.equal(p.messages.length,0);
   p.tick(1);assert.equal(p.messages.length,1);p.tick(1200);assert.equal(p.messages.length,1);
+});
+test('the face sequence reveals the title only after the full head animation',()=>{
+  const p=morph({mobile:true});
+  p.end({target:{},animationName:'look-around'});
+  assert.equal(p.endingClasses.size,0);
+  p.end({target:p.art,animationName:'face-bounce'});
+  assert.ok(p.endingClasses.has('is-visible'));
+  assert.equal(p.messages.length,0);
+  p.tick(1200);
+  assert.equal(p.messages.length,1);
 });
 test('mobile reduced motion skips the extra ending delay and cancels a pending hold',()=>{
   const initial=morph({mobile:true,reduced:true});initial.flush();assert.equal(initial.messages.length,1);
