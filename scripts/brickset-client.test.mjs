@@ -156,6 +156,7 @@ test('large collections render only one page while search and details retain eve
   assert.equal(rendered.length,1,'unchanged fresh data must not rebuild the cached catalogue');
   assert.equal(rendered[0].length,96);
   assert.equal(pagers[0].querySelector('span').textContent,'1–96 of 2.188');
+  assert.equal(pagers.length,1,'Only the bottom pagination row is created');
   assert.equal(elements.get('#resultCount').textContent,'BRICKSET: Showing 2.188 of 2.188 minifigs');
   pagers[0].querySelector('[data-page="next"]').onclick();
   assert.equal(rendered.at(-1)[0],'Brickset::fig0097');

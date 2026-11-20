@@ -11,19 +11,19 @@
   let page = 0, resultKey = '', snapshotKey = '';
   let figuresByCode = new Map();
   const visiblePrices = new Map();
-  const pagers = [document.createElement('nav'), document.createElement('nav')];
+  const pagers = [document.createElement('nav')];
   for (const pager of pagers) {
     pager.className = 'brickset-pagination'; pager.hidden = true;
     pager.setAttribute('aria-label', 'Brickset collection pages');
-    pager.innerHTML = '<button type="button" data-page="previous">Previous</button><span aria-live="polite"></span><button type="button" data-page="next">Next</button>';
+    pager.innerHTML = '<button type="button" data-page="previous">&lt; Previous</button><span aria-live="polite"></span><button type="button" data-page="next">Next &gt;</button>';
     for (const direction of ['previous', 'next']) pager.querySelector(`[data-page="${direction}"]`).onclick = () => {
       page += direction === 'next' ? 1 : -1;
       render();
-      if (pager === pagers[1]) pagers[0].scrollIntoView({ block: 'center' });
+      $('#catalogue').scrollIntoView({ block: 'start' });
     };
   }
-  pagers[1].classList.add('brickset-pagination-bottom');
-  $('#catalogue').before(pagers[0]); $('#catalogue').after(pagers[1]);
+  pagers[0].classList.add('brickset-pagination-bottom');
+  $('#catalogue').after(pagers[0]);
   const bar = document.createElement('div');
   bar.className = 'brickset-sync-bar';
   bar.hidden = true;
