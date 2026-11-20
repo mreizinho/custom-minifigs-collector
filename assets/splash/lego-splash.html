@@ -38,10 +38,7 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 /* The face sequence shares the original artwork and ending with the fuse. */
 .face-splash #frame1 { animation-name: face-frame1; }
 .face-splash #frame2 { display: none; }
-.face-splash #frame3 {
-  animation-name: face-frame3;
-  animation-timing-function: ease-in;
-}
+.face-splash #frame3 { animation-name: face-frame3; }
 .face-splash #frame4 {
   animation-name: face-frame4;
   animation-timing-function: ease-in;
@@ -72,12 +69,13 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 }
 
 @keyframes face-frame1 {
-  0%, 25.99% { opacity: 1; }
+  0% { opacity: 1; }
   26%, 100% { opacity: 0; }
 }
+/* Switch both expressions on the same tick so their printed features cannot overlap. */
 @keyframes face-frame3 {
-  0%, 23% { opacity: 0; }
-  26%, 42% { opacity: 1; }
+  0% { opacity: 0; }
+  26% { opacity: 1; }
   42.01%, 100% { opacity: 0; }
 }
 @keyframes face-frame4 {
