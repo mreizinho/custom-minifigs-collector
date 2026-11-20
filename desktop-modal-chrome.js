@@ -39,8 +39,8 @@
       root.style.setProperty('--desktop-header-line-top',`${header.getBoundingClientRect().bottom - borderWidth}px`);
     }
     root.style.setProperty('--desktop-scrollbar-background',background);
-    const scrollbarThumb = document.body.classList.contains('dark') ? '#606161' : '#888888';
-    root.style.setProperty('--desktop-scrollbar-thumb',format(blend(rgb(scrollbarThumb))));
+    const scrollbarThumb = rgb(bodyStyle.getPropertyValue('--page-scrollbar-thumb')) || [136,136,136];
+    root.style.setProperty('--desktop-scrollbar-thumb',format(blend(scrollbarThumb)));
     root.style.setProperty('--desktop-modal-gutter-line',format(blend(line)));
     if (dimmed !== (backdrops.length > 0)) {
       dimmed = backdrops.length > 0;

@@ -6,7 +6,7 @@ const source=fs.readFileSync(new URL('../desktop-modal-chrome.js',import.meta.ur
 function page({platform='desktop',installed=true}={}){
   const classes=new Set(),events=new Map(),observed=[];
   const root={style:{backgroundColor:'rgb(230, 231, 228)',setProperty(key,value){this[key]=value;}},classList:{add:name=>classes.add(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
-  const body={tagName:'BODY',dark:false,classList:{contains:name=>name==='dark'&&body.dark},backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(){return this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)',borderBottomWidth:'1px',bottom:72,getBoundingClientRect(){return{bottom:this.bottom};},scrolled:false,classList:{contains:()=>header.scrolled}},theme={content:'#e6e7e4'};
+  const body={tagName:'BODY',dark:false,backgroundColor:'rgb(230, 231, 228)',themeBackground:'',getPropertyValue(name){return name==='--page-scrollbar-thumb'?(this.dark?'#606161':''):this.themeBackground;}},header={borderBottomColor:'rgb(209, 210, 207)',borderBottomWidth:'1px',bottom:72,getBoundingClientRect(){return{bottom:this.bottom};},scrolled:false,classList:{contains:()=>header.scrolled}},theme={content:'#e6e7e4'};
   let open=[],changed,reads=0;
   vm.runInNewContext(source,{window:{collectorPwaPlatform:platform,matchMedia:()=>({matches:installed}),addEventListener:(name,fn)=>events.set(name,fn)},document:{documentElement:root,body,querySelector:selector=>selector.includes('theme-color')?theme:header,querySelectorAll:()=>open},getComputedStyle:node=>{reads++;return node;},MutationObserver:class{constructor(fn){changed=fn;}observe(...args){observed.push(args);}}});
   return{root,body,header,theme,classes,observed,events,reads:()=>reads,setOpen:dialogs=>{open=dialogs;changed([{type:'attributes',target:dialogs[0]||body}]);},notify:records=>changed(records)};
@@ -83,6 +83,8 @@ test('production shares desktop scrollbar resources across entry points with mob
     assert.ok(html.includes('/desktop-scrollbars.css'));
   }
   const css=fs.readFileSync(new URL('desktop-scrollbars.css',dist),'utf8');
+  assert.match(css,/--page-scrollbar-thumb: #606161/);
+  assert.match(css,/html\[data-pwa-platform="mobile"\]:has\(body\.dark\) \{\s*scrollbar-color: var\(--page-scrollbar-thumb\) transparent/);
   assert.match(css,/@media \(min-width:601px\), \(display-mode:standalone\)/);
   assert.match(css,/html.desktop-scrollbars::-webkit-scrollbar-track:vertical \{ margin-top:var\(--desktop-header-line-top\); border-top:1px solid/);
 });

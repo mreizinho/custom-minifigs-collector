@@ -1,3 +1,14 @@
+html:has(body.dark) { --page-scrollbar-thumb: #606161; }
+
+@media (display-mode:standalone), (display-mode:fullscreen) {
+  html[data-pwa-platform="mobile"]:has(body.dark) {
+    scrollbar-color: var(--page-scrollbar-thumb) transparent;
+  }
+  html[data-pwa-platform="mobile"]:has(body.dark)::-webkit-scrollbar-thumb {
+    background-color: var(--page-scrollbar-thumb);
+  }
+}
+
 /* Keep the always-visible thin page track below the titlebar and sticky header. */
 @media (min-width:601px), (display-mode:standalone), (display-mode:window-controls-overlay) {
   html.desktop-scrollbars { --desktop-topbar-height:72px; --desktop-titlebar-height:0px; --desktop-header-bottom:calc(var(--desktop-titlebar-height) + var(--desktop-topbar-height)); --desktop-header-line-top:calc(var(--desktop-header-bottom) - 1px); --desktop-gutter-line:var(--line); --desktop-gutter-shadow-image:none; scrollbar-width:auto; scrollbar-color:auto; scrollbar-gutter:stable; }
@@ -10,7 +21,7 @@
   /* A border snaps like the header's own 1px border at fractional display scales.
      The shadow image extends that header's 4px offset / 10px blur to the edge. */
   html.desktop-scrollbars::-webkit-scrollbar-track:vertical { margin-top:var(--desktop-header-line-top); border-top:1px solid var(--desktop-gutter-line); background-image:var(--desktop-gutter-shadow-image); background-repeat:no-repeat; background-size:100% 24px; background-origin:padding-box; background-clip:padding-box; }
-  html.desktop-scrollbars::-webkit-scrollbar-thumb { background:var(--desktop-scrollbar-thumb,#888); border-radius:999px; }
+  html.desktop-scrollbars::-webkit-scrollbar-thumb { background:var(--desktop-scrollbar-thumb,var(--page-scrollbar-thumb,#888)); border-radius:999px; }
   html.desktop-scrollbars::-webkit-scrollbar-button { display:none; }
   html.desktop-scrollbars::-webkit-scrollbar-corner { background:transparent; }
   @media (max-width:600px) { html.desktop-scrollbars { --desktop-topbar-height:60px; } }
