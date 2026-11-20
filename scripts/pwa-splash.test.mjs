@@ -166,14 +166,14 @@ test('the face sequence animates one yellow expression over the blank head',()=>
 function morph({reduced=false,mobile=false,desktop=!mobile,face=false}={}) {
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');
   const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
-  const messages=[],microtasks=[],endingClasses=new Set(),timers=new Map();let end,changed,now=0,id=0;
+  const messages=[],microtasks=[],endingClasses=new Set(),timers=new Map();let start,end,changed,now=0,id=0;
   const faceClasses=new Set(),faceArtwork={classList:{add:name=>faceClasses.add(name)}};
-  const art={addEventListener:(name,fn)=>{assert.equal(name,'animationend');end=fn;}};
+  const art={addEventListener:(name,fn)=>{if(name==='animationstart')start=fn;else{assert.equal(name,'animationend');end=fn;}}};
   const ending={classList:{add:name=>endingClasses.add(name)}},otherEndingClasses=new Set(),otherEnding={classList:{add:name=>otherEndingClasses.add(name)}};
   const reduce={matches:reduced,addEventListener:(name,fn)=>{assert.equal(name,'change');changed=fn;}};
   vm.runInNewContext(script,{document:{documentElement:{classList:{contains:name=>name==='mobile-launch'?mobile:name==='desktop-launch'?desktop:name==='face-splash'&&face}},querySelector:selector=>selector==='.head-motion'?art:selector==='.splash-face'?faceArtwork:selector===(mobile?'.mobile-ending':'.desktop-ending')?ending:otherEnding},matchMedia:()=>reduce,parent:{postMessage:(message,origin)=>messages.push({message,origin})},location:{origin:'https://test.example'},queueMicrotask:fn=>microtasks.push(fn),setTimeout:(fn,delay)=>{timers.set(++id,{fn,at:now+delay});return id;},clearTimeout:key=>timers.delete(key)});
   const tick=ms=>{now+=ms;for(const [key,timer]of timers)if(timer.at<=now){timers.delete(key);timer.fn();}};
-  return{art,messages,faceClasses,endingClasses,otherEndingClasses,tick,end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
+  return{art,messages,faceClasses,endingClasses,otherEndingClasses,tick,start:event=>start(event),end:event=>end(event),change:event=>changed(event),flush:()=>microtasks.forEach(fn=>fn())};
 }
 test('desktop reveals its own ending after the root animation, then reports completion once',()=>{
   const p=morph();assert.equal(p.messages.length,0);
@@ -194,15 +194,17 @@ test('mobile shows the logo words only after animation completion, then holds th
   p.tick(600);p.end({target:p.art,animationName:'bounce'});p.tick(599);assert.equal(p.messages.length,0);
   p.tick(1);assert.equal(p.messages.length,1);p.tick(1200);assert.equal(p.messages.length,1);
 });
-test('the face stays visible as the title appears and holds',()=>{
+test('the title appears when the smile starts and holds without restarting',()=>{
   const p=morph({mobile:true,face:true});
-  p.end({target:{},animationName:'look-around'});
+  p.start({target:{},animationName:'blink-twice'});
   assert.equal(p.endingClasses.size,0);
   assert.equal(p.faceClasses.size,0);
-  p.end({target:p.art,animationName:'face-bounce'});
+  p.start({target:{},animationName:'smile-mouth'});
   assert.equal(p.faceClasses.size,0);
   assert.ok(p.endingClasses.has('is-visible'));
-  p.tick(1499);
+  p.tick(1000);
+  p.end({target:p.art,animationName:'face-bounce'});
+  p.tick(499);
   assert.equal(p.messages.length,0);
   p.tick(1);
   assert.equal(p.messages.length,1);
