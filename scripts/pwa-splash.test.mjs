@@ -224,8 +224,10 @@ test('mobile ending uses the local website logo font and retains the calibrated 
   assert.ok(html.includes('<span class="desktop-ending-top">Custom Minifigs</span>'));
   assert.ok(html.includes('<span class="desktop-ending-bottom">Collector</span>'));
   assert.ok(html.includes('.desktop-ending{display:none}'));
-  assert.ok(html.includes('.desktop-launch .desktop-ending.is-visible .desktop-ending-top{opacity:1}'));
-  assert.ok(html.includes('.desktop-launch .desktop-ending.is-visible .desktop-ending-bottom{opacity:1;transform:scale(1)}'));
+  for(const platform of ['desktop','mobile']){
+    assert.ok(html.includes(`.${platform}-launch .${platform}-ending span{opacity:0;transform:scale(.6)`));
+    assert.ok(html.includes(`.${platform}-launch .${platform}-ending.is-visible span{opacity:1;transform:scale(1)}`));
+  }
 });
 function fusePreview({width=992.1,height=width,reduced=false}={}){
   const html=fs.readFileSync(new URL('../assets/splash/lego-splash.html',import.meta.url),'utf8');

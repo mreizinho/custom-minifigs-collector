@@ -24,16 +24,16 @@ if (splashPlatform === 'mobile' || splashPlatform === 'desktop') {
 .mobile-ending span{position:absolute;left:0;right:0;white-space:nowrap}
 .mobile-ending-top{top:6px}
 .mobile-ending-bottom{top:218px;color:#252624;font-size:46.5px;line-height:56px}
-.mobile-launch .mobile-ending-bottom{opacity:0;transform:scale(.6);transform-origin:center;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease}
-.mobile-launch .mobile-ending.is-visible .mobile-ending-bottom{opacity:1;transform:scale(1)}
-@media(prefers-reduced-motion:reduce){.mobile-launch .mobile-ending,.mobile-launch .mobile-ending-bottom{transition:none}.mobile-launch .mobile-ending-bottom{transform:none}}
+.mobile-launch .mobile-ending span{opacity:0;transform:scale(.6);transform-origin:center;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease}
+.mobile-launch .mobile-ending.is-visible span{opacity:1;transform:scale(1)}
+@media(prefers-reduced-motion:reduce){.mobile-launch .mobile-ending,.mobile-launch .mobile-ending span{transition:none}.mobile-launch .mobile-ending span{transform:none}}
 .desktop-ending{display:none}
 .desktop-launch .desktop-ending{display:block;position:absolute;inset:0;pointer-events:none;text-align:center;white-space:nowrap;color:#252624;font:400 clamp(32px,10vmin,84px)/1.2 'Barlow Condensed',sans-serif;letter-spacing:.65px;text-transform:uppercase}
 .desktop-ending span{position:absolute;left:0;right:0}
-.desktop-ending-top{bottom:calc(50% + min(88vw,660px,82svh)*.2795 + 16px);font-size:calc(clamp(32px,10vmin,84px) / 1.55 + .5px);opacity:0;transition:opacity .25s ease}
-.desktop-ending-bottom{top:calc(50% + min(88vw,660px,82svh)*.277 + 16px);opacity:0;transform:scale(.6);transform-origin:center;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease}
-.desktop-launch .desktop-ending.is-visible .desktop-ending-top{opacity:1}
-.desktop-launch .desktop-ending.is-visible .desktop-ending-bottom{opacity:1;transform:scale(1)}
+.desktop-ending-top{bottom:calc(50% + min(88vw,660px,82svh)*.2795 + 16px);font-size:calc(clamp(32px,10vmin,84px) / 1.55 + .5px)}
+.desktop-ending-bottom{top:calc(50% + min(88vw,660px,82svh)*.277 + 16px)}
+.desktop-launch .desktop-ending span{opacity:0;transform:scale(.6);transform-origin:center;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease}
+.desktop-launch .desktop-ending.is-visible span{opacity:1;transform:scale(1)}
 @media(prefers-reduced-motion:reduce){.desktop-launch .desktop-ending span{transition:none;transform:none}}
 /* The face sequence shares the original artwork and ending with the fuse. */
 .face-splash #frame1 { animation-name: face-frame1; animation-duration: var(--yellow-duration); }
