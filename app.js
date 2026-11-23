@@ -1219,6 +1219,12 @@ function collapseBricklinkSection(){
   if(manualAddSnapshot){manualAddInputs.forEach((input,index)=>input.value=manualAddSnapshot[index]);manualAddSnapshot=null;syncCurrencyControl()}
   addFigureFieldArea.style.height='';closeBricklinkPill();clearBricklinkImport();$('#newBricklinkCode').value='';
 }
+$('#closeAddFigure').onclick=()=>{
+  // A click moves focus off the code input before the handler runs.
+  if(pillEntry.hidden){closeAddFigure();return}
+  collapseBricklinkSection();
+  toggleBricklinkImport.focus();
+};
 function applyBricklinkFieldLayout(){
   if(!addFigureFieldArea.classList.contains('is-bricklink'))addFigureFieldArea.style.height=Math.ceil(addFigureFieldArea.getBoundingClientRect().height)+'px';
   importHiddenFields.forEach(field=>field.hidden=true);valueRow.append(conditionField);importPhoto.hidden=false;addFigureFieldArea.classList.add('is-bricklink');closeBricklinkPill();
