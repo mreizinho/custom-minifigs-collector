@@ -1139,6 +1139,16 @@ collectionMenuElement.addEventListener('keydown',event=>{const control=event.tar
 function mergeCollectionMenuOrder(names,saved){const known=new Set(names),seen=new Set();return [...(Array.isArray(saved)?saved:[]),...names].filter(name=>known.has(name)&&!seen.has(name)&&seen.add(name))}
 function moveCollectionMenuName(names,source,target,after=false){if(source===target||!names.includes(source)||!names.includes(target))return [...names];const result=names.filter(name=>name!==source);result.splice(result.indexOf(target)+(after?1:0),0,source);return result}
 function orderedCollectionMenuNames(){let saved=[];try{saved=JSON.parse(localStorage.getItem(`minifig-collection-order-${SHEET_ID}`)||'[]')}catch{}return mergeCollectionMenuOrder(COLLECTIONS,saved)}
+function handleCollectionNumberShortcut(event){
+  if(event.defaultPrevented||event.isComposing||!event.ctrlKey||event.altKey||event.metaKey||event.shiftKey||!/^[1-9]$/.test(event.key))return;
+  const installed=window.matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches||navigator.standalone===true;
+  if(!installed||document.documentElement.classList.contains('pwa-splash-pending')||document.querySelector('dialog:modal'))return;
+  const collection=orderedCollectionMenuNames()[Number(event.key)-1];
+  if(!collection)return;
+  event.preventDefault();
+  if(!event.repeat)selectCollection(collection);
+}
+document.addEventListener('keydown',handleCollectionNumberShortcut);
 const collectionDragDesktop=window.matchMedia('(min-width: 601px) and (pointer: fine)');
 let draggedCollection='',draggedCollectionSheet='',suppressCollectionClickUntil=0;
 function clearCollectionDropMarkers(){collectionMenuElement.querySelectorAll('.collection-drop-before,.collection-drop-after').forEach(row=>row.classList.remove('collection-drop-before','collection-drop-after'))}

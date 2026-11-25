@@ -20,3 +20,27 @@ test('supports upward drops and ignores invalid or self drops',()=>{
  assert.deepEqual(plain(context.moveCollectionMenuName(names,'C','C')),names);
  assert.deepEqual(plain(context.moveCollectionMenuName(names,'Missing','B')),names);
 });
+test('PWA number shortcuts follow the visible collection order and ignore unavailable slots',()=>{
+ const selected=[];
+ let installed=true,modal=false;
+ const shortcut=vm.createContext({
+   window:{matchMedia:()=>({matches:installed})},navigator:{},
+   document:{documentElement:{classList:{contains:()=>false}},querySelector:()=>modal},
+   orderedCollectionMenuNames:()=>['Military','Star Wars','Brickset'],
+   selectCollection:name=>selected.push(name)
+ });
+ vm.runInContext(source.slice(source.indexOf('function handleCollectionNumberShortcut('),source.indexOf("document.addEventListener('keydown',handleCollectionNumberShortcut)")),shortcut);
+ const press=(key,overrides={})=>{
+   const event={key,ctrlKey:true,preventDefault(){this.defaultPrevented=true;},...overrides};
+   shortcut.handleCollectionNumberShortcut(event);
+   return Boolean(event.defaultPrevented);
+ };
+ assert.equal(press('1'),true);
+ assert.equal(press('3'),true);
+ assert.equal(press('9'),false);
+ assert.equal(press('2',{altKey:true}),false);
+ assert.equal(press('2',{repeat:true}),true);
+ modal=true;assert.equal(press('2'),false);
+ modal=false;installed=false;assert.equal(press('2'),false);
+ assert.deepEqual(selected,['Military','Brickset']);
+});
