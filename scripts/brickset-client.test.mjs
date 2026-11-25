@@ -56,10 +56,21 @@ test('selects the saved tag on entry and preserves manual changes while browsing
   context.renderFilters();
   assert.deepEqual(tags.map(tag=>tag.checked),[false,true]);
   assert.equal(storage.get(`collector-brickset-default-tag-v1-${owner}`),'Star Wars');
+  const choices=tags.map(({value})=>({value,checked:true}));
+  context.$('#bricksetTagChoices').querySelectorAll=()=>choices.filter(choice=>choice.checked);
+  context.$('#bricksetDefaultTagDialog').close=()=>{};
+  context.$('#bricksetDefaultTagForm').onsubmit({preventDefault(){}});
+  assert.equal(storage.get(`collector-brickset-default-tags-v1-${owner}`),'["Star Wars","Castle"]');
+  assert.deepEqual(tags.map(tag=>tag.checked),[true,true]);
   context.selectCollection('Other');context.activeCollection='Other';
   context.selectCollection('Brickset');context.activeCollection='Brickset';context.figures=[];
+  tags.forEach(tag=>{tag.checked=false});
   await context.window.collectorLoadBrickset();
-  assert.deepEqual(tags.map(tag=>tag.checked),[true,false]);
+  assert.deepEqual(tags.map(tag=>tag.checked),[true,true]);
+  context.$('#clearBricksetDefaultTags').onclick();
+  context.$('#bricksetDefaultTagForm').onsubmit({preventDefault(){}});
+  assert.equal(storage.get(`collector-brickset-default-tags-v1-${owner}`),'[]');
+  assert.deepEqual(tags.map(tag=>tag.checked),[false,false]);
 });
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {
   let request;

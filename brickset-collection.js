@@ -3,9 +3,15 @@
   const OWNER = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
   const CACHE_KEY = `collector-brickset-cache-v1-${OWNER}`;
   const PRICE_KEY = `collector-brickset-prices-v1-${OWNER}`;
-  const DEFAULT_TAG_KEY = `collector-brickset-default-tag-v1-${OWNER}`;
-  let defaultTag = '', applyDefaultOnEntry = true;
-  try { defaultTag = localStorage.getItem(DEFAULT_TAG_KEY) || ''; } catch {}
+  const DEFAULT_TAGS_KEY = `collector-brickset-default-tags-v1-${OWNER}`;
+  let defaultTags = new Set(), applyDefaultOnEntry = true;
+  try {
+    const saved = localStorage.getItem(DEFAULT_TAGS_KEY);
+    const tags = saved === null
+      ? [localStorage.getItem(`collector-brickset-default-tag-v1-${OWNER}`)]
+      : JSON.parse(saved);
+    if (Array.isArray(tags)) defaultTags = new Set(tags.filter(tag => typeof tag === 'string' && tag));
+  } catch {}
   let prices = {};
   try { prices = JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}; } catch {}
   let priceRevision = 0, priceController = null;
@@ -83,7 +89,7 @@
 
   function syncPinnedTag() {
     for (const input of tagFilters()) {
-      const pinned = Boolean(defaultTag) && input.value === defaultTag;
+      const pinned = defaultTags.has(input.value);
       const chip = input.closest('label');
       chip.classList.toggle('brickset-tag-pinned', pinned);
       if (pinned) chip.setAttribute('title', 'Default Brickset tag');
@@ -98,7 +104,7 @@
     defaultTagButton.disabled = !tagFilters().length;
     if (applyDefaultOnEntry) {
       applyDefaultOnEntry = false;
-      if (defaultTag) for (const input of tagFilters()) input.checked = input.value === defaultTag;
+      if (defaultTags.size) for (const input of tagFilters()) input.checked = defaultTags.has(input.value);
     }
     syncPinnedTag();
   };
@@ -106,16 +112,15 @@
   defaultTagButton.onclick = () => {
     if (!isBricksetCollection()) return;
     tagChoices.replaceChildren();
-    for (const tag of ['', ...Array.from(tagFilters(), input => input.value)]) {
+    for (const {value: tag} of tagFilters()) {
       const label = document.createElement('label');
       const input = document.createElement('input');
-      input.type = 'radio'; input.name = 'bricksetDefaultTag'; input.value = tag;
-      input.checked = tag === defaultTag;
+      input.type = 'checkbox'; input.name = 'bricksetDefaultTag'; input.value = tag;
+      input.checked = defaultTags.has(tag);
       label.dataset.tag = tag;
-      label.append(input, tag || 'No default');
+      label.append(input, tag);
       tagChoices.append(label);
     }
-    if (!tagChoices.querySelector(':checked')) tagChoices.querySelector('input').checked = true;
     tagStatus.textContent = '';
     tagSearch.value = '';
     defaultTagDialog.showModal();
@@ -124,22 +129,25 @@
   tagSearch.oninput = () => {
     const query = tagSearch.value.trim().toLowerCase();
     for (const choice of tagChoices.children) {
-      choice.hidden = Boolean(choice.dataset.tag) && !choice.dataset.tag.toLowerCase().includes(query);
+      choice.hidden = !choice.dataset.tag.toLowerCase().includes(query);
     }
   };
   $('#cancelBricksetDefaultTag').onclick = () => defaultTagDialog.close();
+  $('#clearBricksetDefaultTags').onclick = () => {
+    for (const input of tagChoices.querySelectorAll('input:checked')) input.checked = false;
+  };
   $('#bricksetDefaultTagForm').onsubmit = event => {
     event.preventDefault();
     if (!isBricksetCollection()) { defaultTagDialog.close(); return; }
-    const nextTag = tagChoices.querySelector(':checked')?.value || '';
-    try { localStorage.setItem(DEFAULT_TAG_KEY, nextTag); }
-    catch { tagStatus.textContent = 'The default tag could not be saved on this device.'; return; }
-    if (nextTag !== defaultTag) {
-      const previousTag = defaultTag;
-      defaultTag = nextTag;
+    const nextTags = new Set(Array.from(tagChoices.querySelectorAll('input:checked'), input => input.value));
+    try { localStorage.setItem(DEFAULT_TAGS_KEY, JSON.stringify([...nextTags])); }
+    catch { tagStatus.textContent = 'The default tags could not be saved on this device.'; return; }
+    if (nextTags.size !== defaultTags.size || [...nextTags].some(tag => !defaultTags.has(tag))) {
+      const previousTags = defaultTags;
+      defaultTags = nextTags;
       for (const input of tagFilters()) {
-        if (nextTag) input.checked = input.value === nextTag;
-        else if (input.value === previousTag) input.checked = false;
+        if (nextTags.size) input.checked = nextTags.has(input.value);
+        else if (previousTags.has(input.value)) input.checked = false;
       }
       syncPinnedTag();
       render();

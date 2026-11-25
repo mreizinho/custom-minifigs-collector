@@ -43,6 +43,8 @@
   font-size: 1em;
   margin-inline-start: .3em;
   vertical-align: middle;
+  position: relative;
+  top: -2px;
 }
 .brickset-default-tag-dialog {
   width: min(420px, calc(100% - 32px));
@@ -81,6 +83,7 @@
 #bricksetTagChoices input { accent-color: var(--accent); }
 #bricksetTagStatus:empty { display: none; }
 .brickset-tag-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#clearBricksetDefaultTags { margin-inline-end: auto; }
 .brickset-tag-dialog-actions button {
   padding: 8px 14px;
   background: var(--paper);
