@@ -36,7 +36,12 @@
 }
 .brickset-collection-active #bricksetDefaultTagButton { display: inline-flex; }
 .brickset-collection-active .brickset-tag-static-title { display: none; }
-#bricksetDefaultTagButton .filter-pin-icon { width: 18px; height: 18px; }
+#bricksetDefaultTagButton .filter-pin-icon {
+  width: .9em;
+  height: .9em;
+  width: 1.2cap;
+  height: 1.2cap;
+}
 .tag-filters .brickset-tag-pinned::after {
   content: "push_pin";
   font-family: "Material Symbols Rounded";
