@@ -36,7 +36,7 @@
 }
 .brickset-collection-active #bricksetDefaultTagButton { display: inline-flex; }
 .brickset-collection-active .brickset-tag-static-title { display: none; }
-#bricksetDefaultTagButton .material-symbols-rounded { font-size: 1.15em; }
+#bricksetDefaultTagButton .filter-pin-icon { width: 18px; height: 18px; }
 .tag-filters .brickset-tag-pinned::after {
   content: "push_pin";
   font-family: "Material Symbols Rounded";

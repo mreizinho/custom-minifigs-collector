@@ -72,6 +72,8 @@
   refresh.onclick = () => loadBricksetCollection(true);
 
   const defaultTagButton = $('#bricksetDefaultTagButton');
+  const filterPinIcon = document.querySelector('.filter-pin-icon');
+  if (filterPinIcon) defaultTagButton.append(filterPinIcon.cloneNode(true));
   const defaultTagDialog = $('#bricksetDefaultTagDialog');
   const tagSearch = $('#bricksetTagSearch');
   const tagChoices = $('#bricksetTagChoices');
