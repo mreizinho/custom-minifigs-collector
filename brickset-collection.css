@@ -37,8 +37,8 @@
 .brickset-collection-active #bricksetDefaultTagButton { display: inline-flex; }
 .brickset-collection-active .brickset-tag-static-title { display: none; }
 #bricksetDefaultTagButton .material-symbols-rounded {
-  font-size: 1.8em;
-  font-size: 2.4cap;
+  font-size: 1.62em;
+  font-size: 2.16cap;
   line-height: 1;
 }
 .tag-filters .brickset-tag-pinned::after {
