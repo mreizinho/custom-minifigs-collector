@@ -52,6 +52,8 @@ test('selects the saved tag on entry and preserves manual changes while browsing
   await context.window.collectorLoadBrickset();
   assert.deepEqual(tags.map(tag=>tag.checked),[true,false]);
   assert.equal(pins.get('Star Wars'),true);
+  const icon=context.$('#bricksetDefaultTagButton').querySelector('.material-symbols-rounded');
+  assert.equal(icon.textContent,'sell');
   tags[0].checked=false;tags[1].checked=true;
   context.renderFilters();
   assert.deepEqual(tags.map(tag=>tag.checked),[false,true]);
@@ -70,6 +72,7 @@ test('selects the saved tag on entry and preserves manual changes while browsing
   context.$('#clearBricksetDefaultTags').onclick();
   context.$('#bricksetDefaultTagForm').onsubmit({preventDefault(){}});
   assert.equal(storage.get(`collector-brickset-default-tags-v1-${owner}`),'[]');
+  assert.equal(icon.textContent,'loyalty');
   assert.deepEqual(tags.map(tag=>tag.checked),[false,false]);
 });
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {

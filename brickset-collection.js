@@ -78,8 +78,7 @@
   refresh.onclick = () => loadBricksetCollection(true);
 
   const defaultTagButton = $('#bricksetDefaultTagButton');
-  const filterPinIcon = document.querySelector('.filter-pin-icon');
-  if (filterPinIcon) defaultTagButton.append(filterPinIcon.cloneNode(true));
+  const defaultTagIcon = defaultTagButton.querySelector('.material-symbols-rounded');
   const defaultTagDialog = $('#bricksetDefaultTagDialog');
   const tagSearch = $('#bricksetTagSearch');
   const tagChoices = $('#bricksetTagChoices');
@@ -88,6 +87,7 @@
   defaultTagButton.disabled = true;
 
   function syncPinnedTag() {
+    defaultTagIcon.textContent = defaultTags.size ? 'sell' : 'loyalty';
     for (const input of tagFilters()) {
       const pinned = defaultTags.has(input.value);
       const chip = input.closest('label');
