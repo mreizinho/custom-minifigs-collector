@@ -15,6 +15,7 @@ import {
   getDoc,
   getFirestore,
   onSnapshot,
+  runTransaction,
   serverTimestamp,
   setDoc
 } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
@@ -644,6 +645,72 @@ async function connectUser(user) {
 
 window.addEventListener('collector-onboarding-complete', () => {
   saveNow(true).then(() => status('Your collection spreadsheet is ready and its configuration was saved.')).catch(error => status(`Spreadsheet created, but configuration sync failed: ${error.message}`, true));
+});
+
+// Brickset defaults sync independently of manual settings backup and restore.
+const bricksetTagOwner = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
+const bricksetTagsKey = `collector-brickset-default-tags-v1-${bricksetTagOwner}`;
+const pendingBricksetTagsKey = `${bricksetTagsKey}-pending`;
+let unsubscribeBricksetTags, writingBricksetTags = false;
+const validBricksetTags = tags => Array.isArray(tags) && tags.every(tag => typeof tag === 'string' && tag)
+  ? [...new Set(tags)] : null;
+function readPendingBricksetTags() {
+  try { return validBricksetTags(JSON.parse(localStorage.getItem(pendingBricksetTagsKey))); }
+  catch { return null; }
+}
+async function syncPendingBricksetTags() {
+  if (writingBricksetTags || auth.currentUser?.uid !== bricksetTagOwner) return;
+  const tags = readPendingBricksetTags();
+  if (!tags) return;
+  writingBricksetTags = true;
+  try {
+    await setDoc(doc(db, 'users', bricksetTagOwner), { bricksetDefaultTags: tags }, { merge: true });
+    if (JSON.stringify(readPendingBricksetTags()) === JSON.stringify(tags)) {
+      nativeRemoveItem.call(localStorage, pendingBricksetTagsKey);
+    }
+  } catch (error) {
+    console.warn('Brickset default tags could not sync yet.', error);
+    return;
+  } finally {
+    writingBricksetTags = false;
+  }
+  if (readPendingBricksetTags()) void syncPendingBricksetTags();
+}
+window.addEventListener('collector-brickset-default-tags-changed', syncPendingBricksetTags);
+window.addEventListener('online', syncPendingBricksetTags);
+onAuthStateChanged(auth, user => {
+  unsubscribeBricksetTags?.();
+  unsubscribeBricksetTags = null;
+  if (user?.uid !== bricksetTagOwner) return;
+  const settings = doc(db, 'users', user.uid);
+  let migrating = false;
+  unsubscribeBricksetTags = onSnapshot(settings, { includeMetadataChanges: true }, snapshot => {
+    if (auth.currentUser?.uid !== user.uid || snapshot.metadata.hasPendingWrites) return;
+    if (readPendingBricksetTags()) { void syncPendingBricksetTags(); return; }
+    const remote = validBricksetTags(snapshot.data()?.bricksetDefaultTags);
+    if (remote) {
+      try { nativeSetItem.call(localStorage, bricksetTagsKey, JSON.stringify(remote)); }
+      catch (error) { console.warn('Could not cache Brickset default tags.', error); }
+      window.dispatchEvent(new CustomEvent('collector-brickset-default-tags-synced', { detail: remote }));
+      return;
+    }
+    if (migrating || snapshot.metadata.fromCache) return;
+    let local;
+    try {
+      const saved = localStorage.getItem(bricksetTagsKey);
+      const legacy = localStorage.getItem(`collector-brickset-default-tag-v1-${user.uid}`);
+      local = validBricksetTags(saved === null ? (legacy ? [legacy] : []) : JSON.parse(saved));
+    } catch { return; }
+    if (!local?.length) return;
+    migrating = true;
+    runTransaction(db, async transaction => {
+      const latest = await transaction.get(settings);
+      if (auth.currentUser?.uid !== user.uid || readPendingBricksetTags() ||
+          Object.hasOwn(latest.data() || {}, 'bricksetDefaultTags')) return;
+      transaction.set(settings, { bricksetDefaultTags: local }, { merge: true });
+    }).catch(error => console.warn('Could not migrate Brickset default tags.', error))
+      .finally(() => { migrating = false; });
+  }, error => console.warn('Brickset default tags subscription failed.', error));
 });
 
 installSettingsUi();

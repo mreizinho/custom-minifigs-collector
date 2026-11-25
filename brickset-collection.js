@@ -97,6 +97,18 @@
     }
   }
 
+  window.addEventListener('collector-brickset-default-tags-synced', event => {
+    const next = new Set(event.detail);
+    if (next.size === defaultTags.size && [...next].every(tag => defaultTags.has(tag))) return;
+    const inputs = Array.from(tagFilters());
+    const followDefault = inputs.every(input => input.checked === defaultTags.has(input.value));
+    defaultTags = next;
+    if (!isBricksetCollection() || applyDefaultOnEntry) return;
+    if (followDefault) for (const input of inputs) input.checked = defaultTags.has(input.value);
+    syncPinnedTag();
+    if (followDefault) render();
+  });
+
   const previousRenderFilters = renderFilters;
   renderFilters = () => {
     previousRenderFilters();
@@ -140,8 +152,11 @@
     event.preventDefault();
     if (!isBricksetCollection()) { defaultTagDialog.close(); return; }
     const nextTags = new Set(Array.from(tagChoices.querySelectorAll('input:checked'), input => input.value));
-    try { localStorage.setItem(DEFAULT_TAGS_KEY, JSON.stringify([...nextTags])); }
-    catch { tagStatus.textContent = 'The default tags could not be saved on this device.'; return; }
+    try {
+      const saved = JSON.stringify([...nextTags]);
+      localStorage.setItem(DEFAULT_TAGS_KEY, saved);
+      localStorage.setItem(`${DEFAULT_TAGS_KEY}-pending`, saved);
+    } catch { tagStatus.textContent = 'The default tags could not be saved on this device.'; return; }
     if (nextTags.size !== defaultTags.size || [...nextTags].some(tag => !defaultTags.has(tag))) {
       const previousTags = defaultTags;
       defaultTags = nextTags;
@@ -152,6 +167,7 @@
       syncPinnedTag();
       render();
     }
+    window.dispatchEvent(new Event('collector-brickset-default-tags-changed'));
     defaultTagDialog.close();
   };
 

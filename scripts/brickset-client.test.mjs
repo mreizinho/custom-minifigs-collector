@@ -4,11 +4,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const code = fs.readFileSync(new URL('../brickset-collection.js', import.meta.url), 'utf8');
 const owner = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
+const firebaseCode = fs.readFileSync(new URL('../firebase-sync.js', import.meta.url), 'utf8');
 const snapshot = { source: 'brickset', fetchedAt: '2026-11-17T00:00:00Z', notesAvailable: true, figures: [
   { code: 'sw0971', name: 'Luke', theme: 'Star Wars', tags: ['Star Wars'], ownedTotal: 2, ownedInSets: 1, ownedLoose: 1, photoUrl: 'https://img.bricklink.com/ItemImage/MN/0/sw0971.png' }
 ] };
 function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, defaultTag, collections=['Star Wars'] } = {}) {
-  const storage = new Map(), elements = new Map();
+  const storage = new Map(), elements = new Map(), listeners = new Map();
   if (cached) storage.set(`collector-brickset-cache-v1-${owner}`, JSON.stringify(cached));
   if (cachedPrices) storage.set(`collector-brickset-prices-v1-${owner}`, JSON.stringify(cachedPrices));
   if (defaultTag) storage.set(`collector-brickset-default-tag-v1-${owner}`, defaultTag);
@@ -27,7 +28,7 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, defa
   const pagers=[],rendered=[];
   bar.querySelector = selector => selector === 'button' ? refresh : status;
   const $ = selector => { if (!elements.has(selector)) elements.set(selector, element());const result=elements.get(selector);result.closest=()=>selector==='#ownedStat'?ownedButton:selector==='#ownedValue'?valueButton:totalCard;return result; };
-  const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener() {}, matchMedia:()=>({matches:false}) },
+  const context = { window: { collectorFirebaseUser: uid, collectorGetIdToken: async () => 'firebase-test-token', addEventListener:(name,fn)=>listeners.set(name,fn), dispatchEvent:event=>listeners.get(event.type)?.(event), matchMedia:()=>({matches:false}) },
     document: { createElement: tag => {if(tag==='div')return bar;const created=element();if(tag==='nav')pagers.push(created);return created;}, body: element(), querySelectorAll: () => [], querySelector: () => null }, $,
     fetch: (url, options) => url.endsWith('/prices') ? (priceFetcher ? priceFetcher(url, options) : Promise.resolve(Response.json({prices:[],errors:[{error:'No test prices'}]}))) : fetcher(url, options),
     localStorage: { getItem: k => storage.get(k) || null, setItem: (k,v) => storage.set(k,v) },
@@ -35,7 +36,7 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, defa
     canReadBricksetCollection: () => uid === owner, renderFilters() {}, render() { rendered.push([...context.filtered()].map(row=>row.id));context.updateStats(); }, openDetail() {},
     collectionMenuElement: { querySelectorAll: () => [] }, rebuildCollectionChoices() {},
     toggleOwned() {}, toggleWished() {}, openRenameCollection() {}, deleteCollection() {}, selectCollection() {},
-    queueMicrotask() {}, AbortSignal, AbortController, setTimeout, clearTimeout, updateStats() {}, loadExchangeRates() {}, money: n => String(n),formatFigureCount:n=>Number(n).toLocaleString('de-DE')
+    queueMicrotask() {}, Event, AbortSignal, AbortController, setTimeout, clearTimeout, updateStats() {}, loadExchangeRates() {}, money: n => String(n),formatFigureCount:n=>Number(n).toLocaleString('de-DE')
   };
   context.isBricksetCollection = (name = context.activeCollection) => name === 'Brickset' && uid === owner;
   context.filtered = () => context.figures;
@@ -74,6 +75,48 @@ test('selects the saved tag on entry and preserves manual changes while browsing
   assert.equal(storage.get(`collector-brickset-default-tags-v1-${owner}`),'[]');
   assert.equal(icon.textContent,'loyalty');
   assert.deepEqual(tags.map(tag=>tag.checked),[false,false]);
+});
+test('synced defaults update the automatic selection while preserving manually selected filters', async () => {
+  const {context}=client(async()=>Response.json(snapshot),{defaultTag:'Star Wars'});
+  const tags=['Star Wars','Castle','City'].map(value=>({
+    value,checked:false,closest:()=>({classList:{toggle(){}},setAttribute(){},removeAttribute(){}})
+  }));
+  context.$('#tagFilters').querySelectorAll=()=>tags;
+  await context.window.collectorLoadBrickset();
+  const sync=detail=>context.window.dispatchEvent({type:'collector-brickset-default-tags-synced',detail});
+  sync(['Castle','City']);
+  assert.deepEqual(tags.map(tag=>tag.checked),[false,true,true]);
+  tags[2].checked=false;
+  sync(['Star Wars']);
+  assert.deepEqual(tags.map(tag=>tag.checked),[false,true,false]);
+});
+test('Brickset account sync keeps an existing cloud value and uploads a pending clear', async () => {
+  const key=`collector-brickset-default-tags-v1-${owner}`;
+  const storage=new Map([[key,'["Star Wars"]']]);
+  const callbacks=new Map(), events=[], writes=[];
+  let connect, notify;
+  const context={
+    auth:{currentUser:{uid:owner}}, db:{}, doc:(_db,...parts)=>parts.join('/'),
+    localStorage:{getItem:k=>storage.get(k)??null},
+    nativeSetItem:(k,v)=>storage.set(k,v),nativeRemoveItem:k=>storage.delete(k),
+    onAuthStateChanged:(_auth,fn)=>{connect=fn;},
+    onSnapshot:(_doc,_options,fn)=>{notify=fn;return()=>{};},
+    setDoc:async(path,value,options)=>writes.push([path,value,options]),
+    runTransaction:()=>assert.fail('An existing empty cloud preference must not be migrated over'),
+    CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail;}},
+    window:{addEventListener:(name,fn)=>callbacks.set(name,fn),dispatchEvent:event=>events.push(event)}
+  };
+  const start=firebaseCode.indexOf('// Brickset defaults sync independently');
+  const end=firebaseCode.indexOf('\ninstallSettingsUi();',start);
+  vm.runInNewContext(firebaseCode.slice(start,end),context);
+  connect(context.auth.currentUser);
+  notify({metadata:{fromCache:false,hasPendingWrites:false},data:()=>({bricksetDefaultTags:[]})});
+  assert.equal(storage.get(key),'[]');
+  assert.equal(JSON.stringify(events.at(-1).detail),'[]');
+  storage.set(`${key}-pending`,'[]');
+  await callbacks.get('collector-brickset-default-tags-changed')();
+  assert.equal(JSON.stringify(writes),JSON.stringify([[`users/${owner}`,{bricksetDefaultTags:[]},{merge:true}]]));
+  assert.equal(storage.has(`${key}-pending`),false);
 });
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {
   let request;
