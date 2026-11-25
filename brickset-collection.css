@@ -22,3 +22,73 @@
 @media(max-width:850px){.brickset-pagination{order:3}.brickset-pagination-bottom{order:4}}
 @media(min-width:601px){.brickset-refresh .material-symbols-rounded{font-size:19px}}
 @media(max-width:600px){.brickset-sync-bar{font-size:12px}.brickset-refresh{top:10px;right:10px}}
+#bricksetDefaultTagButton {
+  display: none;
+  align-items: center;
+  gap: .4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+.brickset-collection-active #bricksetDefaultTagButton { display: inline-flex; }
+.brickset-collection-active .brickset-tag-static-title { display: none; }
+#bricksetDefaultTagButton .material-symbols-rounded { font-size: 1.15em; }
+.tag-filters .brickset-tag-pinned::after {
+  content: "push_pin";
+  font-family: "Material Symbols Rounded";
+  font-size: 1em;
+  margin-inline-start: .3em;
+  vertical-align: middle;
+}
+.brickset-default-tag-dialog {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 64px);
+  padding: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.brickset-default-tag-dialog h2 { margin: 0; }
+.brickset-default-tag-dialog p { color: var(--muted); margin: .5em 0 1em; }
+#bricksetTagSearch {
+  width: 100%;
+  margin: 6px 0 12px;
+  padding: 8px 10px;
+  font: inherit;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+}
+#bricksetTagChoices {
+  min-width: 0;
+  max-height: min(260px, 42dvh);
+  overflow: auto;
+  padding: 4px 8px;
+  margin: 0;
+  border: 1px solid var(--line);
+}
+#bricksetTagChoices label:not([hidden]) {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  cursor: pointer;
+}
+#bricksetTagChoices input { accent-color: var(--accent); }
+#bricksetTagStatus:empty { display: none; }
+.brickset-tag-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.brickset-tag-dialog-actions button {
+  padding: 8px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.brickset-tag-dialog-actions button[type="submit"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: transparent;
+}

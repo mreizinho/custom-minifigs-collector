@@ -7,10 +7,11 @@ const owner = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
 const snapshot = { source: 'brickset', fetchedAt: '2026-11-17T00:00:00Z', notesAvailable: true, figures: [
   { code: 'sw0971', name: 'Luke', theme: 'Star Wars', tags: ['Star Wars'], ownedTotal: 2, ownedInSets: 1, ownedLoose: 1, photoUrl: 'https://img.bricklink.com/ItemImage/MN/0/sw0971.png' }
 ] };
-function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, collections=['Star Wars'] } = {}) {
+function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, defaultTag, collections=['Star Wars'] } = {}) {
   const storage = new Map(), elements = new Map();
   if (cached) storage.set(`collector-brickset-cache-v1-${owner}`, JSON.stringify(cached));
   if (cachedPrices) storage.set(`collector-brickset-prices-v1-${owner}`, JSON.stringify(cachedPrices));
+  if (defaultTag) storage.set(`collector-brickset-default-tag-v1-${owner}`, defaultTag);
   const element = () => {
     const children=new Map();
     return { hidden: false, disabled: false, textContent: '', innerHTML: '',
@@ -41,6 +42,25 @@ function client(fetcher, { cached, uid = owner, priceFetcher, cachedPrices, coll
   vm.createContext(context); vm.runInContext(code, context);
   return { context, status, refresh, storage, elements, pagers, rendered };
 }
+test('selects the saved tag on entry and preserves manual changes while browsing', async () => {
+  const {context,storage}=client(async()=>Response.json(snapshot),{defaultTag:'Star Wars'});
+  const pins=new Map();
+  const tags=['Star Wars','Castle'].map(value=>({
+    value,checked:false,closest:()=>({classList:{toggle:(_name,pinned)=>pins.set(value,pinned)},setAttribute(){},removeAttribute(){}})
+  }));
+  context.$('#tagFilters').querySelectorAll=()=>tags;
+  await context.window.collectorLoadBrickset();
+  assert.deepEqual(tags.map(tag=>tag.checked),[true,false]);
+  assert.equal(pins.get('Star Wars'),true);
+  tags[0].checked=false;tags[1].checked=true;
+  context.renderFilters();
+  assert.deepEqual(tags.map(tag=>tag.checked),[false,true]);
+  assert.equal(storage.get(`collector-brickset-default-tag-v1-${owner}`),'Star Wars');
+  context.selectCollection('Other');context.activeCollection='Other';
+  context.selectCollection('Brickset');context.activeCollection='Brickset';context.figures=[];
+  await context.window.collectorLoadBrickset();
+  assert.deepEqual(tags.map(tag=>tag.checked),[true,false]);
+});
 test('renders the external collection with stable IDs, tags, and no sheet row; refresh is authenticated', async () => {
   let request;
   const { context, status, refresh, elements } = client(async (url, options) => { request = { url, options }; return Response.json(snapshot); });

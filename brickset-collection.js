@@ -3,6 +3,9 @@
   const OWNER = 'rh8WrITlLTXrsDj5mbJHzA1D4Bk2';
   const CACHE_KEY = `collector-brickset-cache-v1-${OWNER}`;
   const PRICE_KEY = `collector-brickset-prices-v1-${OWNER}`;
+  const DEFAULT_TAG_KEY = `collector-brickset-default-tag-v1-${OWNER}`;
+  let defaultTag = '', applyDefaultOnEntry = true;
+  try { defaultTag = localStorage.getItem(DEFAULT_TAG_KEY) || ''; } catch {}
   let prices = {};
   try { prices = JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}; } catch {}
   let priceRevision = 0, priceController = null;
@@ -67,6 +70,80 @@
     if (button) button.title = tooltip;
   }
   refresh.onclick = () => loadBricksetCollection(true);
+
+  const defaultTagButton = $('#bricksetDefaultTagButton');
+  const defaultTagDialog = $('#bricksetDefaultTagDialog');
+  const tagSearch = $('#bricksetTagSearch');
+  const tagChoices = $('#bricksetTagChoices');
+  const tagStatus = $('#bricksetTagStatus');
+  const tagFilters = () => $('#tagFilters').querySelectorAll('.tag-filter');
+  defaultTagButton.disabled = true;
+
+  function syncPinnedTag() {
+    for (const input of tagFilters()) {
+      const pinned = Boolean(defaultTag) && input.value === defaultTag;
+      const chip = input.closest('label');
+      chip.classList.toggle('brickset-tag-pinned', pinned);
+      if (pinned) chip.setAttribute('title', 'Default Brickset tag');
+      else chip.removeAttribute('title');
+    }
+  }
+
+  const previousRenderFilters = renderFilters;
+  renderFilters = () => {
+    previousRenderFilters();
+    if (!isBricksetCollection() || !figures.some(figure => figure.source === 'brickset')) return;
+    defaultTagButton.disabled = !tagFilters().length;
+    if (applyDefaultOnEntry) {
+      applyDefaultOnEntry = false;
+      if (defaultTag) for (const input of tagFilters()) input.checked = input.value === defaultTag;
+    }
+    syncPinnedTag();
+  };
+
+  defaultTagButton.onclick = () => {
+    if (!isBricksetCollection()) return;
+    tagChoices.replaceChildren();
+    for (const tag of ['', ...Array.from(tagFilters(), input => input.value)]) {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'radio'; input.name = 'bricksetDefaultTag'; input.value = tag;
+      input.checked = tag === defaultTag;
+      label.dataset.tag = tag;
+      label.append(input, tag || 'No default');
+      tagChoices.append(label);
+    }
+    if (!tagChoices.querySelector(':checked')) tagChoices.querySelector('input').checked = true;
+    tagStatus.textContent = '';
+    tagSearch.value = '';
+    defaultTagDialog.showModal();
+    tagSearch.focus();
+  };
+  tagSearch.oninput = () => {
+    const query = tagSearch.value.trim().toLowerCase();
+    for (const choice of tagChoices.children) {
+      choice.hidden = Boolean(choice.dataset.tag) && !choice.dataset.tag.toLowerCase().includes(query);
+    }
+  };
+  $('#cancelBricksetDefaultTag').onclick = () => defaultTagDialog.close();
+  $('#bricksetDefaultTagForm').onsubmit = event => {
+    event.preventDefault();
+    if (!isBricksetCollection()) { defaultTagDialog.close(); return; }
+    const nextTag = tagChoices.querySelector(':checked')?.value || '';
+    try { localStorage.setItem(DEFAULT_TAG_KEY, nextTag); }
+    catch { tagStatus.textContent = 'The default tag could not be saved on this device.'; return; }
+    if (nextTag !== defaultTag) {
+      const previousTag = defaultTag;
+      defaultTag = nextTag;
+      for (const input of tagFilters()) {
+        if (nextTag) input.checked = input.value === nextTag;
+        else if (input.value === previousTag) input.checked = false;
+      }
+      syncPinnedTag();
+      render();
+    }
+    defaultTagDialog.close();
+  };
 
   function readCache() {
     try {
@@ -293,7 +370,12 @@
   deleteCollection = (name, options) => { if (isBricksetCollection(name)) return; return previousDelete(name, options); };
   const previousSelect = selectCollection;
   selectCollection = name => {
-    if (name !== activeCollection) { page = 0; resultKey = ''; }
+    if (name !== activeCollection) {
+      page = 0; resultKey = '';
+      applyDefaultOnEntry = isBricksetCollection(name);
+      defaultTagButton.disabled = true;
+      if (defaultTagDialog.open) defaultTagDialog.close();
+    }
     for (const pager of pagers) pager.hidden = true;
     visiblePrices.clear();
     ++requestRevision;
