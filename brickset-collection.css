@@ -9,6 +9,12 @@
 .brickset-refresh:hover{background:transparent;color:var(--accent,#ff5a35)}
 .brickset-refresh:disabled{opacity:.6;cursor:default}
 .brickset-collection-active #addFigure,.brickset-collection-active .add-photo-overlay{display:none!important}
+@media (max-width: 560px) {
+  .brickset-collection-active .quick-search.is-visible { bottom: max(20px, env(safe-area-inset-bottom)); }
+}
+@media (560px < width <= 600px) {
+  .brickset-collection-active .quick-search.is-visible { top: 143px; }
+}
 .brickset-collection-active .own:disabled,.brickset-collection-active #detailOwn:disabled{opacity:1;cursor:default}
 .brickset-collection-active .wish{display:none}
 .brickset-collection-active [data-stat-filter="owned"]{cursor:default;opacity:1}
