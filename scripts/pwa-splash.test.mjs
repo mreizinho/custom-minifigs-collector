@@ -25,11 +25,11 @@ function launch({installed=true,reduced=false,mode='standalone',userAgent='',ani
 test('normal browser visits do not load or show the animation',()=>{
   const p=launch({installed:false});assert.equal(p.window.collectorSplash,undefined);assert.equal(p.frame.src,undefined);assert.equal(p.classes.size,0);
 });
-test('startup defaults to the face sequence and honors the saved fuse choice',()=>{
-  for (const [animation, expected] of [[null,null],['face',null],['fuse','fuse']]) {
-    const p=launch({animation});
+test('desktop and mobile always use Blink and look, including after a saved fuse preference',()=>{
+  for (const userAgent of ['Desktop','Android','iPhone']) {
+    const p=launch({animation:'fuse',userAgent});
     p.window.collectorSplash.mount();
-    assert.equal(new URL(p.frame.src).searchParams.get('animation'),expected);
+    assert.equal(new URL(p.frame.src).searchParams.get('animation'),null);
   }
 });
 test('desktop custom-titlebar mode starts the splash and waits for animation completion',async()=>{

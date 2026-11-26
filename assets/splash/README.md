@@ -1,8 +1,8 @@
 # Shared startup animation
 
 Source: supplied 9 lego-fuse-top-right-synced.zip, index.html (6.2 seconds).
-The original fuse animation is available under Settings → Display → Startup
-animation or with `?animation=fuse` on the splash URL. The default sequence
+The original fuse animation can be previewed with `?animation=fuse` on the
+standalone splash URL. App startup uses Blink and look for everyone, which
 animates the grin, wink, and laugh over the yellow head from frame 1. It
 then blinks and smiles over the final outline before the title appears.
 

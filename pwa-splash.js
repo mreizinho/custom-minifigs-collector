@@ -80,13 +80,6 @@
       frame = layer.querySelector('iframe');
       const source = new URL(frame.dataset.src, location.origin);
       source.searchParams.set('platform', window.collectorPwaPlatform || (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent || '') ? 'mobile' : 'desktop'));
-      try {
-        if (localStorage.getItem('minifig-splash-animation') === 'fuse') {
-          source.searchParams.set('animation', 'fuse');
-        }
-      } catch {
-        // The default splash also works when storage is unavailable.
-      }
       frame.src = source.href;
       frame.addEventListener('error', () => { animationReady = true; maybeFinish(); }, { once: true });
       document.addEventListener('DOMContentLoaded', () => {
